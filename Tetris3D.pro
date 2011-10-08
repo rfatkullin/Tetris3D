@@ -4,9 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core
-
-QT       -= gui
+QT       += core opengl
 
 TARGET = Tetris3D
 CONFIG   += console
@@ -18,10 +16,10 @@ TEMPLATE = app
 SOURCES += \
     Material.cpp \
     Geom.cpp \
-    source.cpp \
     Figures.cpp \
     Game.cpp \
-    MainWindow.cpp
+    MainWindow.cpp \
+    main.cpp
 
 HEADERS += \
     Material.h \
@@ -29,6 +27,8 @@ HEADERS += \
     Game.h \
     Figures.h \
     MainWindow.h
+
+
 
 
 

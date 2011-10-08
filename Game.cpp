@@ -1,4 +1,4 @@
-#include <GL/glut.h>
+#include <QGLWidget>
 #include <math.h>
 #include <stdio.h>
 #include "Game.h"
