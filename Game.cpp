@@ -4,27 +4,31 @@
 #include "Game.h"
 #include "Figures.h"
 
-const int	Game :: FIELD_POSITION_BY_Y_AXIS = -200;
-const float	Game :: CAMERA_POS_CHANGE_KOEFF =	0.01f;
-const float	Game :: CAMERA_RADIUS =				300.0f;
+const int	Game :: FieldPositionByY = -200;
+const float	Game :: CameraPosChangeKoeff =	0.01f;
+const float	Game :: CameraRadius =	300.0f;
 
 Game :: Game()
 {
-	Start();
+    light_position[ 0 ] = LightPosByX;
+    light_position[ 1 ] = LightPosByY;
+    light_position[ 2 ] = LightPosByZ;
+    light_position[ 3 ] = 1.0f;
+    Start();
 }
 
 void Game :: Start()
 {	
 	camera_position =	SphericalCoor( pi / 4, pi / 4 );
-	current_figure =	new Figure( 0.0f, 300.0f, 0.0f, L_FIGURE );	
+	current_figure =	new Figure( 0.0f, 300.0f, 0.0f, LFigure );
 	rotating_step =		0;	
-	game_speed =		FIRST_SPEED;	
-	rotating =			false;
-	score =				0;	
+	game_speed =		FirstSpeed;
+	rotating =		false;
+	score =			0;
 	
-	for ( int i = 0; i < FIELD_WIDTH; ++i )
-		for ( int j = 0; j < FIELD_LENGTH; ++j )
-			for ( int k = 0; k < FIELD_HEIGHT; ++k )
+	for ( int i = 0; i < FieldWidth; ++i )
+		for ( int j = 0; j < FieldLength; ++j )
+			for ( int k = 0; k < FieldHeight; ++k )
 				field[ i ][ j ][ k ] = 0;	
 }
 
@@ -35,7 +39,7 @@ void Game :: NextStep()
 	
 	//Move down the figure
 	Point3D figure_position = current_figure -> GetPosition();
-	if ( figure_position.y - game_speed * 0.5f >= FIELD_POSITION_BY_Y_AXIS )
+	if ( figure_position.y - game_speed * 0.5f >= FieldPositionByY )
 		current_figure -> SetPostion( Point3D( figure_position.x, figure_position.y - game_speed * 0.5f,  figure_position.z ));
 
 	//Rotate the figure
@@ -43,15 +47,15 @@ void Game :: NextStep()
 	{
 		rotating_step++;
 		final_angle = rotating_step * rotating_angle;
-		if ( rotating_step == ROTATE_STEP_COUNT )
+		if ( rotating_step == RotateStepsCount )
 		{
 			rotating_step = 0;
 			rotating = false;
 			state = true;			
 		}
-		if ( rotating_plane == PLANE_XY )
+		if ( rotating_plane == PlaneXY )
 			current_figure -> RotateOnXY( final_angle, state );
-		else if ( rotating_plane == PLANE_ZY )
+		else if ( rotating_plane == PlaneZY )
 			current_figure -> RotateOnZY( final_angle, state );
 		else
 			current_figure -> RotateOnZX( final_angle, state );
@@ -69,15 +73,15 @@ void Game :: DrawField()
 	glMaterialfv( GL_FRONT, GL_SPECULAR, specular_light );
 
 	glBegin( GL_LINES );
-		for ( int i = 0; i <= FIELD_LENGTH; ++i )
+		for ( int i = 0; i <= FieldLength; ++i )
 		{
-			glVertex3f( ( -FIELD_WIDTH / 2 + i ) * BLOCK_SIZE, FIELD_POSITION_BY_Y_AXIS, ( -FIELD_LENGTH / 2 ) * BLOCK_SIZE );
-			glVertex3f( ( -FIELD_WIDTH / 2 + i ) * BLOCK_SIZE, FIELD_POSITION_BY_Y_AXIS, (  FIELD_LENGTH / 2 ) * BLOCK_SIZE );
+			glVertex3f( ( -FieldWidth / 2 + i ) * BlockSize, FieldPositionByY, ( -FieldLength / 2 ) * BlockSize );
+			glVertex3f( ( -FieldWidth / 2 + i ) * BlockSize, FieldPositionByY, (  FieldLength / 2 ) * BlockSize );
 		}
-		for ( int i = 0; i <= FIELD_WIDTH; ++i )
+		for ( int i = 0; i <= FieldWidth; ++i )
 		{
-			glVertex3f( (  FIELD_WIDTH / 2 ) * BLOCK_SIZE, FIELD_POSITION_BY_Y_AXIS, ( -FIELD_LENGTH / 2 + i ) * BLOCK_SIZE );
-			glVertex3f( ( -FIELD_WIDTH / 2 ) * BLOCK_SIZE, FIELD_POSITION_BY_Y_AXIS, ( -FIELD_LENGTH / 2 + i ) * BLOCK_SIZE );
+			glVertex3f( (  FieldWidth / 2 ) * BlockSize, FieldPositionByY, ( -FieldLength / 2 + i ) * BlockSize );
+			glVertex3f( ( -FieldWidth / 2 ) * BlockSize, FieldPositionByY, ( -FieldLength / 2 + i ) * BlockSize );
 		}
 	glEnd();		
 }
@@ -93,20 +97,25 @@ void Game :: DrawWorld()
 	current_figure -> Draw();
 }
 
+float* Game :: GetLightPosition()
+{
+    return light_position;
+}
+
 void Game :: ShiftFigureByXAxis( ShiftDirection shift )
 {
 	Point3D position = current_figure -> GetPosition();
 	
-	if ( ( position.x + shift * BLOCK_SIZE >= -FIELD_WIDTH / 2 * BLOCK_SIZE ) && ( position.x + shift * BLOCK_SIZE <= FIELD_WIDTH / 2 * BLOCK_SIZE ) )
-		position.x += shift * BLOCK_SIZE;
+	if ( ( position.x + shift * BlockSize >= -FieldWidth / 2 * BlockSize ) && ( position.x + shift * BlockSize <= FieldWidth / 2 * BlockSize ) )
+		position.x += shift * BlockSize;
 	current_figure  -> SetPostion( position );
 }
 
 void Game :: ShiftFigureByZAxis( ShiftDirection shift )
 {
 	Point3D position = current_figure -> GetPosition();
-	if ( ( position.z + shift * BLOCK_SIZE >= -FIELD_LENGTH / 2 * BLOCK_SIZE ) && ( position.z + shift * BLOCK_SIZE <= FIELD_LENGTH / 2 * BLOCK_SIZE ) )
-		position.z += shift * BLOCK_SIZE;
+	if ( ( position.z + shift * BlockSize >= -FieldLength / 2 * BlockSize ) && ( position.z + shift * BlockSize <= FieldLength / 2 * BlockSize ) )
+		position.z += shift * BlockSize;
 	current_figure  -> SetPostion( position );
 }
 
@@ -114,8 +123,8 @@ void Game :: Rotate( RotatePlane plane, RotateSide side )
 {
 	if ( !rotating )
 	{
-		rotating_angle = pi / 2 / ROTATE_STEP_COUNT;
-		if ( side == ROTATE_BY_CLOCK_WISE )
+		rotating_angle = pi / 2 / RotateStepsCount;
+		if ( side == RotateByClockWise )
 			rotating_angle *= -1;
 		rotating_plane = plane;
 		rotating = true;
@@ -124,22 +133,22 @@ void Game :: Rotate( RotatePlane plane, RotateSide side )
 
 void Game :: DropDownFigure()
 {
-	game_speed = SEVENTH_SPEED;
+	game_speed = SeventhSpeed;
 }
 
 
 void Game :: ChangeCameraPosition( float x, float y )
 {
-	if ( InRange( camera_position.teta + CAMERA_POS_CHANGE_KOEFF * y, -pi / 2, pi / 2 )	)
-		camera_position.teta += CAMERA_POS_CHANGE_KOEFF * y;
-	camera_position.alpha -= CAMERA_POS_CHANGE_KOEFF * x;
+	if ( InRange( camera_position.teta + CameraPosChangeKoeff * y, -pi / 2, pi / 2 )	)
+		camera_position.teta += CameraPosChangeKoeff * y;
+	camera_position.alpha -= CameraPosChangeKoeff * x;
 	camera_position.alpha = camera_position.alpha - ( ( int )( camera_position.alpha / 2 / pi ) * 2 * pi );
 }
 
 Point3D Game :: GetCameraPosition()
 {
 	float cos_teta = cos( camera_position.teta );
-	return Point3D( cos_teta * sin( camera_position.alpha ) * CAMERA_RADIUS, sin( camera_position.teta ) * CAMERA_RADIUS, cos_teta * cos( camera_position.alpha ) * CAMERA_RADIUS );
+	return Point3D( cos_teta * sin( camera_position.alpha ) * CameraRadius, sin( camera_position.teta ) * CameraRadius, cos_teta * cos( camera_position.alpha ) * CameraRadius );
 }
 
 

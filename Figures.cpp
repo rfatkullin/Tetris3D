@@ -14,14 +14,14 @@ Block :: Block( float new_x, float new_y, float new_z, Material new_material )
 	current_rel_coordinates = const_rel_coordinates = Point3D( new_x, new_y, new_z );
 	material = new_material;
 	
-	current_vertices[ 0 ] = const_vertices[ 0 ] = Point3D( -BLOCK_SIZE / 2,  BLOCK_SIZE / 2, -BLOCK_SIZE / 2 );
-	current_vertices[ 1 ] = const_vertices[ 1 ] = Point3D( -BLOCK_SIZE / 2,  BLOCK_SIZE / 2,  BLOCK_SIZE / 2 );
-	current_vertices[ 2 ] = const_vertices[ 2 ] = Point3D(  BLOCK_SIZE / 2,  BLOCK_SIZE / 2,  BLOCK_SIZE / 2 );
-	current_vertices[ 3 ] = const_vertices[ 3 ] = Point3D(  BLOCK_SIZE / 2,  BLOCK_SIZE / 2, -BLOCK_SIZE / 2 );
-	current_vertices[ 4 ] = const_vertices[ 4 ] = Point3D(  BLOCK_SIZE / 2, -BLOCK_SIZE / 2, -BLOCK_SIZE / 2 );
-	current_vertices[ 5 ] = const_vertices[ 5 ] = Point3D(  BLOCK_SIZE / 2, -BLOCK_SIZE / 2,  BLOCK_SIZE / 2 );
-	current_vertices[ 6 ] = const_vertices[ 6 ] = Point3D( -BLOCK_SIZE / 2, -BLOCK_SIZE / 2,  BLOCK_SIZE / 2 );
-	current_vertices[ 7 ] = const_vertices[ 7 ] = Point3D( -BLOCK_SIZE / 2, -BLOCK_SIZE / 2, -BLOCK_SIZE / 2 );
+	current_vertices[ 0 ] = const_vertices[ 0 ] = Point3D( -BlockSize / 2,  BlockSize / 2, -BlockSize / 2 );
+	current_vertices[ 1 ] = const_vertices[ 1 ] = Point3D( -BlockSize / 2,  BlockSize / 2,  BlockSize / 2 );
+	current_vertices[ 2 ] = const_vertices[ 2 ] = Point3D(  BlockSize / 2,  BlockSize / 2,  BlockSize / 2 );
+	current_vertices[ 3 ] = const_vertices[ 3 ] = Point3D(  BlockSize / 2,  BlockSize / 2, -BlockSize / 2 );
+	current_vertices[ 4 ] = const_vertices[ 4 ] = Point3D(  BlockSize / 2, -BlockSize / 2, -BlockSize / 2 );
+	current_vertices[ 5 ] = const_vertices[ 5 ] = Point3D(  BlockSize / 2, -BlockSize / 2,  BlockSize / 2 );
+	current_vertices[ 6 ] = const_vertices[ 6 ] = Point3D( -BlockSize / 2, -BlockSize / 2,  BlockSize / 2 );
+	current_vertices[ 7 ] = const_vertices[ 7 ] = Point3D( -BlockSize / 2, -BlockSize / 2, -BlockSize / 2 );
 }
 
 void Block :: Rotate( float &a, float &b, float angle )
@@ -36,7 +36,7 @@ void Block :: Rotate( float &a, float &b, float angle )
 void Block :: CurrentCoordinatesToConst()
 {
 	const_rel_coordinates = current_rel_coordinates;
-	for ( int i = 0; i < BLOCKS_VERTEX_COUNT; ++i )
+	for ( int i = 0; i < BlocksVertexCount; ++i )
 		const_vertices[ i ] = current_vertices[ i ];
 }
 
@@ -45,7 +45,7 @@ void Block :: RotateOnZY( float angle, bool change_const )
 	current_rel_coordinates = const_rel_coordinates;
 	Rotate( current_rel_coordinates.z, current_rel_coordinates.y, angle );
 
-	for ( int i = 0; i < BLOCKS_VERTEX_COUNT; ++i )
+	for ( int i = 0; i < BlocksVertexCount; ++i )
 	{
 		current_vertices[ i ] = const_vertices[ i ];
 		Rotate( current_vertices[ i ].z, current_vertices[ i ].y, angle  );
@@ -60,7 +60,7 @@ void Block :: RotateOnZX( float angle, bool change_const )
 	current_rel_coordinates = const_rel_coordinates;
 	Rotate( current_rel_coordinates.z, current_rel_coordinates.x, angle );
 
-	for ( int i = 0; i < BLOCKS_VERTEX_COUNT; ++i )
+	for ( int i = 0; i < BlocksVertexCount; ++i )
 	{
 		current_vertices[ i ] = const_vertices[ i ];
 		Rotate( current_vertices[ i ].z, current_vertices[ i ].x, angle  );
@@ -80,7 +80,7 @@ void Block :: RotateOnXY( float angle, bool change_const )
 	current_rel_coordinates = const_rel_coordinates;
 	Rotate( current_rel_coordinates.x, current_rel_coordinates.y, angle );
 	
-	for ( int i = 0; i < BLOCKS_VERTEX_COUNT; ++i )
+	for ( int i = 0; i < BlocksVertexCount; ++i )
 	{
 		current_vertices[ i ] = const_vertices[ i ];
 		Rotate( current_vertices[ i ].x, current_vertices[ i ].y, angle  );
@@ -171,82 +171,82 @@ Figure :: Figure( float x, float y, float z, Figures type )
 	position = Point3D( x, y, z );
 	
 	srand( time( 0 ) );
-	material = materials[ rand() % MATERIALS_COUNT ];
+	material = materials[ rand() % MaterialsCount ];
 
 	switch ( type )
 	{
-	case I_FIGURE :
-		blocks[ 0 ] = new Block( 0.0f, BLOCK_SIZE + BLOCK_SIZE / 2, 0.0f, material );
-		blocks[ 1 ] = new Block( 0.0f, BLOCK_SIZE / 2, 0.0f, material  );
-		blocks[ 2 ] = new Block( 0.0f, -BLOCK_SIZE / 2, 0.0f, material );
-		blocks[ 3 ] = new Block( 0.0f, -( BLOCK_SIZE + BLOCK_SIZE / 2 ), 0.0f, material );
+	case IFigure :
+		blocks[ 0 ] = new Block( 0.0f, BlockSize + BlockSize / 2, 0.0f, material );
+		blocks[ 1 ] = new Block( 0.0f, BlockSize / 2, 0.0f, material  );
+		blocks[ 2 ] = new Block( 0.0f, -BlockSize / 2, 0.0f, material );
+		blocks[ 3 ] = new Block( 0.0f, -( BlockSize + BlockSize / 2 ), 0.0f, material );
 		break;
-	case J_FIGURE :
-		blocks[ 0 ] = new Block( 0.0f, BLOCK_SIZE + BLOCK_SIZE / 2, 0.0f, material );
-		blocks[ 1 ] = new Block( 0.0f, BLOCK_SIZE / 2, 0.0f, material );
-		blocks[ 2 ] = new Block( 0.0f, -BLOCK_SIZE / 2, 0.0f, material );
-		blocks[ 3 ] = new Block( BLOCK_SIZE, -( BLOCK_SIZE + BLOCK_SIZE / 2 ), 0.0f, material );
+	case JFigure :
+		blocks[ 0 ] = new Block( 0.0f, BlockSize + BlockSize / 2, 0.0f, material );
+		blocks[ 1 ] = new Block( 0.0f, BlockSize / 2, 0.0f, material );
+		blocks[ 2 ] = new Block( 0.0f, -BlockSize / 2, 0.0f, material );
+		blocks[ 3 ] = new Block( BlockSize, -( BlockSize + BlockSize / 2 ), 0.0f, material );
 		break;
-	case L_FIGURE :
-		blocks[ 0 ] = new Block( 0.0f, -( BLOCK_SIZE + BLOCK_SIZE / 2 ), 0.0f, material );
-		blocks[ 1 ] = new Block( 0.0f, BLOCK_SIZE / 2, 0.0f, material );
-		blocks[ 2 ] = new Block( 0.0f, -BLOCK_SIZE / 2, 0.0f, material );
-		blocks[ 3 ] = new Block( -BLOCK_SIZE, -( BLOCK_SIZE + BLOCK_SIZE / 2 ), 0.0f, material );
+	case LFigure :
+		blocks[ 0 ] = new Block( 0.0f, -( BlockSize + BlockSize / 2 ), 0.0f, material );
+		blocks[ 1 ] = new Block( 0.0f, BlockSize / 2, 0.0f, material );
+		blocks[ 2 ] = new Block( 0.0f, -BlockSize / 2, 0.0f, material );
+		blocks[ 3 ] = new Block( -BlockSize, -( BlockSize + BlockSize / 2 ), 0.0f, material );
 		break;
-	case O_FIGURE :
-		blocks[ 0 ] = new Block( -BLOCK_SIZE / 2, BLOCK_SIZE / 2, 0.0f, material );
-		blocks[ 1 ] = new Block( BLOCK_SIZE / 2, BLOCK_SIZE / 2, 0.0f, material );
-		blocks[ 2 ] = new Block( BLOCK_SIZE / 2, -BLOCK_SIZE / 2, 0.0f, material );
-		blocks[ 3 ] = new Block( -BLOCK_SIZE / 2, -BLOCK_SIZE / 2, 0.0f, material );
+	case OFigure :
+		blocks[ 0 ] = new Block( -BlockSize / 2, BlockSize / 2, 0.0f, material );
+		blocks[ 1 ] = new Block( BlockSize / 2, BlockSize / 2, 0.0f, material );
+		blocks[ 2 ] = new Block( BlockSize / 2, -BlockSize / 2, 0.0f, material );
+		blocks[ 3 ] = new Block( -BlockSize / 2, -BlockSize / 2, 0.0f, material );
 		break;
-	case S_FIGURE :
-		blocks[ 0 ] = new Block( BLOCK_SIZE + BLOCK_SIZE / 2, BLOCK_SIZE / 2, 0.0f, material );
-		blocks[ 1 ] = new Block( 0.0f, BLOCK_SIZE / 2, 0.0f, material );
-		blocks[ 2 ] = new Block( 0.0f, -BLOCK_SIZE / 2, 0.0f, material );
-		blocks[ 3 ] = new Block( -( BLOCK_SIZE + BLOCK_SIZE / 2 ), -BLOCK_SIZE + BLOCK_SIZE / 2, 0.0f, material );
+	case SFigure :
+		blocks[ 0 ] = new Block( BlockSize + BlockSize / 2, BlockSize / 2, 0.0f, material );
+		blocks[ 1 ] = new Block( 0.0f, BlockSize / 2, 0.0f, material );
+		blocks[ 2 ] = new Block( 0.0f, -BlockSize / 2, 0.0f, material );
+		blocks[ 3 ] = new Block( -( BlockSize + BlockSize / 2 ), -BlockSize + BlockSize / 2, 0.0f, material );
 		break;
-	case T_FIGURE :
-		blocks[ 0 ] = new Block( BLOCK_SIZE, BLOCK_SIZE / 2, 0.0f, material );
-		blocks[ 1 ] = new Block( 0.0f, BLOCK_SIZE / 2, 0.0f, material );
-		blocks[ 2 ] = new Block( -BLOCK_SIZE, BLOCK_SIZE / 2, 0.0f, material );
-		blocks[ 3 ] = new Block( 0.0f, -BLOCK_SIZE / 2, 0.0f, material );
+	case TFigure :
+		blocks[ 0 ] = new Block( BlockSize, BlockSize / 2, 0.0f, material );
+		blocks[ 1 ] = new Block( 0.0f, BlockSize / 2, 0.0f, material );
+		blocks[ 2 ] = new Block( -BlockSize, BlockSize / 2, 0.0f, material );
+		blocks[ 3 ] = new Block( 0.0f, -BlockSize / 2, 0.0f, material );
 		break;
-	default : //Z_FIGURE :
-		blocks[ 0 ] = new Block( -BLOCK_SIZE, BLOCK_SIZE / 2, 0.0f, material );
-		blocks[ 1 ] = new Block( 0.0f, BLOCK_SIZE / 2, 0.0f, material );
-		blocks[ 2 ] = new Block( 0.0f, -BLOCK_SIZE / 2, 0.0f, material );
-		blocks[ 3 ] = new Block( BLOCK_SIZE, -BLOCK_SIZE / 2, 0.0f, material );
+	default : //ZFigure :
+		blocks[ 0 ] = new Block( -BlockSize, BlockSize / 2, 0.0f, material );
+		blocks[ 1 ] = new Block( 0.0f, BlockSize / 2, 0.0f, material );
+		blocks[ 2 ] = new Block( 0.0f, -BlockSize / 2, 0.0f, material );
+		blocks[ 3 ] = new Block( BlockSize, -BlockSize / 2, 0.0f, material );
 	}
 }
 
 Figure :: ~Figure()
 {
-	for ( int i = 0; i < BLOCKS_NUMBER; ++i )
+	for ( int i = 0; i < BlocksCount; ++i )
 		delete blocks[ i ];
 }
 
 void Figure :: Draw()
 {
-	for ( int i = 0; i < BLOCKS_NUMBER; ++i )
+	for ( int i = 0; i < BlocksCount; ++i )
 		blocks[ i ] -> Draw( position );	
 }
 
 void Figure :: RotateOnZY( float angle, bool change_const )
 {
-	for ( int i = 0; i < BLOCKS_NUMBER; ++i )
+	for ( int i = 0; i < BlocksCount; ++i )
 		blocks[ i ] -> RotateOnZY( angle, change_const );
 }
 
 void Figure :: RotateOnZX( float angle, bool change_const )
 {
-	for ( int i = 0; i < BLOCKS_NUMBER; ++i )
+	for ( int i = 0; i < BlocksCount; ++i )
 		blocks[ i ] -> RotateOnZX( angle, change_const );
 }
 
 void Figure :: RotateOnXY( float angle, bool change_const )
 {
 
-	for ( int i = 0; i < BLOCKS_NUMBER; ++i )
+	for ( int i = 0; i < BlocksCount; ++i )
 		blocks[ i ] -> RotateOnXY( angle, change_const );	
 }
 

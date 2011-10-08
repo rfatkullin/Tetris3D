@@ -1,3 +1,5 @@
+#include <QMouseEvent>
+#include <QKeyEvent>
 #include "MainWindow.h"
 #include "Geom.h"
 #include "Game.h"
@@ -30,16 +32,16 @@ void MainWindow :: resizeGL(int new_width, int new_height)
     glLoadIdentity();
     camera_positon = game -> GetCameraPosition();
     gluLookAt( camera_positon.x, camera_positon.y, camera_positon.z, 0, 0, 0, 0, 1, 0 );
-    glLightfv( GL_LIGHT0, GL_POSITION, light_position );
+    glLightfv( GL_LIGHT0, GL_POSITION, game -> GetLightPosition() );
     glColor3f( 1.0f, 1.0f, 1.0f );
     glPointSize( 4.0f );
     glBegin( GL_POINTS );
-	    glVertex3fv( light_position );
+    glVertex3fv( game -> GetLightPosition() );
     glEnd();
-    game.DrawWorld();
+    game -> DrawWorld();
     //CoordianatesDraw();
 
-    glutSwapBuffers();
+    swapBuffers();
 }
 
 void MainWindow :: paintGL()
@@ -63,31 +65,31 @@ void MainWindow :: paintGL()
 
 void MainWindow :: keyPressEvent( QKeyEvent* keyboard )
 {
-    switch ( keyboard -> key )
+    switch ( keyboard -> key() )
     {
 	    case Qt :: Key_Escape :
 		    exit( 0 );
 		    break;
 	    case Qt :: Key_Space :
-		    game.DropDownFigure();
+		    game -> DropDownFigure();
 		    break;
 	    case Qt :: Key_D :
-		    game.Rotate( PLANE_XY, ROTATE_BY_CLOCK_WISE );
+		    game.Rotate( PlaneXY, RotateByClockWise );
 		    break;
 	    case Qt :: Key_A :
-		    game.Rotate( PLANE_XY, ROTATE_BY_ANTI_CLOCK_WISE );
+		    game.Rotate( PlaneXY, RotateByAntiClockWise );
 		    break;
 	    case Qt :: Key_W :
-		    game.Rotate( PLANE_ZY, ROTATE_BY_CLOCK_WISE );
+		    game.Rotate( PlaneZY, RotateByClockWise );
 		    break;
 	    case Qt :: Key_S :
-		    game.Rotate( PLANE_ZY, ROTATE_BY_ANTI_CLOCK_WISE );
+		    game.Rotate( PlaneZY, RotateByAntiClockWise );
 		    break;
 	    case Qt :: Key_Q :
-		    game.Rotate( PLANE_ZX, ROTATE_BY_CLOCK_WISE );
+		    game.Rotate( PlaneZX, RotateByClockWise );
 		    break;
 	    case Qt :: Key_E :
-		    game.Rotate( PLANE_ZX, ROTATE_BY_ANTI_CLOCK_WISE );
+		    game.Rotate( PlaneZX, RotateByAntiClockWise );
 		    break;
 	    default:
 		    break;
