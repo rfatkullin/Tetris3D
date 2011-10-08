@@ -15,4 +15,20 @@ CONFIG   -= app_bundle
 TEMPLATE = app
 
 
-SOURCES += main.cpp
+SOURCES += \
+    Material.cpp \
+    Geom.cpp \
+    source.cpp \
+    Figures.cpp \
+    Game.cpp \
+    MainWindow.cpp
+
+HEADERS += \
+    Material.h \
+    Geom.h \
+    Game.h \
+    Figures.h \
+    MainWindow.h
+
+
+
