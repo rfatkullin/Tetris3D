@@ -24,8 +24,7 @@ Scene :: ~Scene()
 void Scene :: initializeGL()
 {
     glEnable( GL_DEPTH_TEST );
-    glEnable( GL_LINE_SMOOTH );
-
+    //glDisable( GL_POLYGON_SMOOTH );
     glEnable( GL_LIGHTING );
     glEnable( GL_LIGHT0 );
 

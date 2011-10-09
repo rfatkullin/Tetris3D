@@ -1,15 +1,36 @@
 #include "Material.h"
 
-Material :: Material( float new_r, float new_g, float new_b )
+Material :: Material( float a_r, float a_g, float a_b, float a_a,
+	  float d_r, float d_g, float d_b, float d_a,
+	  float s_r, float s_g, float s_b, float s_a )
 {
-	material[ 0 ] = new_r;
-	material[ 1 ] = new_g;
-	material[ 2 ] = new_b;
-	material[ 3 ] = 1.0f;
-	
+    material_for_ambient[ 0 ] = a_r;
+    material_for_ambient[ 1 ] = a_g;
+    material_for_ambient[ 2 ] = a_b;
+    material_for_ambient[ 2 ] = a_a;
+
+    material_for_diffuse[ 0 ] = d_r;
+    material_for_diffuse[ 1 ] = d_g;
+    material_for_diffuse[ 2 ] = d_b;
+    material_for_diffuse[ 3 ] = d_a;
+
+    material_for_specular[ 0 ] = s_r;
+    material_for_specular[ 1 ] = s_g;
+    material_for_specular[ 2 ] = s_b;
+    material_for_specular[ 3 ] = s_a;
 }
 
-const float* Material :: GetMaterial()
+const float* Material :: GetMaterialForAmbient()
 {
-	return material;
+    return material_for_ambient;
+}
+
+const float* Material :: GetMaterialForDiffuse()
+{
+    return material_for_diffuse;
+}
+
+const float* Material :: GetMaterialForSpecular()
+{
+    return material_for_specular;
 }

@@ -5,12 +5,33 @@
 #define FIGURES_H
 
 enum Figures { IFigure = 0, JFigure, LFigure, OFigure, SFigure, TFigure, ZFigure };
-
-//const Color colors[ COLORS_COUNT ] = { Color( 1.0f, 0.0f, 1.0f ), Color( 0.0f, 1.0f, 0.0f ), Color( 1.0f, 0.0f, 0.0f ), Color( 0.0f, 0.0f, 1.0f ), Color( 0.7f, 0.7f, 0.7f ) };
-//const Color colors[ COLORS_COUNT ] = { Color( 0.0f, 1.0f, 0.0f ) };
-
-const int	    MaterialsCount = 1;
-const Material materials[ MaterialsCount ] = { Material( 0.0f, 1.0f, 0.0f ) };
+const int	MaterialsCount = 6;
+const Material	materials[ MaterialsCount ] = {
+    Material(  0.0f, 1.0f, 0.0f, 1.0f,
+	       0.0f, 1.0f, 0.0f, 1.0f,
+	       0.2f, 0.2f, 0.2f, 1.0f
+	    ),
+    Material(  1.0f, 0.0f, 0.0f, 1.0f,
+	       1.0f, 0.0f, 0.0f, 1.0f,
+	       0.2f, 0.2f, 0.2f, 1.0f
+	    ),
+    Material(  0.0f, 0.0f, 1.0f, 1.0f,
+    	       0.0f, 0.0f, 1.0f, 1.0f,
+    	       0.2f, 0.2f, 0.2f, 1.0f
+	    ),
+    Material(  1.0f, 0.0f, 1.0f, 1.0f,
+	       1.0f, 0.0f, 1.0f, 1.0f,
+	       0.2f, 0.2f, 0.2f, 1.0f
+	    ),
+    Material(  1.0f, 1.0f, 0.0f, 1.0f,
+	       1.0f, 1.0f, 0.0f, 1.0f,
+	       0.2f, 0.2f, 0.2f, 1.0f
+	    ),
+    Material(  0.0f, 1.0f, 1.0f, 1.0f,
+	       0.0f, 1.0f, 1.0f, 1.0f,
+	       0.2f, 0.2f, 0.2f, 1.0f
+	    )
+    };
 
 class Block
 {
@@ -46,9 +67,13 @@ private :
 
 	
 public :
-		Figure( float x, float y, float z, Figures type );
+		Figure( float x, float y, float z, Figures type, Material new_material );
 		~Figure();
     Point3D	GetPosition();
+//    float	MinByX();
+//    float	MaxByX();
+//    float	MinByZ();
+//    float	MaxByZ();
     void	SetPostion( Point3D new_position );
     void	RotateOnZY( float angle, bool change_const );
     void	RotateOnZX( float angle, bool change_const );

@@ -25,9 +25,10 @@ Game :: Game()
 
 void Game :: Start()
 {	
+    srand( time( 0 ) );
     last_mouse_position =   Point3D( 0.0f, 0.0f, 0.0f );
     camera_position =	    SphericalCoor( pi / 4, pi / 4 );
-    current_figure =	    new Figure( 0.0f, 300.0f, -( Block :: Block :: BlockSize / 2 ), LFigure );
+    current_figure =	    new Figure( 0.0f, 300.0f, -( Block :: Block :: BlockSize / 2 ), LFigure, materials[ rand() % MaterialsCount ] );
     rotating_step =	    0;
     game_speed =	    FirstSpeed;
     rotating =		    false;

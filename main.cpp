@@ -3,9 +3,9 @@
 
 int main( int argc, char **argv )
 {
-    float ambient_light[ 4 ] = { 0.3f, 0.3f, 0.3f, 1.0f };
-    float diffuse_light[ 4 ] = { 0.7f, 0.7f, 0.7f, 1.0f };
-    float speculaer_light[ 4 ] = { 0.5f, 0.5f, 0.5f, 1.0f };
+    float ambient_light[ 4 ] = { 1.0f, 1.0f, 1.0f, 1.0f };
+    float diffuse_light[ 4 ] = { 0.5f, 0.5f, 0.5f, 1.0f };
+    float speculaer_light[ 4 ] = { 0.2f, 0.2f, 0.2f, 1.0f };
 
     QApplication app( argc, argv );
 
