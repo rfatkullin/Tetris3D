@@ -19,6 +19,7 @@ protected:
     void keyPressEvent( QKeyEvent* key );
     void mousePressEvent( QMouseEvent* mouse );
     void mouseMoveEvent( QMouseEvent* mouse );
+    void timerEvent( QTimerEvent * );
 private:
     Game* game;
 };

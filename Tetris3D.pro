@@ -7,7 +7,7 @@
 QT       += core opengl
 
 TARGET = Tetris3D
-CONFIG   += console
+CONFIG   += console opengl gui
 CONFIG   -= app_bundle
 
 TEMPLATE = app

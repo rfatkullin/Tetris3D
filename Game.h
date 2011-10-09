@@ -6,33 +6,18 @@
 
 class Game
 {
-private:
-	enum		    { FieldWidth = 4, FieldLength = 4, FieldHeight = 4,RotateStepsCount = 20 };
-	enum ShiftDirection { ShiftRight = 1, ShiftLeft = -1, ShitBack = -1, ShiftAhead = 1 };
-	enum LightPosition  { LightPosByX = 0 , LightPosByY = 300, LightPosByZ = 300 };
-	enum RotatePlane    { PlaneXY, PlaneZY, PlaneZX };
-	enum RotateSide	    { RotateByClockWise, RotateByAntiClockWise };
-	enum GameSpeed	    { FirstSpeed = 1, SecondSpeed = 2, ThirdSpeed = 4, FourthSpeed = 8, FifthSpeed = 10, SixthSpeed = 12, SeventhSpeed = 14 };
-
-	static const float	CameraRadius;
-	static const float	CameraPosChangeKoeff;
-	static const int	FieldPositionByY;
-	unsigned char		field[ FieldWidth ][ FieldLength ][ FieldHeight ];
-	SphericalCoor		camera_position;
-	unsigned int		score;	
-	static float		light_position[ 4 ];
-	RotatePlane		rotating_plane;
-	GameSpeed		game_speed;
-	Figure*			current_figure;
-	float			rotating_angle;
-	bool			rotating;
-	int			rotating_step;
-	
-	void			DrawField();
-	void			DrawInterface();
 public:
-				Game();
+	Game();
+	enum	RotatePlane	{ PlaneXY, PlaneZY, PlaneZX };
+	enum	RotateSide	{ RotateByClockWise, RotateByAntiClockWise };
+	enum	ShiftDirection	{ ShiftRight = 1, ShiftLeft = -1, ShitBack = -1, ShiftAhead = 1 };
+
+
+	static	void		InitializeStaticData();
+
 	Point3D			GetCameraPosition();
+	Point3D			GetLastMousePosition();
+	void			SetLastMousePosition( float x, float y );
 	float*			GetLightPosition();
 	void			ChangeCameraPosition( float x, float y );
 	void			DrawWorld();
@@ -43,6 +28,31 @@ public:
 	void			ShiftFigureByZAxis( ShiftDirection shift );
 	void			Rotate( RotatePlane plane, RotateSide side );
 	void			DropDownFigure();
+private:
+	enum		    { FieldWidth = 4, FieldLength = 4, FieldHeight = 4,RotateStepsCount = 20 };
+	enum LightPosition  { LightPosByX = 0 , LightPosByY = 300, LightPosByZ = 300 };
+	enum GameSpeed	    { FirstSpeed = 1, SecondSpeed = 2, ThirdSpeed = 4, FourthSpeed = 8, FifthSpeed = 10, SixthSpeed = 12, SeventhSpeed = 14 };
+
+	static const float	CameraRadius;
+	static const float	CameraPosChangeKoeff;
+	static const int	FieldPositionByY;
+	static float		light_position[ 4 ];
+
+	unsigned char		field[ FieldWidth ][ FieldLength ][ FieldHeight ];
+	unsigned int		score;
+	SphericalCoor		camera_position;
+	Point3D			last_mouse_position;
+
+	RotatePlane		rotating_plane;
+	GameSpeed		game_speed;
+	Figure*			current_figure;
+	float			rotating_angle;
+	bool			rotating;
+	int			rotating_step;
+	
+	void			DrawField();
+	void			DrawInterface();
+
 };
 
 #endif
