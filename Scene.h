@@ -1,17 +1,18 @@
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#ifndef SCENE_H
+#define SCENE_H
 
 #include <QGLWidget>
 #include "Game.h"
 
-const int    WindowWidth = 600;
+const int   WindowWidth = 600;
 const int   WindowHeight = 600;
 
-class MainWindow : public QGLWidget
+class Scene : public QGLWidget
 {
 public:
-    MainWindow( QWidget* pwgt = 0 );
-    ~MainWindow();
+    Scene( QWidget* pwgt = 0 );
+    ~Scene();
+    void SetLigthOption( float ambient[ 4 ], float diffuse[ 4 ], float specular[ 4 ] );
 protected:
     void initializeGL();
     void resizeGL( int new_width, int new_height );
@@ -22,6 +23,9 @@ protected:
     void timerEvent( QTimerEvent * );
 private:
     Game* game;
+    float ambient_light[ 4 ];
+    float diffuse_light[ 4 ];
+    float speculaer_light[ 4 ];
 };
 
-#endif // MAINWINDOW_H
+#endif // SCENE_H

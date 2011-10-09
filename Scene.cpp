@@ -1,22 +1,36 @@
 #include <QMouseEvent>
 #include <QKeyEvent>
-#include "MainWindow.h"
+#include "Scene.h"
 #include "Geom.h"
 #include "Game.h"
 
-MainWindow :: MainWindow( QWidget* pwgt ) : QGLWidget( pwgt )
+Scene :: Scene( QWidget* pwgt ) : QGLWidget( pwgt )
 {
     game = new Game();
     setMouseTracking( false  );
+    for ( int i = 0; i < 4; i++	    )
+    {
+	ambient_light[ i ] = 0.0f;
+	diffuse_light[ i ] = 0.0f;
+	speculaer_light[ i ] = 0.0f;
+    }
 }
 
-MainWindow :: ~MainWindow()
+Scene :: ~Scene()
 {
     delete game;
 }
 
-void MainWindow :: initializeGL()
+void Scene :: initializeGL()
 {
+
+    glEnable( GL_LIGHTING );
+    glEnable( GL_LIGHT0 );
+
+    glLightf( GL_LIGHT0, GL_CONSTANT_ATTENUATION, 1.0f );
+    glLightf( GL_LIGHT0, GL_LINEAR_ATTENUATION, 0.0f );
+    glLightf( GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 0.0f );
+
     glClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -24,12 +38,12 @@ void MainWindow :: initializeGL()
     glViewport( 0, 0, WindowWidth, WindowHeight );
 }
 
-void MainWindow :: resizeGL(int new_width, int new_height)
+void Scene :: resizeGL(int new_width, int new_height)
 {
      glViewport( 0, 0, new_width, new_height );
 }
 
-void MainWindow :: paintGL()
+void Scene :: paintGL()
 {
     Point3D camera_positon;
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
@@ -40,16 +54,16 @@ void MainWindow :: paintGL()
     glLightfv( GL_LIGHT0, GL_POSITION, game -> GetLightPosition() );
     glColor3f( 1.0f, 1.0f, 1.0f );
     glPointSize( 4.0f );
+
     glBegin( GL_POINTS );
-    glVertex3fv( game -> GetLightPosition() );
+	glVertex3fv( game -> GetLightPosition() );
     glEnd();
     game -> DrawWorld();
-    //CoordianatesDraw();
 
     swapBuffers();
 }
 
-void MainWindow :: keyPressEvent( QKeyEvent* keyboard )
+void Scene :: keyPressEvent( QKeyEvent* keyboard )
 {
     switch ( keyboard -> key() )
     {
@@ -82,21 +96,36 @@ void MainWindow :: keyPressEvent( QKeyEvent* keyboard )
     }
 }
 
-void MainWindow :: mousePressEvent( QMouseEvent* mouse )
+void Scene :: mousePressEvent( QMouseEvent* mouse )
 {
     if ( mouse -> button() ==Qt :: LeftButton )
 	game -> SetLastMousePosition( mouse -> globalX(), mouse -> globalY() );
 }
 
-void MainWindow :: mouseMoveEvent( QMouseEvent* mouse )
+void Scene :: mouseMoveEvent( QMouseEvent* mouse )
 {
     Point3D last_mouse_position = game -> GetLastMousePosition();
     game -> ChangeCameraPosition( mouse -> globalX() - last_mouse_position.x, mouse -> globalY() - last_mouse_position.y );
     game -> SetLastMousePosition( mouse -> globalX(), mouse -> globalY() );
 }
 
-void Game :: timerEvent( QTimerEvent * )
+void Scene :: timerEvent( QTimerEvent * )
 {
-
+    game -> NextStep();
+    paintGL();
 }
+
+void Scene :: SetLigthOption( float ambient[ 4 ], float diffuse[ 4 ], float specular[ 4 ] )
+{
+    for ( int i = 0; i < 4; i++	    )
+    {
+	ambient_light[ i ] = ambient[ i ];
+	diffuse_light[ i ] = diffuse[ i ];
+	speculaer_light[ i ] = specular[ i ];
+    }
+    glLightfv( GL_LIGHT0, GL_AMBIENT, ambient_light );
+    glLightfv( GL_LIGHT0, GL_DIFFUSE, diffuse_light );
+    glLightfv( GL_LIGHT0, GL_SPECULAR, speculaer_light );
+}
+
 

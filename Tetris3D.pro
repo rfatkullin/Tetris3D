@@ -18,15 +18,19 @@ SOURCES += \
     Geom.cpp \
     Figures.cpp \
     Game.cpp \
-    MainWindow.cpp \
-    main.cpp
+    main.cpp \
+    Scene.cpp
 
 HEADERS += \
     Material.h \
     Geom.h \
     Game.h \
     Figures.h \
-    MainWindow.h
+    Scene.h
+
+
+
+
 
 
 
