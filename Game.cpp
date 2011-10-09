@@ -27,7 +27,7 @@ void Game :: Start()
 {	
     last_mouse_position =   Point3D( 0.0f, 0.0f, 0.0f );
     camera_position =	    SphericalCoor( pi / 4, pi / 4 );
-    current_figure =	    new Figure( 0.0f, 300.0f, 0.0f, LFigure );
+    current_figure =	    new Figure( 0.0f, 300.0f, -( Block :: Block :: BlockSize / 2 ), LFigure );
     rotating_step =	    0;
     game_speed =	    FirstSpeed;
     rotating =		    false;
@@ -41,56 +41,56 @@ void Game :: Start()
 
 void Game :: NextStep()
 {
-	float	final_angle = 0.0f;
-	bool	state = false;
-	
-	//Move down the figure
-	Point3D figure_position = current_figure -> GetPosition();
-	if ( figure_position.y - game_speed * 0.5f >= FieldPositionByY )
-		current_figure -> SetPostion( Point3D( figure_position.x, figure_position.y - game_speed * 0.5f,  figure_position.z ));
+    float	final_angle = 0.0f;
+    bool	state = false;
 
-	//Rotate the figure
-	if ( rotating )
+    //Move down the figure
+    Point3D figure_position = current_figure -> GetPosition();
+    if ( figure_position.y - game_speed * 0.5f - Block :: BlockSize / 2 - Block :: BlockSize >= FieldPositionByY )
+	    current_figure -> SetPostion( Point3D( figure_position.x, figure_position.y - game_speed * 0.5f,  figure_position.z ));
+
+    //Rotate the figure
+    if ( rotating )
+    {
+	rotating_step++;
+	final_angle = rotating_step * rotating_angle;
+	if ( rotating_step == RotateStepsCount )
 	{
-		rotating_step++;
-		final_angle = rotating_step * rotating_angle;
-		if ( rotating_step == RotateStepsCount )
-		{
-			rotating_step = 0;
-			rotating = false;
-			state = true;			
-		}
-		if ( rotating_plane == PlaneXY )
-			current_figure -> RotateOnXY( final_angle, state );
-		else if ( rotating_plane == PlaneZY )
-			current_figure -> RotateOnZY( final_angle, state );
-		else
-			current_figure -> RotateOnZX( final_angle, state );
+		rotating_step = 0;
+		rotating = false;
+		state = true;
 	}
+	if ( rotating_plane == PlaneXY )
+		current_figure -> RotateOnXY( final_angle, state );
+	else if ( rotating_plane == PlaneZY )
+		current_figure -> RotateOnZY( final_angle, state );
+	else
+		current_figure -> RotateOnZX( final_angle, state );
+    }
 }
 
 void Game :: DrawField()
 {
-	float ambient_light[ 4 ] = { 0.5f, 0.5f, 0.5f, 1.0f };
-	float diffues_light[ 4 ] = { 0.0f, 0.0f, 0.0f, 1.0f };
-	float specular_light[ 4 ] = { 0.0f, 0.0f, 0.0f, 1.0f };
+    float ambient_light[ 4 ] = { 0.5f, 0.5f, 0.5f, 1.0f };
+    float diffues_light[ 4 ] = { 0.0f, 0.0f, 0.0f, 1.0f };
+    float specular_light[ 4 ] = { 0.0f, 0.0f, 0.0f, 1.0f };
 
-	glMaterialfv( GL_FRONT, GL_AMBIENT, ambient_light );
-	glMaterialfv( GL_FRONT, GL_DIFFUSE, diffues_light );
-	glMaterialfv( GL_FRONT, GL_SPECULAR, specular_light );
+    glMaterialfv( GL_FRONT, GL_AMBIENT, ambient_light );
+    glMaterialfv( GL_FRONT, GL_DIFFUSE, diffues_light );
+    glMaterialfv( GL_FRONT, GL_SPECULAR, specular_light );
 
-	glBegin( GL_LINES );
-		for ( int i = 0; i <= FieldLength; ++i )
-		{
-			glVertex3f( ( -FieldWidth / 2 + i ) * BlockSize, FieldPositionByY, ( -FieldLength / 2 ) * BlockSize );
-			glVertex3f( ( -FieldWidth / 2 + i ) * BlockSize, FieldPositionByY, (  FieldLength / 2 ) * BlockSize );
-		}
-		for ( int i = 0; i <= FieldWidth; ++i )
-		{
-			glVertex3f( (  FieldWidth / 2 ) * BlockSize, FieldPositionByY, ( -FieldLength / 2 + i ) * BlockSize );
-			glVertex3f( ( -FieldWidth / 2 ) * BlockSize, FieldPositionByY, ( -FieldLength / 2 + i ) * BlockSize );
-		}
-	glEnd();		
+    glBegin( GL_LINES );
+	for ( int i = 0; i <= FieldLength; ++i )
+	{
+	    glVertex3f( ( -FieldWidth / 2 + i ) * Block :: BlockSize, FieldPositionByY, ( -FieldLength / 2 ) * Block :: BlockSize );
+	    glVertex3f( ( -FieldWidth / 2 + i ) * Block :: BlockSize, FieldPositionByY, (  FieldLength / 2 ) * Block :: BlockSize );
+	}
+	for ( int i = 0; i <= FieldWidth; ++i )
+	{
+	    glVertex3f( (  FieldWidth / 2 ) * Block :: BlockSize, FieldPositionByY, ( -FieldLength / 2 + i ) * Block :: BlockSize );
+	    glVertex3f( ( -FieldWidth / 2 ) * Block :: BlockSize, FieldPositionByY, ( -FieldLength / 2 + i ) * Block :: BlockSize );
+	}
+     glEnd();
 }
 
 void Game :: DrawInterface()
@@ -114,16 +114,16 @@ void Game :: ShiftFigureByXAxis( ShiftDirection shift )
 {
 	Point3D position = current_figure -> GetPosition();
 	
-	if ( ( position.x + shift * BlockSize >= -FieldWidth / 2 * BlockSize ) && ( position.x + shift * BlockSize <= FieldWidth / 2 * BlockSize ) )
-		position.x += shift * BlockSize;
+	if ( ( position.x + shift * Block :: BlockSize >= -FieldWidth / 2 * Block :: BlockSize ) && ( position.x + shift * Block :: BlockSize <= FieldWidth / 2 * Block :: BlockSize ) )
+		position.x += shift * Block :: BlockSize;
 	current_figure  -> SetPostion( position );
 }
 
 void Game :: ShiftFigureByZAxis( ShiftDirection shift )
 {
 	Point3D position = current_figure -> GetPosition();
-	if ( ( position.z + shift * BlockSize >= -FieldLength / 2 * BlockSize ) && ( position.z + shift * BlockSize <= FieldLength / 2 * BlockSize ) )
-		position.z += shift * BlockSize;
+	if ( ( position.z + shift * Block :: BlockSize >= -FieldLength / 2 * Block :: BlockSize ) && ( position.z + shift * Block :: BlockSize <= FieldLength / 2 * Block :: BlockSize ) )
+		position.z += shift * Block :: BlockSize;
 	current_figure  -> SetPostion( position );
 }
 

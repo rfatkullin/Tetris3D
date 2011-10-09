@@ -4,6 +4,10 @@
 #include <QGLWidget>
 #include "Figures.h"
 
+//const unsigned int Figure :: BlocksCount = 4;
+//const unsigned int Block :: BlocksVertexCount = 8;
+//const int	   Block :: Block :: BlockSize = 30;
+
 Block :: Block( float new_x, float new_y, float new_z, Material new_material )
 {
 	/*
@@ -14,14 +18,14 @@ Block :: Block( float new_x, float new_y, float new_z, Material new_material )
 	current_rel_coordinates = const_rel_coordinates = Point3D( new_x, new_y, new_z );
 	material = new_material;
 	
-	current_vertices[ 0 ] = const_vertices[ 0 ] = Point3D( -BlockSize / 2,  BlockSize / 2, -BlockSize / 2 );
-	current_vertices[ 1 ] = const_vertices[ 1 ] = Point3D( -BlockSize / 2,  BlockSize / 2,  BlockSize / 2 );
-	current_vertices[ 2 ] = const_vertices[ 2 ] = Point3D(  BlockSize / 2,  BlockSize / 2,  BlockSize / 2 );
-	current_vertices[ 3 ] = const_vertices[ 3 ] = Point3D(  BlockSize / 2,  BlockSize / 2, -BlockSize / 2 );
-	current_vertices[ 4 ] = const_vertices[ 4 ] = Point3D(  BlockSize / 2, -BlockSize / 2, -BlockSize / 2 );
-	current_vertices[ 5 ] = const_vertices[ 5 ] = Point3D(  BlockSize / 2, -BlockSize / 2,  BlockSize / 2 );
-	current_vertices[ 6 ] = const_vertices[ 6 ] = Point3D( -BlockSize / 2, -BlockSize / 2,  BlockSize / 2 );
-	current_vertices[ 7 ] = const_vertices[ 7 ] = Point3D( -BlockSize / 2, -BlockSize / 2, -BlockSize / 2 );
+	current_vertices[ 0 ] = const_vertices[ 0 ] = Point3D( -Block :: BlockSize / 2,  Block :: BlockSize / 2, -Block :: BlockSize / 2 );
+	current_vertices[ 1 ] = const_vertices[ 1 ] = Point3D( -Block :: BlockSize / 2,  Block :: BlockSize / 2,  Block :: BlockSize / 2 );
+	current_vertices[ 2 ] = const_vertices[ 2 ] = Point3D(  Block :: BlockSize / 2,  Block :: BlockSize / 2,  Block :: BlockSize / 2 );
+	current_vertices[ 3 ] = const_vertices[ 3 ] = Point3D(  Block :: BlockSize / 2,  Block :: BlockSize / 2, -Block :: BlockSize / 2 );
+	current_vertices[ 4 ] = const_vertices[ 4 ] = Point3D(  Block :: BlockSize / 2, -Block :: BlockSize / 2, -Block :: BlockSize / 2 );
+	current_vertices[ 5 ] = const_vertices[ 5 ] = Point3D(  Block :: BlockSize / 2, -Block :: BlockSize / 2,  Block :: BlockSize / 2 );
+	current_vertices[ 6 ] = const_vertices[ 6 ] = Point3D( -Block :: BlockSize / 2, -Block :: BlockSize / 2,  Block :: BlockSize / 2 );
+	current_vertices[ 7 ] = const_vertices[ 7 ] = Point3D( -Block :: BlockSize / 2, -Block :: BlockSize / 2, -Block :: BlockSize / 2 );
 }
 
 void Block :: Rotate( float &a, float &b, float angle )
@@ -176,46 +180,46 @@ Figure :: Figure( float x, float y, float z, Figures type )
 	switch ( type )
 	{
 	case IFigure :
-		blocks[ 0 ] = new Block( 0.0f, BlockSize + BlockSize / 2, 0.0f, material );
-		blocks[ 1 ] = new Block( 0.0f, BlockSize / 2, 0.0f, material  );
-		blocks[ 2 ] = new Block( 0.0f, -BlockSize / 2, 0.0f, material );
-		blocks[ 3 ] = new Block( 0.0f, -( BlockSize + BlockSize / 2 ), 0.0f, material );
+		blocks[ 0 ] = new Block( 0.0f, Block :: BlockSize + Block :: BlockSize / 2, 0.0f, material );
+		blocks[ 1 ] = new Block( 0.0f, Block :: BlockSize / 2, 0.0f, material  );
+		blocks[ 2 ] = new Block( 0.0f, -Block :: BlockSize / 2, 0.0f, material );
+		blocks[ 3 ] = new Block( 0.0f, -( Block :: BlockSize + Block :: BlockSize / 2 ), 0.0f, material );
 		break;
 	case JFigure :
-		blocks[ 0 ] = new Block( 0.0f, BlockSize + BlockSize / 2, 0.0f, material );
-		blocks[ 1 ] = new Block( 0.0f, BlockSize / 2, 0.0f, material );
-		blocks[ 2 ] = new Block( 0.0f, -BlockSize / 2, 0.0f, material );
-		blocks[ 3 ] = new Block( BlockSize, -( BlockSize + BlockSize / 2 ), 0.0f, material );
+		blocks[ 0 ] = new Block( 0.0f, Block :: BlockSize + Block :: BlockSize / 2, 0.0f, material );
+		blocks[ 1 ] = new Block( 0.0f, Block :: BlockSize / 2, 0.0f, material );
+		blocks[ 2 ] = new Block( 0.0f, -Block :: BlockSize / 2, 0.0f, material );
+		blocks[ 3 ] = new Block( Block :: BlockSize, -( Block :: BlockSize + Block :: BlockSize / 2 ), 0.0f, material );
 		break;
 	case LFigure :
-		blocks[ 0 ] = new Block( 0.0f, -( BlockSize + BlockSize / 2 ), 0.0f, material );
-		blocks[ 1 ] = new Block( 0.0f, BlockSize / 2, 0.0f, material );
-		blocks[ 2 ] = new Block( 0.0f, -BlockSize / 2, 0.0f, material );
-		blocks[ 3 ] = new Block( -BlockSize, -( BlockSize + BlockSize / 2 ), 0.0f, material );
+		blocks[ 0 ] = new Block(  Block :: BlockSize / 2,  Block :: BlockSize, 0.0f, material );
+		blocks[ 1 ] = new Block(  Block :: BlockSize / 2,  0.0f,	       0.0f, material );
+		blocks[ 2 ] = new Block(  Block :: BlockSize / 2, -Block :: BlockSize, 0.0f, material );
+		blocks[ 3 ] = new Block( -Block :: BlockSize / 2, -Block :: BlockSize, 0.0f, material );
 		break;
 	case OFigure :
-		blocks[ 0 ] = new Block( -BlockSize / 2, BlockSize / 2, 0.0f, material );
-		blocks[ 1 ] = new Block( BlockSize / 2, BlockSize / 2, 0.0f, material );
-		blocks[ 2 ] = new Block( BlockSize / 2, -BlockSize / 2, 0.0f, material );
-		blocks[ 3 ] = new Block( -BlockSize / 2, -BlockSize / 2, 0.0f, material );
+		blocks[ 0 ] = new Block( -Block :: BlockSize / 2, Block :: BlockSize / 2, 0.0f, material );
+		blocks[ 1 ] = new Block( Block :: BlockSize / 2, Block :: BlockSize / 2, 0.0f, material );
+		blocks[ 2 ] = new Block( Block :: BlockSize / 2, -Block :: BlockSize / 2, 0.0f, material );
+		blocks[ 3 ] = new Block( -Block :: BlockSize / 2, -Block :: BlockSize / 2, 0.0f, material );
 		break;
 	case SFigure :
-		blocks[ 0 ] = new Block( BlockSize + BlockSize / 2, BlockSize / 2, 0.0f, material );
-		blocks[ 1 ] = new Block( 0.0f, BlockSize / 2, 0.0f, material );
-		blocks[ 2 ] = new Block( 0.0f, -BlockSize / 2, 0.0f, material );
-		blocks[ 3 ] = new Block( -( BlockSize + BlockSize / 2 ), -BlockSize + BlockSize / 2, 0.0f, material );
+		blocks[ 0 ] = new Block( Block :: BlockSize + Block :: BlockSize / 2, Block :: BlockSize / 2, 0.0f, material );
+		blocks[ 1 ] = new Block( 0.0f, Block :: BlockSize / 2, 0.0f, material );
+		blocks[ 2 ] = new Block( 0.0f, -Block :: BlockSize / 2, 0.0f, material );
+		blocks[ 3 ] = new Block( -( Block :: BlockSize + Block :: BlockSize / 2 ), -Block :: BlockSize + Block :: BlockSize / 2, 0.0f, material );
 		break;
 	case TFigure :
-		blocks[ 0 ] = new Block( BlockSize, BlockSize / 2, 0.0f, material );
-		blocks[ 1 ] = new Block( 0.0f, BlockSize / 2, 0.0f, material );
-		blocks[ 2 ] = new Block( -BlockSize, BlockSize / 2, 0.0f, material );
-		blocks[ 3 ] = new Block( 0.0f, -BlockSize / 2, 0.0f, material );
+		blocks[ 0 ] = new Block( Block :: BlockSize, Block :: BlockSize / 2, 0.0f, material );
+		blocks[ 1 ] = new Block( 0.0f, Block :: BlockSize / 2, 0.0f, material );
+		blocks[ 2 ] = new Block( -Block :: BlockSize, Block :: BlockSize / 2, 0.0f, material );
+		blocks[ 3 ] = new Block( 0.0f, -Block :: BlockSize / 2, 0.0f, material );
 		break;
 	default : //ZFigure :
-		blocks[ 0 ] = new Block( -BlockSize, BlockSize / 2, 0.0f, material );
-		blocks[ 1 ] = new Block( 0.0f, BlockSize / 2, 0.0f, material );
-		blocks[ 2 ] = new Block( 0.0f, -BlockSize / 2, 0.0f, material );
-		blocks[ 3 ] = new Block( BlockSize, -BlockSize / 2, 0.0f, material );
+		blocks[ 0 ] = new Block( -Block :: BlockSize, Block :: BlockSize / 2, 0.0f, material );
+		blocks[ 1 ] = new Block( 0.0f, Block :: BlockSize / 2, 0.0f, material );
+		blocks[ 2 ] = new Block( 0.0f, -Block :: BlockSize / 2, 0.0f, material );
+		blocks[ 3 ] = new Block( Block :: BlockSize, -Block :: BlockSize / 2, 0.0f, material );
 	}
 }
 

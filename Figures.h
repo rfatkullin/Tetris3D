@@ -4,20 +4,20 @@
 #ifndef FIGURES_H
 #define FIGURES_H
 
-const unsigned int  BlocksCount = 4;
-const unsigned int  BlocksVertexCount = 8;
-const int	    BlockSize = 30;
-const int	    MaterialsCount = 1;
-
 enum Figures { IFigure = 0, JFigure, LFigure, OFigure, SFigure, TFigure, ZFigure };
 
 //const Color colors[ COLORS_COUNT ] = { Color( 1.0f, 0.0f, 1.0f ), Color( 0.0f, 1.0f, 0.0f ), Color( 1.0f, 0.0f, 0.0f ), Color( 0.0f, 0.0f, 1.0f ), Color( 0.7f, 0.7f, 0.7f ) };
 //const Color colors[ COLORS_COUNT ] = { Color( 0.0f, 1.0f, 0.0f ) };
+
+const int	    MaterialsCount = 1;
 const Material materials[ MaterialsCount ] = { Material( 0.0f, 1.0f, 0.0f ) };
 
 class Block
-{			  
-private: 
+{
+public :
+    static const unsigned int	BlocksVertexCount = 8;
+    static const int		BlockSize = 30;
+private :
     Material    material;
     Point3D	current_rel_coordinates;
     Point3D	const_rel_coordinates;
@@ -37,13 +37,15 @@ public:
 
 class Figure
 {
-private:
+public :
+    static const unsigned int  BlocksCount = 4;
+private :
     Material	material;
     Point3D	position;
     Block	*blocks[ BlocksCount ];
 
 	
-public:
+public :
 		Figure( float x, float y, float z, Figures type );
 		~Figure();
     Point3D	GetPosition();
