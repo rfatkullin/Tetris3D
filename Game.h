@@ -8,9 +8,9 @@ class Game
 {
 public:
 	Game();
-	enum	RotatePlane	{ PlaneXY, PlaneZY, PlaneZX };
+	enum	RotatePlane	{   PlaneXY, PlaneZY, PlaneZX };
 	enum	RotateSide	{ RotateByClockWise, RotateByAntiClockWise };
-	enum	ShiftDirection	{ ShiftRight = 1, ShiftLeft = -1, ShitBack = -1, ShiftAhead = 1 };
+	enum	ShiftDirection	{ ShiftRight = 1, ShiftLeft = -1, ShiftBack = -1, ShiftAhead = 1 };
 
 
 	static	void		InitializeStaticData();

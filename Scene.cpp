@@ -23,6 +23,8 @@ Scene :: ~Scene()
 
 void Scene :: initializeGL()
 {
+    glEnable( GL_DEPTH_TEST );
+    glEnable( GL_LINE_SMOOTH );
 
     glEnable( GL_LIGHTING );
     glEnable( GL_LIGHT0 );
@@ -68,31 +70,43 @@ void Scene :: keyPressEvent( QKeyEvent* keyboard )
     switch ( keyboard -> key() )
     {
 	    case Qt :: Key_Escape :
-		    exit( 0 );
-		    break;
+		exit( 0 );
+		break;
 	    case Qt :: Key_Space :
-		    game -> DropDownFigure();
-		    break;
+		game -> DropDownFigure();
+		break;
+	   case Qt :: Key_Right :
+		game -> ShiftFigureByXAxis( Game :: ShiftRight );
+		break;
+	    case Qt :: Key_Left :
+		game -> ShiftFigureByXAxis( Game :: ShiftLeft );
+		break;
+	    case Qt :: Key_Up :
+		game -> ShiftFigureByZAxis( Game :: ShiftBack );
+		break;
+	    case Qt :: Key_Down :
+		game -> ShiftFigureByZAxis( Game :: ShiftAhead );
+		break;
 	    case Qt :: Key_D :
-		    game -> Rotate( Game :: PlaneXY, Game :: RotateByClockWise );
-		    break;
+		game -> Rotate( Game :: PlaneXY, Game :: RotateByClockWise );
+		break;
 	    case Qt :: Key_A :
-		    game -> Rotate( Game :: PlaneXY, Game :: RotateByAntiClockWise );
-		    break;
+		game -> Rotate( Game :: PlaneXY, Game :: RotateByAntiClockWise );
+		break;
 	    case Qt :: Key_W :
-		    game -> Rotate( Game :: PlaneZY, Game :: RotateByClockWise );
-		    break;
+		game -> Rotate( Game :: PlaneZY, Game :: RotateByClockWise );
+		break;
 	    case Qt :: Key_S :
-		    game -> Rotate( Game :: PlaneZY, Game :: RotateByAntiClockWise );
-		    break;
+		game -> Rotate( Game :: PlaneZY, Game :: RotateByAntiClockWise );
+		break;
 	    case Qt :: Key_Q :
-		    game -> Rotate( Game :: PlaneZX, Game :: RotateByClockWise );
-		    break;
+		game -> Rotate( Game :: PlaneZX, Game :: RotateByClockWise );
+		break;
 	    case Qt :: Key_E :
-		    game -> Rotate( Game :: PlaneZX, Game :: RotateByAntiClockWise );
-		    break;
+		game -> Rotate( Game :: PlaneZX, Game :: RotateByAntiClockWise );
+		break;
 	    default:
-		    break;
+		break;
     }
 }
 

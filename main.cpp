@@ -22,14 +22,14 @@
 //	game.ChangeCameraPosition( x - last_mouse_position.x, y - last_mouse_position.y );
 //	last_mouse_position.x = x;
 //	last_mouse_position.y = y;
-	
+
 //}
 
 //void MouseClick( int button, int state, int x, int y )
 //{
 //	if ( state == GLUT_DOWN  )
 //		last_mouse_position = Point3D( x, y, 0.0f );
-	
+
 //}
 
 //void SpecKeyBoard( int ch, int x, int y )
@@ -163,7 +163,7 @@
 //	glutInitWindowPosition(200, 100);
 //	glutCreateWindow("Simple");
 //	glutDisplayFunc(RenderScene);
-	
+
 ////	glutMouseFunc(Mouse);
 //	glutSpecialFunc( SpecKeyBoard );
 //	glutKeyboardFunc( KeyBoard );
@@ -171,11 +171,11 @@
 //	glutMotionFunc( CameraMotion );
 //	glutMouseFunc( MouseClick );
 //	MyInitOpenGL();
-	
+
 //	//Параметры glEnable/glDisable
 
 //	glEnable( GL_DEPTH_TEST );
-	
+
 //	//glLightModelfv( GL_LIGHT_MODEL_AMBIENT, ambient_light );
 //	LightInit();
 //	glEnable( GL_LINE_SMOOTH );
