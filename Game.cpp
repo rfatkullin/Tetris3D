@@ -28,7 +28,7 @@ void Game :: Start()
     srand( time( 0 ) );
     last_mouse_position =   Point3D( 0.0f, 0.0f, 0.0f );
     camera_position =	    SphericalCoor( pi / 4, pi / 4 );
-    current_figure =	    new Figure( 0.0f, 300.0f, -( Block :: Block :: BlockSize / 2 ), LFigure, materials[ rand() % MaterialsCount ] );
+    current_figure =	    new Figure( 0.0f, 300.0f, -( Block :: BlockSize / 2 ), LFigure, materials[ rand() % MaterialsCount ] );
     rotating_step =	    0;
     game_speed =	    FirstSpeed;
     rotating =		    false;
@@ -101,43 +101,55 @@ void Game :: DrawInterface()
 
 void Game :: DrawWorld()
 {
-	DrawField();
-	current_figure -> Draw();
+    DrawField();
+    current_figure -> Draw();
 }
 
 float* Game :: GetLightPosition()
 {
-    return light_position;
-    //return 0;
+    return light_position;    
 }
 
-void Game :: ShiftFigureByXAxis( ShiftDirection shift )
+void Game :: ShiftFigureByXAxis( ShiftDirection shift_koeff )
 {
-	Point3D position = current_figure -> GetPosition();
-	
-	if ( ( position.x + shift * Block :: BlockSize >= -FieldWidth / 2 * Block :: BlockSize ) && ( position.x + shift * Block :: BlockSize <= FieldWidth / 2 * Block :: BlockSize ) )
-		position.x += shift * Block :: BlockSize;
-	current_figure  -> SetPostion( position );
+    Point3D	position = current_figure -> GetPosition();
+    float	max_x_pos = current_figure -> MaxByX();
+    float	min_x_pos = current_figure -> MinByX();
+    float	shift = shift_koeff * Block :: BlockSize;
+
+    if ( ( Game :: FieldMinBound <= min_x_pos + shift  ) && ( min_x_pos + shift <= Game :: FieldMaxBound ) &&
+	 ( Game :: FieldMinBound <= max_x_pos + shift  ) && ( max_x_pos + shift <= Game :: FieldMaxBound )
+       )
+	position.x += shift;
+
+    current_figure -> SetPostion( position );
 }
 
-void Game :: ShiftFigureByZAxis( ShiftDirection shift )
+void Game :: ShiftFigureByZAxis( ShiftDirection shift_koeff )
 {
-	Point3D position = current_figure -> GetPosition();
-	if ( ( position.z + shift * Block :: BlockSize >= -FieldLength / 2 * Block :: BlockSize ) && ( position.z + shift * Block :: BlockSize <= FieldLength / 2 * Block :: BlockSize ) )
-		position.z += shift * Block :: BlockSize;
-	current_figure  -> SetPostion( position );
+    Point3D	position = current_figure -> GetPosition();
+    float	max_z_pos = current_figure -> MaxByZ();
+    float	min_z_pos = current_figure -> MinByZ();
+    float	shift = shift_koeff * Block :: BlockSize;
+
+    if ( ( Game :: FieldMinBound <= min_z_pos + shift  ) && ( min_z_pos + shift <= Game :: FieldMaxBound ) &&
+	 ( Game :: FieldMinBound <= max_z_pos + shift  ) && ( max_z_pos + shift <= Game :: FieldMaxBound )
+       )
+	position.z += shift;
+
+    current_figure -> SetPostion( position );
 }
 
 void Game :: Rotate( RotatePlane plane, RotateSide side )
 {
-	if ( !rotating )
-	{
-		rotating_angle = pi / 2 / RotateStepsCount;
-		if ( side == RotateByClockWise )
-			rotating_angle *= -1;
-		rotating_plane = plane;
-		rotating = true;
-	}
+    if ( !rotating )
+    {
+	rotating_angle = pi / 2 / RotateStepsCount;
+	if ( side == RotateByClockWise )
+	    rotating_angle *= -1;
+	rotating_plane = plane;
+	rotating = true;
+    }
 }
 
 void Game :: DropDownFigure()
@@ -148,16 +160,16 @@ void Game :: DropDownFigure()
 
 void Game :: ChangeCameraPosition( float x, float y )
 {
-	if ( InRange( camera_position.teta + CameraPosChangeKoeff * y, -pi / 2, pi / 2 )	)
-		camera_position.teta += CameraPosChangeKoeff * y;
-	camera_position.alpha -= CameraPosChangeKoeff * x;
-	camera_position.alpha = camera_position.alpha - ( ( int )( camera_position.alpha / 2 / pi ) * 2 * pi );
+    if ( InRange( camera_position.teta + CameraPosChangeKoeff * y, -pi / 2, pi / 2 )	)
+	camera_position.teta += CameraPosChangeKoeff * y;
+    camera_position.alpha -= CameraPosChangeKoeff * x;
+    camera_position.alpha = camera_position.alpha - ( ( int )( camera_position.alpha / 2 / pi ) * 2 * pi );
 }
 
 Point3D Game :: GetCameraPosition()
 {
-	float cos_teta = cos( camera_position.teta );
-	return Point3D( cos_teta * sin( camera_position.alpha ) * CameraRadius, sin( camera_position.teta ) * CameraRadius, cos_teta * cos( camera_position.alpha ) * CameraRadius );
+    float cos_teta = cos( camera_position.teta );
+    return Point3D( cos_teta * sin( camera_position.alpha ) * CameraRadius, sin( camera_position.teta ) * CameraRadius, cos_teta * cos( camera_position.alpha ) * CameraRadius );
 }
 
 void Game :: SetLastMousePosition( float x, float y )

@@ -30,6 +30,8 @@ struct SphericalCoor
     SphericalCoor() : teta( 0.0f ), alpha( 0.0f ) { }
 };
 
-bool InRange( float x, float a, float b );
+bool	InRange( float x, float a, float b );
+float	Max( float a, float b );
+float	Min( float a, float b );
 
 #endif

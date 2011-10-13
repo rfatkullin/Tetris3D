@@ -8,10 +8,9 @@ class Game
 {
 public:
 	Game();
-	enum	RotatePlane	{   PlaneXY, PlaneZY, PlaneZX };
+	enum	RotatePlane	{ PlaneXY, PlaneZY, PlaneZX };
 	enum	RotateSide	{ RotateByClockWise, RotateByAntiClockWise };
 	enum	ShiftDirection	{ ShiftRight = 1, ShiftLeft = -1, ShiftBack = -1, ShiftAhead = 1 };
-
 
 	static	void		InitializeStaticData();
 
@@ -29,10 +28,10 @@ public:
 	void			Rotate( RotatePlane plane, RotateSide side );
 	void			DropDownFigure();
 private:
-	enum		    { FieldWidth = 4, FieldLength = 4, FieldHeight = 4,RotateStepsCount = 20 };
+	enum		    { FieldWidth = 4, FieldLength = 4, FieldHeight = 4, RotateStepsCount = 20 };
 	enum LightPosition  { LightPosByX = 0 , LightPosByY = 300, LightPosByZ = 300 };
 	enum GameSpeed	    { FirstSpeed = 1, SecondSpeed = 2, ThirdSpeed = 4, FourthSpeed = 8, FifthSpeed = 10, SixthSpeed = 12, SeventhSpeed = 14 };
-
+	enum		    { FieldMaxBound = FieldWidth / 2 * Block :: BlockSize, FieldMinBound = -FieldWidth / 2 * Block :: BlockSize  };
 	static const float	CameraRadius;
 	static const float	CameraPosChangeKoeff;
 	static const int	FieldPositionByY;

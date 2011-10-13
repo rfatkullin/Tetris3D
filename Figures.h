@@ -50,6 +50,10 @@ private :
     void    DrawSide( Point3D x1, Point3D x2, Point3D x3, Point3D x4 );
 public:
 	    Block( float new_x, float new_y, float new_z, Material new_material );
+    float   MinByX();
+    float   MaxByX();
+    float   MinByZ();
+    float   MaxByZ();
     void    RotateOnZY( float angle, bool change_const );
     void    RotateOnZX( float angle, bool change_const );
     void    RotateOnXY( float angle, bool change_const );
@@ -70,10 +74,10 @@ public :
 		Figure( float x, float y, float z, Figures type, Material new_material );
 		~Figure();
     Point3D	GetPosition();
-//    float	MinByX();
-//    float	MaxByX();
-//    float	MinByZ();
-//    float	MaxByZ();
+    float	MinByX();
+    float	MaxByX();
+    float	MinByZ();
+    float	MaxByZ();
     void	SetPostion( Point3D new_position );
     void	RotateOnZY( float angle, bool change_const );
     void	RotateOnZX( float angle, bool change_const );

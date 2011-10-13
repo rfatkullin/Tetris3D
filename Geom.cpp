@@ -49,3 +49,18 @@ bool InRange( float x, float a, float b )
 	return ( x >= a + eps ) && ( x <= b - eps );
 }
 
+float Max( float a, float b )
+{
+    if ( a < b - eps )
+	return b;
+    return a;
+}
+
+float Min( float a, float b )
+{
+    if ( a < b - eps )
+	return a;
+    return b;
+}
+
+
