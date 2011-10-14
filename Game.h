@@ -14,8 +14,8 @@ public:
 
 	static	void		InitializeStaticData();
 
-	Point3D			GetCameraPosition();
-	Point3D			GetLastMousePosition();
+	Point3Df			GetCameraPosition();
+	Point3Df			GetLastMousePosition();
 	void			SetLastMousePosition( float x, float y );
 	float*			GetLightPosition();
 	void			ChangeCameraPosition( float x, float y );
@@ -37,10 +37,10 @@ private:
 	static const int	FieldPositionByY;
 	static float		light_position[ 4 ];
 
-	unsigned char		field[ FieldWidth ][ FieldLength ][ FieldHeight ];
+	Block*			field[ FieldWidth ][ FieldLength ][ FieldHeight ];
 	unsigned int		score;
 	SphericalCoor		camera_position;
-	Point3D			last_mouse_position;
+	Point3Df			last_mouse_position;
 
 	RotatePlane		rotating_plane;
 	GameSpeed		game_speed;
@@ -51,6 +51,9 @@ private:
 	
 	void			DrawField();
 	void			DrawInterface();
+
+	void			MoveDownFigure();
+	bool			CheckUpRotate();
 
 };
 

@@ -5,10 +5,6 @@
 #include <stdio.h>
 #include "Figures.h"
 
-//const unsigned int Figure :: BlocksCount = 4;
-//const unsigned int Block :: BlocksVertexCount = 8;
-//const int	   Block :: Block :: BlockSize = 30;
-
 Block :: Block( float new_x, float new_y, float new_z, Material new_material )
 {
     /*
@@ -16,17 +12,17 @@ Block :: Block( float new_x, float new_y, float new_z, Material new_material )
 	    1)-,+,- 2)-,+,+ 3)+,+,+ 4)+,+,-
 	    5)+,-,- 6)+,-,+ 7)-,-,+ 8)-,-,-
     */
-    current_rel_coordinates = const_rel_coordinates = Point3D( new_x, new_y, new_z );
+    current_rel_coordinates = const_rel_coordinates = Point3Df( new_x, new_y, new_z );
     material = new_material;
 
-    current_vertices[ 0 ] = const_vertices[ 0 ] = Point3D( -Block :: BlockSize / 2,  Block :: BlockSize / 2, -Block :: BlockSize / 2 );
-    current_vertices[ 1 ] = const_vertices[ 1 ] = Point3D( -Block :: BlockSize / 2,  Block :: BlockSize / 2,  Block :: BlockSize / 2 );
-    current_vertices[ 2 ] = const_vertices[ 2 ] = Point3D(  Block :: BlockSize / 2,  Block :: BlockSize / 2,  Block :: BlockSize / 2 );
-    current_vertices[ 3 ] = const_vertices[ 3 ] = Point3D(  Block :: BlockSize / 2,  Block :: BlockSize / 2, -Block :: BlockSize / 2 );
-    current_vertices[ 4 ] = const_vertices[ 4 ] = Point3D(  Block :: BlockSize / 2, -Block :: BlockSize / 2, -Block :: BlockSize / 2 );
-    current_vertices[ 5 ] = const_vertices[ 5 ] = Point3D(  Block :: BlockSize / 2, -Block :: BlockSize / 2,  Block :: BlockSize / 2 );
-    current_vertices[ 6 ] = const_vertices[ 6 ] = Point3D( -Block :: BlockSize / 2, -Block :: BlockSize / 2,  Block :: BlockSize / 2 );
-    current_vertices[ 7 ] = const_vertices[ 7 ] = Point3D( -Block :: BlockSize / 2, -Block :: BlockSize / 2, -Block :: BlockSize / 2 );
+    current_vertices[ 0 ] = const_vertices[ 0 ] = Point3Df( -Block :: BlockSize / 2,  Block :: BlockSize / 2, -Block :: BlockSize / 2 );
+    current_vertices[ 1 ] = const_vertices[ 1 ] = Point3Df( -Block :: BlockSize / 2,  Block :: BlockSize / 2,  Block :: BlockSize / 2 );
+    current_vertices[ 2 ] = const_vertices[ 2 ] = Point3Df(  Block :: BlockSize / 2,  Block :: BlockSize / 2,  Block :: BlockSize / 2 );
+    current_vertices[ 3 ] = const_vertices[ 3 ] = Point3Df(  Block :: BlockSize / 2,  Block :: BlockSize / 2, -Block :: BlockSize / 2 );
+    current_vertices[ 4 ] = const_vertices[ 4 ] = Point3Df(  Block :: BlockSize / 2, -Block :: BlockSize / 2, -Block :: BlockSize / 2 );
+    current_vertices[ 5 ] = const_vertices[ 5 ] = Point3Df(  Block :: BlockSize / 2, -Block :: BlockSize / 2,  Block :: BlockSize / 2 );
+    current_vertices[ 6 ] = const_vertices[ 6 ] = Point3Df( -Block :: BlockSize / 2, -Block :: BlockSize / 2,  Block :: BlockSize / 2 );
+    current_vertices[ 7 ] = const_vertices[ 7 ] = Point3Df( -Block :: BlockSize / 2, -Block :: BlockSize / 2, -Block :: BlockSize / 2 );
 }
 
 void Block :: Rotate( float &a, float &b, float angle )
@@ -72,12 +68,7 @@ void Block :: RotateOnZX( float angle, bool change_const )
     }
 
     if ( change_const )
-	    CurrentCoordinatesToConst();
-	/*float cos_angle = cos( angle );
-	float sin_angle = sin( angle );
-
-	z = -x * sin_angle + z * cos_angle;	
-	x = x * cos_angle + z * sin_angle;	*/
+	    CurrentCoordinatesToConst();	
 }
 
 void Block :: RotateOnXY( float angle, bool change_const )
@@ -95,23 +86,21 @@ void Block :: RotateOnXY( float angle, bool change_const )
 	CurrentCoordinatesToConst();
 }
 
-void Block :: DrawSide( Point3D p1, Point3D p2, Point3D p3, Point3D p4 )
+void Block :: DrawSide( Point3Df p1, Point3Df p2, Point3Df p3, Point3Df p4 )
 {
-    Point3D NormalVector = GetNormalVector( p1, p3, p2 );
+    glEnable(GL_NORMALIZE);
+    Point3Df NormalVector = GetNormalVector( p1, p3, p2 );
 
     glBegin( GL_QUADS );
 	glNormal3f( NormalVector.x, NormalVector.y, NormalVector.z );
-	glVertex3f( p1.x, p1.y, p1.z );
-	glNormal3f( NormalVector.x, NormalVector.y, NormalVector.z );
-	glVertex3f( p2.x, p2.y, p2.z );
-	glNormal3f( NormalVector.x, NormalVector.y, NormalVector.z );
-	glVertex3f( p3.x, p3.y, p3.z );
-	glNormal3f( NormalVector.x, NormalVector.y, NormalVector.z );
+	glVertex3f( p1.x, p1.y, p1.z );	
+	glVertex3f( p2.x, p2.y, p2.z );	
+	glVertex3f( p3.x, p3.y, p3.z );	
 	glVertex3f( p4.x, p4.y, p4.z );
     glEnd();
 }
 
-void Block :: Draw( Point3D figure_location )
+void Block :: Draw( Point3Df figure_location )
 {
     /*
 	    Вершины куба занумерованы в след. порядке( делим куб на 4 части ):
@@ -120,51 +109,51 @@ void Block :: Draw( Point3D figure_location )
     */
 
     //Firts side
-    DrawSide(	Point3D( figure_location.x + current_rel_coordinates.x + current_vertices[ 0 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 0 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 0 ].z ),
-		Point3D( figure_location.x + current_rel_coordinates.x + current_vertices[ 1 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 1 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 1 ].z ),
-		Point3D( figure_location.x + current_rel_coordinates.x + current_vertices[ 2 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 2 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 2 ].z ),
-		Point3D( figure_location.x + current_rel_coordinates.x + current_vertices[ 3 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 3 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 3 ].z )
+    DrawSide(	Point3Df( figure_location.x + current_rel_coordinates.x + current_vertices[ 0 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 0 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 0 ].z ),
+		Point3Df( figure_location.x + current_rel_coordinates.x + current_vertices[ 1 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 1 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 1 ].z ),
+		Point3Df( figure_location.x + current_rel_coordinates.x + current_vertices[ 2 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 2 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 2 ].z ),
+		Point3Df( figure_location.x + current_rel_coordinates.x + current_vertices[ 3 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 3 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 3 ].z )
 	    );
 
     //Second side
-    DrawSide(	Point3D( figure_location.x + current_rel_coordinates.x + current_vertices[ 1 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 1 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 1 ].z ),
-		Point3D( figure_location.x + current_rel_coordinates.x + current_vertices[ 6 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 6 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 6 ].z ),
-		Point3D( figure_location.x + current_rel_coordinates.x + current_vertices[ 5 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 5 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 5 ].z ),
-		Point3D( figure_location.x + current_rel_coordinates.x + current_vertices[ 2 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 2 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 2 ].z )
+    DrawSide(	Point3Df( figure_location.x + current_rel_coordinates.x + current_vertices[ 1 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 1 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 1 ].z ),
+		Point3Df( figure_location.x + current_rel_coordinates.x + current_vertices[ 6 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 6 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 6 ].z ),
+		Point3Df( figure_location.x + current_rel_coordinates.x + current_vertices[ 5 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 5 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 5 ].z ),
+		Point3Df( figure_location.x + current_rel_coordinates.x + current_vertices[ 2 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 2 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 2 ].z )
 	    );
 
     //Third side
-    DrawSide(	Point3D( figure_location.x + current_rel_coordinates.x + current_vertices[ 2 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 2 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 2 ].z ),
-		Point3D( figure_location.x + current_rel_coordinates.x + current_vertices[ 5 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 5 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 5 ].z ),
-		Point3D( figure_location.x + current_rel_coordinates.x + current_vertices[ 4 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 4 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 4 ].z ),
-		Point3D( figure_location.x + current_rel_coordinates.x + current_vertices[ 3 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 3 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 3 ].z )
+    DrawSide(	Point3Df( figure_location.x + current_rel_coordinates.x + current_vertices[ 2 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 2 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 2 ].z ),
+		Point3Df( figure_location.x + current_rel_coordinates.x + current_vertices[ 5 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 5 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 5 ].z ),
+		Point3Df( figure_location.x + current_rel_coordinates.x + current_vertices[ 4 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 4 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 4 ].z ),
+		Point3Df( figure_location.x + current_rel_coordinates.x + current_vertices[ 3 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 3 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 3 ].z )
 	    );
 
     //Fourth side
-    DrawSide(	Point3D( figure_location.x + current_rel_coordinates.x + current_vertices[ 6 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 6 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 6 ].z ),
-		Point3D( figure_location.x + current_rel_coordinates.x + current_vertices[ 7 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 7 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 7 ].z ),
-		Point3D( figure_location.x + current_rel_coordinates.x + current_vertices[ 4 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 4 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 4 ].z ),
-		Point3D( figure_location.x + current_rel_coordinates.x + current_vertices[ 5 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 5 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 5 ].z )
+    DrawSide(	Point3Df( figure_location.x + current_rel_coordinates.x + current_vertices[ 6 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 6 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 6 ].z ),
+		Point3Df( figure_location.x + current_rel_coordinates.x + current_vertices[ 7 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 7 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 7 ].z ),
+		Point3Df( figure_location.x + current_rel_coordinates.x + current_vertices[ 4 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 4 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 4 ].z ),
+		Point3Df( figure_location.x + current_rel_coordinates.x + current_vertices[ 5 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 5 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 5 ].z )
 	    );
 
     //Fifth side
-    DrawSide(	Point3D( figure_location.x + current_rel_coordinates.x + current_vertices[ 0 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 0 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 0 ].z ),
-		Point3D( figure_location.x + current_rel_coordinates.x + current_vertices[ 7 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 7 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 7 ].z ),
-		Point3D( figure_location.x + current_rel_coordinates.x + current_vertices[ 6 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 6 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 6 ].z ),
-		Point3D( figure_location.x + current_rel_coordinates.x + current_vertices[ 1 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 1 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 1 ].z )
+    DrawSide(	Point3Df( figure_location.x + current_rel_coordinates.x + current_vertices[ 0 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 0 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 0 ].z ),
+		Point3Df( figure_location.x + current_rel_coordinates.x + current_vertices[ 7 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 7 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 7 ].z ),
+		Point3Df( figure_location.x + current_rel_coordinates.x + current_vertices[ 6 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 6 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 6 ].z ),
+		Point3Df( figure_location.x + current_rel_coordinates.x + current_vertices[ 1 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 1 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 1 ].z )
 	    );
 
     //Sixth side
-    DrawSide(	Point3D( figure_location.x + current_rel_coordinates.x + current_vertices[ 3 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 3 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 3 ].z ),
-		Point3D( figure_location.x + current_rel_coordinates.x + current_vertices[ 4 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 4 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 4 ].z ),
-		Point3D( figure_location.x + current_rel_coordinates.x + current_vertices[ 7 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 7 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 7 ].z ),
-		Point3D( figure_location.x + current_rel_coordinates.x + current_vertices[ 0 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 0 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 0 ].z )
+    DrawSide(	Point3Df( figure_location.x + current_rel_coordinates.x + current_vertices[ 3 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 3 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 3 ].z ),
+		Point3Df( figure_location.x + current_rel_coordinates.x + current_vertices[ 4 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 4 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 4 ].z ),
+		Point3Df( figure_location.x + current_rel_coordinates.x + current_vertices[ 7 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 7 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 7 ].z ),
+		Point3Df( figure_location.x + current_rel_coordinates.x + current_vertices[ 0 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 0 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 0 ].z )
 	    );
 }
 
 Figure :: Figure( float x, float y, float z, Figures type, Material new_material )
 {
-    position = Point3D( x, y, z );
+    position = Point3Df( x, y, z );
     material = new_material;
 
     switch ( type )
@@ -247,12 +236,12 @@ void Figure :: RotateOnXY( float angle, bool change_const )
 	blocks[ i ] -> RotateOnXY( angle, change_const );
 }
 
-Point3D Figure :: GetPosition()
+Point3Df Figure :: GetPosition()
 {
     return position;
 }
 
-void Figure :: SetPostion( Point3D new_position )
+void Figure :: SetPostion( Point3Df new_position )
 {
     position = new_position;
 }

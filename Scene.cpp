@@ -24,7 +24,7 @@ Scene :: ~Scene()
 void Scene :: initializeGL()
 {
     glEnable( GL_DEPTH_TEST );
-    //glDisable( GL_POLYGON_SMOOTH );
+    glShadeModel( GL_FLAT );
     glEnable( GL_LIGHTING );
     glEnable( GL_LIGHT0 );
 
@@ -46,7 +46,7 @@ void Scene :: resizeGL(int new_width, int new_height)
 
 void Scene :: paintGL()
 {
-    Point3D camera_positon;
+    Point3Df camera_positon;
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     glMatrixMode( GL_MODELVIEW );
     glLoadIdentity();
@@ -117,7 +117,7 @@ void Scene :: mousePressEvent( QMouseEvent* mouse )
 
 void Scene :: mouseMoveEvent( QMouseEvent* mouse )
 {
-    Point3D last_mouse_position = game -> GetLastMousePosition();
+    Point3Df last_mouse_position = game -> GetLastMousePosition();
     game -> ChangeCameraPosition( mouse -> globalX() - last_mouse_position.x, mouse -> globalY() - last_mouse_position.y );
     game -> SetLastMousePosition( mouse -> globalX(), mouse -> globalY() );
 }

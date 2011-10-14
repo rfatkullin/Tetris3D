@@ -5,21 +5,34 @@
 const float pi = 3.141592653f;
 const float eps = 1e-5;
 
-struct Point3D
+struct Point3Df
 {
     float x;
     float y;
     float z;
 
-    Point3D( float new_x, float new_y, float new_z ) : x( new_x ), y( new_y ), z( new_z ) { }
-    Point3D() : x( 0.0f ), y( 0.0f ), z( 0.0f ) {}
-    Point3D& operator = ( const Point3D& rigth_obj );
-    Point3D operator - ( const Point3D& rigth_obj );
-    Point3D operator + ( const Point3D& right_obj );
+    Point3Df( float new_x, float new_y, float new_z ) : x( new_x ), y( new_y ), z( new_z ) { }
+    Point3Df() : x( 0.0f ), y( 0.0f ), z( 0.0f ) {}
+    Point3Df& operator = ( const Point3Df& rigth_obj );
+    Point3Df operator - ( const Point3Df& rigth_obj );
+    Point3Df operator + ( const Point3Df& right_obj );
 };
 
-Point3D operator * ( float a, const Point3D& obj );
-Point3D GetNormalVector( Point3D p1, Point3D p2, Point3D p3 );
+struct Point3Di
+{
+    int x;
+    int y;
+    int z;
+
+    Point3Di( int new_x, int new_y, int new_z ) : x( new_x ), y( new_y ), z( new_z ) { }
+    Point3Di() : x( 0 ), y( 0 ), z( 0 ) {}
+    Point3Di& operator = ( const Point3Di& rigth_obj );
+    Point3Di operator - ( const Point3Di& rigth_obj );
+    Point3Di operator + ( const Point3Di& right_obj );
+};
+
+Point3Df operator * ( float a, const Point3Df& obj );
+Point3Df GetNormalVector( Point3Df p1, Point3Df p2, Point3Df p3 );
 
 struct SphericalCoor
 {
