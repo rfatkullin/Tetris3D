@@ -46,10 +46,10 @@ void Game :: Start()
 
 void Game :: MoveDownFigure()
 {
-    Point3Df figure_position = current_figure -> GetPosition();
-    current_figure -> SetPostion( Point3Df( figure_position.x, figure_position.y - game_speed * 0.5f,  figure_position.z ));
+//    Point3Df figure_position = current_figure -> GetPosition();
+//    current_figure -> SetPostion( Point3Df( figure_position.x, figure_position.y - game_speed * 0.5f,  figure_position.z ));
 
-    for (  )
+//    for (  )
 }
 
 void Game :: NextStep()
@@ -57,13 +57,13 @@ void Game :: NextStep()
     float	final_angle = 0.0f;
     bool	state = false;
 
-    MoveDiwnFigure();
+    //MoveDiwnFigure();
     //Move down the figure
-    /*
+
     Point3Df figure_position = current_figure -> GetPosition();
     if ( figure_position.y - game_speed * 0.5f - Block :: BlockSize / 2 - Block :: BlockSize >= FieldPositionByY )
 	    current_figure -> SetPostion( Point3Df( figure_position.x, figure_position.y - game_speed * 0.5f,  figure_position.z ));
-    */
+
     //Rotate the figure
     if ( rotating )
     {
@@ -78,23 +78,30 @@ void Game :: NextStep()
 	switch ( rotating_plane )
 	{
 	case PlaneXY :
-	    check_figure -> RotateOnXY( final_angle, state );
+	    current_figure -> RotateOnXY( final_angle, state );
 	    break;
 	case PlaneZY :
-	    check_figure -> RotateOnZY( final_angle, state );
+	    current_figure -> RotateOnZY( final_angle, state );
 	    break;
 	default :
-	    check_figure -> RotateOnZX( final_angle, state );
+	    current_figure -> RotateOnZX( final_angle, state );
 	}
     }
 }
 
 void Game :: DrawField()
 {
+    //Camera( +, +, + ) and looking ( 0, 0, 0 )
+    float FarGridZ	    =  -FieldWidth / 2.0f;
+    float LeftGridX	    = -FieldLength / 2.0f;
+    float DownLowerGridY    = -FieldHeight / 2.0f;
+
     glDisable( GL_LIGHTING );
     glColor3f( 1.0f, 1.0f, 1.0f );
 
+
     glBegin( GL_LINES );
+    //XZ Plane
 	for ( int i = 0; i <= FieldLength; ++i )
 	{
 	    glVertex3f( ( -FieldWidth / 2 + i ) * Block :: BlockSize, FieldPositionByY, ( -FieldLength / 2 ) * Block :: BlockSize );
@@ -105,8 +112,20 @@ void Game :: DrawField()
 	    glVertex3f( (  FieldWidth / 2 ) * Block :: BlockSize, FieldPositionByY, ( -FieldLength / 2 + i ) * Block :: BlockSize );
 	    glVertex3f( ( -FieldWidth / 2 ) * Block :: BlockSize, FieldPositionByY, ( -FieldLength / 2 + i ) * Block :: BlockSize );
 	}
-     glEnd();
-     glEnable( GL_LIGHTING );
+
+    //XY Plane, z = -FieldLength / 2 * Block :: Size
+	for ( int i = 0; i <= FieldLength; ++i )
+	{
+	    glVertex3f( ( -FieldWidth / 2 + i ) * Block :: BlockSize, FieldPositionByY, ( -FieldLength / 2 ) * Block :: BlockSize );
+	    glVertex3f( ( -FieldWidth / 2 + i ) * Block :: BlockSize, FieldPositionByY, (  FieldLength / 2 ) * Block :: BlockSize );
+	}
+	for ( int i = 0; i <= FieldWidth; ++i )
+	{
+	    glVertex3f( (  FieldWidth / 2 ) * Block :: BlockSize, FieldPositionByY, ( -FieldLength / 2 + i ) * Block :: BlockSize );
+	    glVertex3f( ( -FieldWidth / 2 ) * Block :: BlockSize, FieldPositionByY, ( -FieldLength / 2 + i ) * Block :: BlockSize );
+	}
+    glEnd();
+    glEnable( GL_LIGHTING );
 }
 
 void Game :: DrawInterface()
@@ -163,7 +182,7 @@ void Game :: Rotate( RotatePlane plane, RotateSide side )
 	if ( side == RotateByClockWise )
 	    rotating_angle *= -1;
 	rotating_plane = plane;
-	if ( CheckUpRotate() )
+	//if ( CheckUpRotate() )
 	    rotating = true;
     }
 }
@@ -199,34 +218,30 @@ Point3Df Game :: GetLastMousePosition( )
     return last_mouse_position;
 }
 
-bool Game :: CheckCollisions()
-{
+//bool Game :: CeckUp
+//()
+//{
+//    Figure check_figure = ( *current_figure );
 
-}
+//    //Checking every step while rotates
+//    for ( int i = 0; i < RotateStepsCount; i++ )
+//    {
+//	final_angle = i * rotating_angle;
 
-bool Game :: CeckUpRotate()
-{
-    Figure check_figure = ( *current_figure );
+//	switch ( rotating_plane )
+//	{
+//	case PlaneXY :
+//	    check_figure -> RotateOnXY( final_angle, state );
+//	    break;
+//	case PlaneZY :
+//	    check_figure -> RotateOnZY( final_angle, state );
+//	    break;
+//	default :
+//	    check_figure -> RotateOnZX( final_angle, state );
+//	}
 
-    //Checking every step while rotates
-    for ( int i = 0; i < RotateStepsCount; i++ )
-    {
-	final_angle = i * rotating_angle;
+//	//Check Collisions
 
-	switch ( rotating_plane )
-	{
-	case PlaneXY :
-	    check_figure -> RotateOnXY( final_angle, state );
-	    break;
-	case PlaneZY :
-	    check_figure -> RotateOnZY( final_angle, state );
-	    break;
-	default :
-	    check_figure -> RotateOnZX( final_angle, state );
-	}
-
-	if ( !CheckCollisions() )
-	    return false;
-    }
-}
+//    }
+//}
 

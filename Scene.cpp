@@ -51,16 +51,14 @@ void Scene :: paintGL()
     glMatrixMode( GL_MODELVIEW );
     glLoadIdentity();
     camera_positon = game -> GetCameraPosition();
-    gluLookAt( camera_positon.x, camera_positon.y, camera_positon.z, 0, 0, 0, 0, 1, 0 );
-    glLightfv( GL_LIGHT0, GL_POSITION, game -> GetLightPosition() );
-    glColor3f( 1.0f, 1.0f, 1.0f );
-    glPointSize( 4.0f );
+//  gluLookAt( camera_positon.x, camera_positon.y, camera_positon.z, 0, 0, 0, 0, 1, 0 );
+//  glLightfv( GL_LIGHT0, GL_POSITION, game -> GetLightPosition() );
 
-    glBegin( GL_POINTS );
-	glVertex3fv( game -> GetLightPosition() );
-    glEnd();
+    gluLookAt( camera_positon.x, camera_positon.y, camera_positon.z, 0, 0, 0, 0, 1, 0 );
+    glViewport( 0, 0, WindowWidth, WindowHeight );
     game -> DrawWorld();
 
+    glLightfv( GL_LIGHT0, GL_POSITION, game -> GetLightPosition() );
     swapBuffers();
 }
 
