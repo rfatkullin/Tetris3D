@@ -3,7 +3,7 @@
 #define POINT_H
 
 const float pi = 3.141592653f;
-const float eps = 1e-5;
+const float eps = 1e-5f;
 
 struct Point3Df
 {

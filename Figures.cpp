@@ -38,7 +38,7 @@ void Block :: CurrentCoordinatesToConst()
 {
     const_rel_coordinates = current_rel_coordinates;
     for ( int i = 0; i < BlocksVertexCount; ++i )
-	    const_vertices[ i ] = current_vertices[ i ];
+	const_vertices[ i ] = current_vertices[ i ];
 }
 
 void Block :: RotateOnZY( float angle, bool change_const )
@@ -63,12 +63,12 @@ void Block :: RotateOnZX( float angle, bool change_const )
 
     for ( int i = 0; i < BlocksVertexCount; ++i )
     {
-	    current_vertices[ i ] = const_vertices[ i ];
-	    Rotate( current_vertices[ i ].z, current_vertices[ i ].x, angle  );
+	current_vertices[ i ] = const_vertices[ i ];
+	Rotate( current_vertices[ i ].z, current_vertices[ i ].x, angle  );
     }
 
     if ( change_const )
-	    CurrentCoordinatesToConst();	
+	CurrentCoordinatesToConst();
 }
 
 void Block :: RotateOnXY( float angle, bool change_const )
@@ -151,6 +151,66 @@ void Block :: Draw( Point3Df figure_location )
 	    );
 }
 
+float Block :: LowerBoundZ()
+{
+    float min_z = current_vertices[ 0 ].z;
+
+    for ( int i = 1; i < BlocksVertexCount; i++ )
+	min_z = Min( min_z, current_vertices[ i ].z );
+
+    return min_z + current_rel_coordinates.z;
+}
+
+float Block :: UpperBoundZ()
+{
+    float max_z = current_vertices[ 0 ].z;
+
+    for ( int i = 1; i < BlocksVertexCount; i++ )
+	max_z = Max( max_z, current_vertices[ i ].z );
+
+    return max_z + current_rel_coordinates.z;
+}
+
+float Block :: LowerBoundX()
+{
+    float min_x = current_vertices[ 0 ].x;
+
+    for ( int i = 1; i < BlocksVertexCount; i++ )
+	min_x = Min( min_x, current_vertices[ i ].x );
+
+    return min_x + current_rel_coordinates.x;
+}
+
+float Block :: UpperBoundX()
+{
+    float max_x = current_vertices[ 0 ].x;
+
+    for ( int i = 1; i < BlocksVertexCount; i++ )
+	max_x = Max( max_x, current_vertices[ i ].x );
+
+    return max_x + current_rel_coordinates.x;
+}
+
+float Block :: LowerBoundY()
+{
+    float min_y = current_vertices[ 0 ].y;
+
+    for ( int i = 1; i < BlocksVertexCount; i++ )
+	min_y = Min( min_y, current_vertices[ i ].y );
+
+    return min_y + current_rel_coordinates.y;
+}
+
+float Block :: UpperBoundY()
+{
+    float max_y = current_vertices[ 0 ].y;
+
+    for ( int i = 1; i < BlocksVertexCount; i++ )
+	max_y = Max( max_y, current_vertices[ i ].y );
+
+    return max_y + current_rel_coordinates.y;
+}
+
 Figure :: Figure( float x, float y, float z, Figures type, Material new_material )
 {
     position = Point3Df( x, y, z );
@@ -221,7 +281,7 @@ void Figure :: Draw()
 void Figure :: RotateOnZY( float angle, bool change_const )
 {
     for ( int i = 0; i < BlocksCount; ++i )
-	    blocks[ i ] -> RotateOnZY( angle, change_const );
+	blocks[ i ] -> RotateOnZY( angle, change_const );
 }
 
 void Figure :: RotateOnZX( float angle, bool change_const )
@@ -241,89 +301,71 @@ Point3Df Figure :: GetPosition()
     return position;
 }
 
-void Figure :: SetPostion( Point3Df new_position )
+void Figure :: SetPosition( Point3Df new_position )
 {
     position = new_position;
 }
 
-float Figure :: MinByX()
+float Figure :: LowerBoundX()
 {
-    float min_x = blocks[ 0 ] -> MinByX();
+    float min_x = blocks[ 0 ] -> LowerBoundX();
 
     for ( int i = 1; i < BlocksCount; i++ )
-	min_x = Min( min_x, blocks[ i ] -> MinByX() );
+	min_x = Min( min_x, blocks[ i ] -> LowerBoundX() );
 
     return min_x + position.x;
 }
 
-float Figure :: MaxByX()
+float Figure :: UpperBoundX()
 {
-    float max_x = blocks[ 0 ] -> MaxByX();
+    float max_x = blocks[ 0 ] -> UpperBoundX();
 
     for ( int i = 1; i < BlocksCount; i++ )
-	max_x = Max( max_x, blocks[ i ] -> MaxByX() );
+	max_x = Max( max_x, blocks[ i ] -> UpperBoundX() );
 
     return max_x + position.x;
 }
 
-float Figure :: MinByZ()
+float Figure :: LowerBoundY()
 {
-    float min_z = blocks[ 0 ] -> MinByZ();
+    float min_y = blocks[ 0 ] -> LowerBoundY();
 
     for ( int i = 1; i < BlocksCount; i++ )
-	min_z = Min( min_z, blocks[ i ] -> MinByZ() );
+	min_y = Min( min_y, blocks[ i ] -> LowerBoundY() );
+
+    return min_y + position.y;
+}
+
+float Figure :: UpperBoundY()
+{
+    float max_y = blocks[ 0 ] -> UpperBoundY();
+
+    for ( int i = 1; i < BlocksCount; i++ )
+	max_y = Max( max_y, blocks[ i ] -> UpperBoundY() );
+
+    return max_y + position.y;
+}
+
+float Figure :: LowerBoundZ()
+{
+    float min_z = blocks[ 0 ] -> LowerBoundZ();
+
+    for ( int i = 1; i < BlocksCount; i++ )
+	min_z = Min( min_z, blocks[ i ] -> LowerBoundZ() );
 
     return min_z + position.z;
 }
 
-float Figure :: MaxByZ()
+float Figure :: UpperBoundZ()
 {
-    float max_z = blocks[ 0 ] -> MaxByZ();
+    float max_z = blocks[ 0 ] -> UpperBoundZ();
 
     for ( int i = 1; i < BlocksCount; i++ )
-	max_z = Max( max_z, blocks[ i ] -> MaxByZ() );
+	max_z = Max( max_z, blocks[ i ] -> UpperBoundZ() );
 
     return max_z + position.z;
 }
 
-float Block :: MinByX()
-{
-    float min_x = current_vertices[ 0 ].x;
 
-    for ( int i = 1; i < BlocksVertexCount; i++ )
-	min_x = Min( min_x, current_vertices[ i ].x );
-
-    return min_x + current_rel_coordinates.x;
-}
-
-float Block :: MaxByX()
-{
-    float max_x = current_vertices[ 0 ].x;
-
-    for ( int i = 1; i < BlocksVertexCount; i++ )
-	max_x = Max( max_x, current_vertices[ i ].x );
-
-    return max_x + current_rel_coordinates.x;
-}
-
-float Block :: MinByZ()
-{
-    float min_z = current_vertices[ 0 ].z;
-
-    for ( int i = 1; i < BlocksVertexCount; i++ )
-	min_z = Min( min_z, current_vertices[ i ].z );
-
-    return min_z + current_rel_coordinates.z;
-}
-
-float Block :: MaxByZ()
-{
-    float max_z = current_vertices[ 0 ].z;
-
-    for ( int i = 1; i < BlocksVertexCount; i++ )
-	max_z = Max( max_z, current_vertices[ i ].z );
-
-    return max_z + current_rel_coordinates.z;
-}
 
 

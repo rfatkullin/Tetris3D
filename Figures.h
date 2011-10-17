@@ -50,10 +50,14 @@ private :
     void    DrawSide( Point3Df x1, Point3Df x2, Point3Df x3, Point3Df x4 );
 public:
 	    Block( float new_x, float new_y, float new_z, Material new_material );
-    float   MinByX();
-    float   MaxByX();
-    float   MinByZ();
-    float   MaxByZ();
+
+    float   LowerBoundX();
+    float   UpperBoundX();
+    float   LowerBoundY();
+    float   UpperBoundY();
+    float   LowerBoundZ();
+    float   UpperBoundZ();
+
     void    RotateOnZY( float angle, bool change_const );
     void    RotateOnZX( float angle, bool change_const );
     void    RotateOnXY( float angle, bool change_const );
@@ -74,11 +78,14 @@ public :
 		Figure( float x, float y, float z, Figures type, Material new_material );
 		~Figure();
     Point3Df	GetPosition();
-    float	MinByX();
-    float	MaxByX();
-    float	MinByZ();
-    float	MaxByZ();
-    void	SetPostion( Point3Df new_position );
+    float	LowerBoundX();
+    float	UpperBoundX();
+    float	LowerBoundY();
+    float	UpperBoundY();
+    float	LowerBoundZ();
+    float	UpperBoundZ();
+
+    void	SetPosition( Point3Df new_position );
     void	RotateOnZY( float angle, bool change_const );
     void	RotateOnZX( float angle, bool change_const );
     void	RotateOnXY( float angle, bool change_const );

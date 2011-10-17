@@ -5,7 +5,7 @@
 #include "Game.h"
 
 const int   WindowWidth = 1200;
-const int   WindowHeight = 1200;
+const int   WindowHeight = 600;
 
 class Scene : public QGLWidget
 {

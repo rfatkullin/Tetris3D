@@ -9,13 +9,13 @@ class Game
 public:
 	Game();
 	enum	RotatePlane	{ PlaneXY, PlaneZY, PlaneZX };
-	enum	RotateSide	{ RotateByClockWise, RotateByAntiClockWise };
+	enum	RotateSide	{ RotateByClockWise = -1, RotateByAntiClockWise = 1 };
 	enum	ShiftDirection	{ ShiftRight = 1, ShiftLeft = -1, ShiftBack = -1, ShiftAhead = 1 };
 
 	static	void		InitializeStaticData();
 
-	Point3Df			GetCameraPosition();
-	Point3Df			GetLastMousePosition();
+	Point3Df		GetCameraPosition();
+	Point3Df		GetLastMousePosition();
 	void			SetLastMousePosition( float x, float y );
 	float*			GetLightPosition();
 	void			ChangeCameraPosition( float x, float y );
@@ -31,7 +31,12 @@ private:
 	enum		    { FieldWidth = 4, FieldLength = 4, FieldHeight = 4, RotateStepsCount = 20 };
 	enum LightPosition  { LightPosByX = 0 , LightPosByY = 300, LightPosByZ = 300 };
 	enum GameSpeed	    { FirstSpeed = 1, SecondSpeed = 2, ThirdSpeed = 4, FourthSpeed = 8, FifthSpeed = 10, SixthSpeed = 12, SeventhSpeed = 14 };
-	enum		    { FieldMaxBound = FieldWidth / 2 * Block :: BlockSize, FieldMinBound = -FieldWidth / 2 * Block :: BlockSize  };
+	enum		    { FieldLowerBoundX = -FieldWidth  / 2 * Block :: BlockSize,
+			      FieldUpperBoundX =  FieldWidth  / 2 * Block :: BlockSize,
+			      FieldLowerBoundY = -FieldHeight / 2 * Block :: BlockSize,
+			      FieldUpperBoundY =  FieldHeight / 2 * Block :: BlockSize,
+			      FieldLowerBoundZ = -FieldWidth  / 2 * Block :: BlockSize,
+			      FieldUpperBoundZ =  FieldWidth  / 2 * Block :: BlockSize };
 	static const float	CameraRadius;
 	static const float	CameraPosChangeKoeff;
 	static const int	FieldPositionByY;
@@ -40,15 +45,17 @@ private:
 	Block*			field[ FieldWidth ][ FieldLength ][ FieldHeight ];
 	unsigned int		score;
 	SphericalCoor		camera_position;
-	Point3Df			last_mouse_position;
+	Point3Df		last_mouse_position;
 
 	RotatePlane		rotating_plane;
 	GameSpeed		game_speed;
 	Figure*			current_figure;
+	Point3Df		pos_change_vec;
 	float			rotating_angle;
 	bool			rotating;
+	bool			is_pos_change;
 	int			rotating_step;
-	
+
 	void			DrawField();
 	void			DrawInterface();
 

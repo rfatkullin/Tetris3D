@@ -10,6 +10,7 @@ int main( int argc, char **argv )
     QApplication app( argc, argv );
 
     Scene scene;
+    scene.resize( WindowWidth, WindowHeight );
     scene.SetLigthOption( ambient_light, diffuse_light, speculaer_light );
     scene.startTimer( 10 );
     scene.show();

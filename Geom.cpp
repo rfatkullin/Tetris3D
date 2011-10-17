@@ -12,27 +12,27 @@ Point3Df& Point3Df :: operator = ( const Point3Df& right_obj )
 
 Point3Df Point3Df :: operator - ( const Point3Df& right_obj )
 {
-	Point3Df tmp;
-	tmp.x = x - right_obj.x;
-	tmp.y = y - right_obj.y;
-	tmp.z = z - right_obj.z;
+    Point3Df tmp;
+    tmp.x = x - right_obj.x;
+    tmp.y = y - right_obj.y;
+    tmp.z = z - right_obj.z;
 
-	return tmp;
+    return tmp;
 }
 
 Point3Df Point3Df :: operator + ( const Point3Df& right_obj )
 {
-	Point3Df tmp;
-	tmp.x = x + right_obj.x;
-	tmp.y = y + right_obj.y;
-	tmp.z = z + right_obj.z;
+    Point3Df tmp;
+    tmp.x = x + right_obj.x;
+    tmp.y = y + right_obj.y;
+    tmp.z = z + right_obj.z;
 
-	return tmp;
+    return tmp;
 }
 
 Point3Df operator * ( float a, const Point3Df& obj )
 {
-	return Point3Df( a * obj.x, a * obj.y, a * obj.z );
+    return Point3Df( a * obj.x, a * obj.y, a * obj.z );
 }
 
 Point3Df GetNormalVector( Point3Df p1, Point3Df p2, Point3Df p3 )
