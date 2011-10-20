@@ -5,6 +5,8 @@
 const float pi = 3.141592653f;
 const float eps = 1e-5f;
 
+struct Point3Di;
+
 struct Point3Df
 {
     float x;
@@ -13,9 +15,10 @@ struct Point3Df
 
     Point3Df( float new_x, float new_y, float new_z ) : x( new_x ), y( new_y ), z( new_z ) { }
     Point3Df() : x( 0.0f ), y( 0.0f ), z( 0.0f ) {}
-    Point3Df& operator = ( const Point3Df& rigth_obj );
-    Point3Df operator - ( const Point3Df& rigth_obj );
-    Point3Df operator + ( const Point3Df& right_obj );
+    Point3Df& operator = ( const Point3Df& right_obj );
+    Point3Df& operator = ( const Point3Di& right_obj );
+    Point3Df  operator - ( const Point3Df& right_obj );
+    Point3Df  operator + ( const Point3Df& right_obj );
 };
 
 struct Point3Di
@@ -26,9 +29,22 @@ struct Point3Di
 
     Point3Di( int new_x, int new_y, int new_z ) : x( new_x ), y( new_y ), z( new_z ) { }
     Point3Di() : x( 0 ), y( 0 ), z( 0 ) {}
-    Point3Di& operator = ( const Point3Di& rigth_obj );
-    Point3Di operator - ( const Point3Di& rigth_obj );
+    Point3Di& operator = ( const Point3Di& right_obj );
+    Point3Di operator - ( const Point3Di& right_obj );
     Point3Di operator + ( const Point3Di& right_obj );
+};
+
+struct Point2Df
+{
+    float x;
+    float y;
+
+    Point2Df( float new_x, float new_y ) : x( new_x ), y( new_y ) {}
+    Point2Df() : x( 0.0f ), y( 0.0f ) {}
+    Point2Df& operator = ( const Point2Df& right_obj );
+    Point2Df  operator - ( const Point2Df& right_obj );
+    Point2Df  operator + ( const Point2Df& right_obj );
+
 };
 
 Point3Df operator * ( float a, const Point3Df& obj );

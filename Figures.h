@@ -37,26 +37,34 @@ class Block
 {
 public :
     static const unsigned int	BlocksVertexCount = 8;
-    static const int		BlockSize = 30;
+    static const int		BlockSize = 30;		//Must be even
 private :
     Material    material;
-    Point3Df	current_rel_coordinates;
-    Point3Df	const_rel_coordinates;
-    Point3Df	current_vertices[ BlocksVertexCount ];
-    Point3Df	const_vertices[ BlocksVertexCount ];
+    Point3Df	rel_position_f;
+    Point3Di	rel_position_i;
+    Point3Df	vertices_f[ BlocksVertexCount ];
+    Point3Di	vertices_i[ BlocksVertexCount ];
 
-    void    CurrentCoordinatesToConst();
     void    Rotate  ( float &a, float &b, float angle );
     void    DrawSide( Point3Df x1, Point3Df x2, Point3Df x3, Point3Df x4 );
-public:
-	    Block( float new_x, float new_y, float new_z, Material new_material );
 
-    float   LowerBoundX();
-    float   UpperBoundX();
-    float   LowerBoundY();
-    float   UpperBoundY();
-    float   LowerBoundZ();
-    float   UpperBoundZ();
+public:
+	    Block( int new_x, int new_y, int new_z, Material new_material );
+
+    Point3Di	GetPosition() const ;
+    float	LowerBoundXf();
+    float	UpperBoundXf();
+    float	LowerBoundYf();
+    float	UpperBoundYf();
+    float	LowerBoundZf();
+    float	UpperBoundZf();
+
+    int		LowerBoundXi();
+    int		UpperBoundXi();
+    int		LowerBoundYi();
+    int		UpperBoundYi();
+    int		LowerBoundZi();
+    int		UpperBoundZi();
 
     void    RotateOnZY( float angle, bool change_const );
     void    RotateOnZX( float angle, bool change_const );
@@ -70,21 +78,29 @@ public :
     static const unsigned int  BlocksCount = 4;
 private :
     Material	material;
-    Point3Df	position;
+    Point3Di	position_i;
+    Point3Df	position_f;
     Block	*blocks[ BlocksCount ];
-
 	
 public :
-		Figure( float x, float y, float z, Figures type, Material new_material );
+		Figure( int x, int y, int z, Figures type, Material new_material );
 		~Figure();
     Point3Df	GetPosition();
-    float	LowerBoundX();
-    float	UpperBoundX();
-    float	LowerBoundY();
-    float	UpperBoundY();
-    float	LowerBoundZ();
-    float	UpperBoundZ();
+    float	LowerBoundXf();
+    float	UpperBoundXf();
+    float	LowerBoundYf();
+    float	UpperBoundYf();
+    float	LowerBoundZf();
+    float	UpperBoundZf();
 
+    int	    	LowerBoundXi();
+    int		UpperBoundXi();
+    int		LowerBoundYi();
+    int		UpperBoundYi();
+    int		LowerBoundZi();
+    int		UpperBoundZi();
+
+    Point3Di	GetBlockPositionByIndex( int index );
     void	SetPosition( Point3Df new_position );
     void	RotateOnZY( float angle, bool change_const );
     void	RotateOnZX( float angle, bool change_const );

@@ -1,28 +1,26 @@
 #include <math.h>
 #include <stdlib.h>
 #include <time.h>
+#include <QApplication>
 #include <QGLWidget>
+#include <QDebug>
 #include <stdio.h>
 #include "Figures.h"
 
-Block :: Block( float new_x, float new_y, float new_z, Material new_material )
+Block :: Block( int new_x, int new_y, int new_z, Material new_material )
 {
-    /*
-	    Вершины куба занумерованы в след. порядке( делим куб на 4 части ):
-	    1)-,+,- 2)-,+,+ 3)+,+,+ 4)+,+,-
-	    5)+,-,- 6)+,-,+ 7)-,-,+ 8)-,-,-
-    */
-    current_rel_coordinates = const_rel_coordinates = Point3Df( new_x, new_y, new_z );
+    rel_position_f = rel_position_i = Point3Di( new_x, new_y, new_z );
     material = new_material;
 
-    current_vertices[ 0 ] = const_vertices[ 0 ] = Point3Df( -Block :: BlockSize / 2,  Block :: BlockSize / 2, -Block :: BlockSize / 2 );
-    current_vertices[ 1 ] = const_vertices[ 1 ] = Point3Df( -Block :: BlockSize / 2,  Block :: BlockSize / 2,  Block :: BlockSize / 2 );
-    current_vertices[ 2 ] = const_vertices[ 2 ] = Point3Df(  Block :: BlockSize / 2,  Block :: BlockSize / 2,  Block :: BlockSize / 2 );
-    current_vertices[ 3 ] = const_vertices[ 3 ] = Point3Df(  Block :: BlockSize / 2,  Block :: BlockSize / 2, -Block :: BlockSize / 2 );
-    current_vertices[ 4 ] = const_vertices[ 4 ] = Point3Df(  Block :: BlockSize / 2, -Block :: BlockSize / 2, -Block :: BlockSize / 2 );
-    current_vertices[ 5 ] = const_vertices[ 5 ] = Point3Df(  Block :: BlockSize / 2, -Block :: BlockSize / 2,  Block :: BlockSize / 2 );
-    current_vertices[ 6 ] = const_vertices[ 6 ] = Point3Df( -Block :: BlockSize / 2, -Block :: BlockSize / 2,  Block :: BlockSize / 2 );
-    current_vertices[ 7 ] = const_vertices[ 7 ] = Point3Df( -Block :: BlockSize / 2, -Block :: BlockSize / 2, -Block :: BlockSize / 2 );
+    vertices_f[ 0 ] = vertices_i[ 0 ] = Point3Di( -Block :: BlockSize / 2,  Block :: BlockSize / 2, -Block :: BlockSize / 2 );
+    vertices_f[ 1 ] = vertices_i[ 1 ] = Point3Di( -Block :: BlockSize / 2,  Block :: BlockSize / 2,  Block :: BlockSize / 2 );
+    vertices_f[ 2 ] = vertices_i[ 2 ] = Point3Di(  Block :: BlockSize / 2,  Block :: BlockSize / 2,  Block :: BlockSize / 2 );
+    vertices_f[ 3 ] = vertices_i[ 3 ] = Point3Di(  Block :: BlockSize / 2,  Block :: BlockSize / 2, -Block :: BlockSize / 2 );
+    vertices_f[ 4 ] = vertices_i[ 4 ] = Point3Di(  Block :: BlockSize / 2, -Block :: BlockSize / 2, -Block :: BlockSize / 2 );
+    vertices_f[ 5 ] = vertices_i[ 5 ] = Point3Di(  Block :: BlockSize / 2, -Block :: BlockSize / 2,  Block :: BlockSize / 2 );
+    vertices_f[ 6 ] = vertices_i[ 6 ] = Point3Di( -Block :: BlockSize / 2, -Block :: BlockSize / 2,  Block :: BlockSize / 2 );
+    vertices_f[ 7 ] = vertices_i[ 7 ] = Point3Di( -Block :: BlockSize / 2, -Block :: BlockSize / 2, -Block :: BlockSize / 2 );
+
 }
 
 void Block :: Rotate( float &a, float &b, float angle )
@@ -34,56 +32,111 @@ void Block :: Rotate( float &a, float &b, float angle )
     a = a * cos_angle + b * sin_angle;
     b = -old_a * sin_angle + b * cos_angle;
 }
-void Block :: CurrentCoordinatesToConst()
-{
-    const_rel_coordinates = current_rel_coordinates;
-    for ( int i = 0; i < BlocksVertexCount; ++i )
-	const_vertices[ i ] = current_vertices[ i ];
-}
 
 void Block :: RotateOnZY( float angle, bool change_const )
 {
-    current_rel_coordinates = const_rel_coordinates;
-    Rotate( current_rel_coordinates.z, current_rel_coordinates.y, angle );
-
-    for ( int i = 0; i < BlocksVertexCount; ++i )
+    if ( !change_const )
     {
-	current_vertices[ i ] = const_vertices[ i ];
-	Rotate( current_vertices[ i ].z, current_vertices[ i ].y, angle  );
-    }
+	rel_position_f = rel_position_i;
+	Rotate( rel_position_f.z, rel_position_f.y, angle );
 
-    if ( change_const )
-	CurrentCoordinatesToConst();
+	for ( int i = 0; i < BlocksVertexCount; ++i )
+	{
+	    vertices_f[ i ] = vertices_i[ i ];
+	    Rotate( vertices_f[ i ].z, vertices_f[ i ].y, angle  );
+	}
+    }
+    else
+    {
+	Point3Di rotate_vec( 0, -1, 1 );
+	int	 prev_z;
+
+	if ( angle > eps )
+	    rotate_vec = Point3Di( 0, 1, -1 );
+
+	prev_z = rel_position_i.z;
+	rel_position_i.z = rel_position_i.y * rotate_vec.y;
+	rel_position_i.y = prev_z * rotate_vec.z;
+	rel_position_f   = rel_position_i;
+
+	for ( int i = 0; i < BlocksVertexCount; ++i )
+	{
+	    prev_z = vertices_i[ i ].z;
+	    vertices_i[ i ].z = vertices_i[ i ].y * rotate_vec.y;
+	    vertices_i[ i ].y = prev_z		  * rotate_vec.z;
+	    vertices_f[ i ] = vertices_i[ i ];
+	}
+    }
 }
 
 void Block :: RotateOnZX( float angle, bool change_const )
 {
-    current_rel_coordinates = const_rel_coordinates;
-    Rotate( current_rel_coordinates.z, current_rel_coordinates.x, angle );
-
-    for ( int i = 0; i < BlocksVertexCount; ++i )
+    if ( !change_const )
     {
-	current_vertices[ i ] = const_vertices[ i ];
-	Rotate( current_vertices[ i ].z, current_vertices[ i ].x, angle  );
-    }
+	rel_position_f = rel_position_i;
+	Rotate( rel_position_f.z, rel_position_f.x, angle );
 
-    if ( change_const )
-	CurrentCoordinatesToConst();
+	for ( int i = 0; i < BlocksVertexCount; ++i )
+	{
+	    vertices_f[ i ] = vertices_i[ i ];
+	    Rotate( vertices_f[ i ].z, vertices_f[ i ].x, angle  );
+	}
+    }
+    else
+    {
+	Point3Di rotate_vec( 1, 0, -1 );
+	int	 prev_z = 0;
+	if ( angle > eps )
+	    rotate_vec = Point3Di( -1, 0, 1 );
+
+	prev_z = rel_position_i.z;
+	rel_position_i.z = rel_position_i.x * rotate_vec.x;
+	rel_position_i.x = prev_z		  * rotate_vec.z;
+	rel_position_f   = rel_position_i;
+
+	for ( int i = 0; i < BlocksVertexCount; ++i )
+	{
+	    prev_z = vertices_i[ i ].z;
+	    vertices_i[ i ].z = vertices_i[ i ].x * rotate_vec.x;
+	    vertices_i[ i ].x = prev_z * rotate_vec.z;
+	    vertices_f[ i ] = vertices_i[ i ];
+	}
+    }
 }
 
 void Block :: RotateOnXY( float angle, bool change_const )
 {
-    current_rel_coordinates = const_rel_coordinates;
-    Rotate( current_rel_coordinates.x, current_rel_coordinates.y, angle );
-
-    for ( int i = 0; i < BlocksVertexCount; ++i )
+    if ( !change_const )
     {
-	current_vertices[ i ] = const_vertices[ i ];
-	Rotate( current_vertices[ i ].x, current_vertices[ i ].y, angle  );
-    }
+	rel_position_f = rel_position_i;
+	Rotate( rel_position_f.x, rel_position_f.y, angle );
 
-    if ( change_const )
-	CurrentCoordinatesToConst();
+	for ( int i = 0; i < BlocksVertexCount; ++i )
+	{
+	    vertices_f[ i ] = vertices_i[ i ];
+	    Rotate( vertices_f[ i ].x, vertices_f[ i ].y, angle  );
+	}
+    }
+    else
+    {
+	Point3Di rotate_vec( -1, 1, 0 );
+	int	 prev_x;
+	if ( angle > eps )
+	    rotate_vec = Point3Di( 1, -1, 0 );
+
+	prev_x = rel_position_i.x;
+	rel_position_i.x = rel_position_i.y * rotate_vec.y;
+	rel_position_i.y = prev_x * rotate_vec.x;
+	rel_position_f   = rel_position_i;
+
+	for ( int i = 0; i < BlocksVertexCount; ++i )
+	{
+	    prev_x = vertices_i[ i ].x;
+	    vertices_i[ i ].x = vertices_i[ i ].y * rotate_vec.y;
+	    vertices_i[ i ].y = prev_x		  * rotate_vec.x;
+	    vertices_f[ i ] = vertices_i[ i ];
+	}
+    }
 }
 
 void Block :: DrawSide( Point3Df p1, Point3Df p2, Point3Df p3, Point3Df p4 )
@@ -103,126 +156,193 @@ void Block :: DrawSide( Point3Df p1, Point3Df p2, Point3Df p3, Point3Df p4 )
 void Block :: Draw( Point3Df figure_location )
 {
     /*
-	    Вершины куба занумерованы в след. порядке( делим куб на 4 части ):
-	    1)-,+,- 2)-,+,+ 3)+,+,+ 4)+,+,-
-	    5)+,-,- 6)+,-,+ 7)-,-,+ 8)-,-,-
+	Вершины куба занумерованы в след. порядке( делим куб на 4 части ):
+	1)-,+,- 2)-,+,+ 3)+,+,+ 4)+,+,-
+	5)+,-,- 6)+,-,+ 7)-,-,+ 8)-,-,-
     */
 
     //Firts side
-    DrawSide(	Point3Df( figure_location.x + current_rel_coordinates.x + current_vertices[ 0 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 0 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 0 ].z ),
-		Point3Df( figure_location.x + current_rel_coordinates.x + current_vertices[ 1 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 1 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 1 ].z ),
-		Point3Df( figure_location.x + current_rel_coordinates.x + current_vertices[ 2 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 2 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 2 ].z ),
-		Point3Df( figure_location.x + current_rel_coordinates.x + current_vertices[ 3 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 3 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 3 ].z )
+    DrawSide(	Point3Df( figure_location.x + rel_position_f.x + vertices_f[ 0 ].x, figure_location.y + rel_position_f.y + vertices_f[ 0 ].y, figure_location.z + rel_position_f.z + vertices_f[ 0 ].z ),
+		Point3Df( figure_location.x + rel_position_f.x + vertices_f[ 1 ].x, figure_location.y + rel_position_f.y + vertices_f[ 1 ].y, figure_location.z + rel_position_f.z + vertices_f[ 1 ].z ),
+		Point3Df( figure_location.x + rel_position_f.x + vertices_f[ 2 ].x, figure_location.y + rel_position_f.y + vertices_f[ 2 ].y, figure_location.z + rel_position_f.z + vertices_f[ 2 ].z ),
+		Point3Df( figure_location.x + rel_position_f.x + vertices_f[ 3 ].x, figure_location.y + rel_position_f.y + vertices_f[ 3 ].y, figure_location.z + rel_position_f.z + vertices_f[ 3 ].z )
 	    );
 
     //Second side
-    DrawSide(	Point3Df( figure_location.x + current_rel_coordinates.x + current_vertices[ 1 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 1 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 1 ].z ),
-		Point3Df( figure_location.x + current_rel_coordinates.x + current_vertices[ 6 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 6 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 6 ].z ),
-		Point3Df( figure_location.x + current_rel_coordinates.x + current_vertices[ 5 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 5 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 5 ].z ),
-		Point3Df( figure_location.x + current_rel_coordinates.x + current_vertices[ 2 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 2 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 2 ].z )
+    DrawSide(	Point3Df( figure_location.x + rel_position_f.x + vertices_f[ 1 ].x, figure_location.y + rel_position_f.y + vertices_f[ 1 ].y, figure_location.z + rel_position_f.z + vertices_f[ 1 ].z ),
+		Point3Df( figure_location.x + rel_position_f.x + vertices_f[ 6 ].x, figure_location.y + rel_position_f.y + vertices_f[ 6 ].y, figure_location.z + rel_position_f.z + vertices_f[ 6 ].z ),
+		Point3Df( figure_location.x + rel_position_f.x + vertices_f[ 5 ].x, figure_location.y + rel_position_f.y + vertices_f[ 5 ].y, figure_location.z + rel_position_f.z + vertices_f[ 5 ].z ),
+		Point3Df( figure_location.x + rel_position_f.x + vertices_f[ 2 ].x, figure_location.y + rel_position_f.y + vertices_f[ 2 ].y, figure_location.z + rel_position_f.z + vertices_f[ 2 ].z )
 	    );
 
     //Third side
-    DrawSide(	Point3Df( figure_location.x + current_rel_coordinates.x + current_vertices[ 2 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 2 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 2 ].z ),
-		Point3Df( figure_location.x + current_rel_coordinates.x + current_vertices[ 5 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 5 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 5 ].z ),
-		Point3Df( figure_location.x + current_rel_coordinates.x + current_vertices[ 4 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 4 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 4 ].z ),
-		Point3Df( figure_location.x + current_rel_coordinates.x + current_vertices[ 3 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 3 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 3 ].z )
+    DrawSide(	Point3Df( figure_location.x + rel_position_f.x + vertices_f[ 2 ].x, figure_location.y + rel_position_f.y + vertices_f[ 2 ].y, figure_location.z + rel_position_f.z + vertices_f[ 2 ].z ),
+		Point3Df( figure_location.x + rel_position_f.x + vertices_f[ 5 ].x, figure_location.y + rel_position_f.y + vertices_f[ 5 ].y, figure_location.z + rel_position_f.z + vertices_f[ 5 ].z ),
+		Point3Df( figure_location.x + rel_position_f.x + vertices_f[ 4 ].x, figure_location.y + rel_position_f.y + vertices_f[ 4 ].y, figure_location.z + rel_position_f.z + vertices_f[ 4 ].z ),
+		Point3Df( figure_location.x + rel_position_f.x + vertices_f[ 3 ].x, figure_location.y + rel_position_f.y + vertices_f[ 3 ].y, figure_location.z + rel_position_f.z + vertices_f[ 3 ].z )
 	    );
 
     //Fourth side
-    DrawSide(	Point3Df( figure_location.x + current_rel_coordinates.x + current_vertices[ 6 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 6 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 6 ].z ),
-		Point3Df( figure_location.x + current_rel_coordinates.x + current_vertices[ 7 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 7 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 7 ].z ),
-		Point3Df( figure_location.x + current_rel_coordinates.x + current_vertices[ 4 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 4 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 4 ].z ),
-		Point3Df( figure_location.x + current_rel_coordinates.x + current_vertices[ 5 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 5 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 5 ].z )
+    DrawSide(	Point3Df( figure_location.x + rel_position_f.x + vertices_f[ 6 ].x, figure_location.y + rel_position_f.y + vertices_f[ 6 ].y, figure_location.z + rel_position_f.z + vertices_f[ 6 ].z ),
+		Point3Df( figure_location.x + rel_position_f.x + vertices_f[ 7 ].x, figure_location.y + rel_position_f.y + vertices_f[ 7 ].y, figure_location.z + rel_position_f.z + vertices_f[ 7 ].z ),
+		Point3Df( figure_location.x + rel_position_f.x + vertices_f[ 4 ].x, figure_location.y + rel_position_f.y + vertices_f[ 4 ].y, figure_location.z + rel_position_f.z + vertices_f[ 4 ].z ),
+		Point3Df( figure_location.x + rel_position_f.x + vertices_f[ 5 ].x, figure_location.y + rel_position_f.y + vertices_f[ 5 ].y, figure_location.z + rel_position_f.z + vertices_f[ 5 ].z )
 	    );
 
     //Fifth side
-    DrawSide(	Point3Df( figure_location.x + current_rel_coordinates.x + current_vertices[ 0 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 0 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 0 ].z ),
-		Point3Df( figure_location.x + current_rel_coordinates.x + current_vertices[ 7 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 7 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 7 ].z ),
-		Point3Df( figure_location.x + current_rel_coordinates.x + current_vertices[ 6 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 6 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 6 ].z ),
-		Point3Df( figure_location.x + current_rel_coordinates.x + current_vertices[ 1 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 1 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 1 ].z )
+    DrawSide(	Point3Df( figure_location.x + rel_position_f.x + vertices_f[ 0 ].x, figure_location.y + rel_position_f.y + vertices_f[ 0 ].y, figure_location.z + rel_position_f.z + vertices_f[ 0 ].z ),
+		Point3Df( figure_location.x + rel_position_f.x + vertices_f[ 7 ].x, figure_location.y + rel_position_f.y + vertices_f[ 7 ].y, figure_location.z + rel_position_f.z + vertices_f[ 7 ].z ),
+		Point3Df( figure_location.x + rel_position_f.x + vertices_f[ 6 ].x, figure_location.y + rel_position_f.y + vertices_f[ 6 ].y, figure_location.z + rel_position_f.z + vertices_f[ 6 ].z ),
+		Point3Df( figure_location.x + rel_position_f.x + vertices_f[ 1 ].x, figure_location.y + rel_position_f.y + vertices_f[ 1 ].y, figure_location.z + rel_position_f.z + vertices_f[ 1 ].z )
 	    );
 
     //Sixth side
-    DrawSide(	Point3Df( figure_location.x + current_rel_coordinates.x + current_vertices[ 3 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 3 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 3 ].z ),
-		Point3Df( figure_location.x + current_rel_coordinates.x + current_vertices[ 4 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 4 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 4 ].z ),
-		Point3Df( figure_location.x + current_rel_coordinates.x + current_vertices[ 7 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 7 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 7 ].z ),
-		Point3Df( figure_location.x + current_rel_coordinates.x + current_vertices[ 0 ].x, figure_location.y + current_rel_coordinates.y + current_vertices[ 0 ].y, figure_location.z + current_rel_coordinates.z + current_vertices[ 0 ].z )
+    DrawSide(	Point3Df( figure_location.x + rel_position_f.x + vertices_f[ 3 ].x, figure_location.y + rel_position_f.y + vertices_f[ 3 ].y, figure_location.z + rel_position_f.z + vertices_f[ 3 ].z ),
+		Point3Df( figure_location.x + rel_position_f.x + vertices_f[ 4 ].x, figure_location.y + rel_position_f.y + vertices_f[ 4 ].y, figure_location.z + rel_position_f.z + vertices_f[ 4 ].z ),
+		Point3Df( figure_location.x + rel_position_f.x + vertices_f[ 7 ].x, figure_location.y + rel_position_f.y + vertices_f[ 7 ].y, figure_location.z + rel_position_f.z + vertices_f[ 7 ].z ),
+		Point3Df( figure_location.x + rel_position_f.x + vertices_f[ 0 ].x, figure_location.y + rel_position_f.y + vertices_f[ 0 ].y, figure_location.z + rel_position_f.z + vertices_f[ 0 ].z )
 	    );
 }
 
-float Block :: LowerBoundZ()
+float Block :: LowerBoundXf()
 {
-    float min_z = current_vertices[ 0 ].z;
+    float min_x = vertices_f[ 0 ].x;
 
     for ( int i = 1; i < BlocksVertexCount; i++ )
-	min_z = Min( min_z, current_vertices[ i ].z );
+	min_x = Min( min_x, vertices_f[ i ].x );
 
-    return min_z + current_rel_coordinates.z;
+    return min_x + rel_position_f.x;
 }
 
-float Block :: UpperBoundZ()
+float Block :: UpperBoundXf()
 {
-    float max_z = current_vertices[ 0 ].z;
+    float max_x = vertices_f[ 0 ].x;
 
     for ( int i = 1; i < BlocksVertexCount; i++ )
-	max_z = Max( max_z, current_vertices[ i ].z );
+	max_x = Max( max_x, vertices_f[ i ].x );
 
-    return max_z + current_rel_coordinates.z;
+    return max_x + rel_position_f.x;
 }
 
-float Block :: LowerBoundX()
+float Block :: LowerBoundYf()
 {
-    float min_x = current_vertices[ 0 ].x;
+    float min_y = vertices_f[ 0 ].y;
 
     for ( int i = 1; i < BlocksVertexCount; i++ )
-	min_x = Min( min_x, current_vertices[ i ].x );
+	min_y = Min( min_y, vertices_f[ i ].y );
 
-    return min_x + current_rel_coordinates.x;
+    return min_y + rel_position_f.y;
 }
 
-float Block :: UpperBoundX()
+float Block :: UpperBoundYf()
 {
-    float max_x = current_vertices[ 0 ].x;
+    float max_y = vertices_f[ 0 ].y;
 
     for ( int i = 1; i < BlocksVertexCount; i++ )
-	max_x = Max( max_x, current_vertices[ i ].x );
+	max_y = Max( max_y, vertices_f[ i ].y );
 
-    return max_x + current_rel_coordinates.x;
+    return max_y + rel_position_f.y;
 }
 
-float Block :: LowerBoundY()
+float Block :: LowerBoundZf()
 {
-    float min_y = current_vertices[ 0 ].y;
+    float min_z = vertices_f[ 0 ].z;
 
     for ( int i = 1; i < BlocksVertexCount; i++ )
-	min_y = Min( min_y, current_vertices[ i ].y );
+	min_z = Min( min_z, vertices_f[ i ].z );
 
-    return min_y + current_rel_coordinates.y;
+    return min_z + rel_position_f.z;
 }
 
-float Block :: UpperBoundY()
+float Block :: UpperBoundZf()
 {
-    float max_y = current_vertices[ 0 ].y;
+    float max_z = vertices_f[ 0 ].z;
 
     for ( int i = 1; i < BlocksVertexCount; i++ )
-	max_y = Max( max_y, current_vertices[ i ].y );
+	max_z = Max( max_z, vertices_f[ i ].z );
 
-    return max_y + current_rel_coordinates.y;
+    return max_z + rel_position_f.z;
 }
 
-Figure :: Figure( float x, float y, float z, Figures type, Material new_material )
+int Block :: LowerBoundXi()
 {
-    position = Point3Df( x, y, z );
+    int min_x = vertices_i[ 0 ].x;
+
+    for ( int i = 1; i < BlocksVertexCount; i++ )
+	min_x = Min( min_x, vertices_i[ i ].x );
+
+    return min_x + rel_position_i.x;
+}
+
+int Block :: UpperBoundXi()
+{
+    int max_y = vertices_i[ 0 ].y;
+
+    for ( int i = 1; i < BlocksVertexCount; i++ )
+	max_y = Max( max_y, vertices_i[ i ].y );
+
+    return max_y + rel_position_i.y;
+}
+
+int Block :: LowerBoundYi()
+{
+    int min_y = vertices_i[ 0 ].y;
+
+    for ( int i = 1; i < BlocksVertexCount; i++ )
+	min_y = Min( min_y, vertices_i[ i ].y );
+
+    return min_y + rel_position_i.y;
+}
+
+int Block :: UpperBoundYi()
+{
+    int max_y = vertices_i[ 0 ].y;
+
+    for ( int i = 1; i < BlocksVertexCount; i++ )
+	max_y = Max( max_y, vertices_i[ i ].y );
+
+    return max_y + rel_position_i.y;
+}
+
+int Block :: LowerBoundZi()
+{
+    int min_z = vertices_i[ 0 ].z;
+
+    for ( int i = 1; i < BlocksVertexCount; i++ )
+	min_z = Min( min_z, vertices_i[ i ].z );
+
+    return min_z + rel_position_i.z;
+}
+
+int Block :: UpperBoundZi()
+{
+    int max_z = vertices_i[ 0 ].z;
+
+    for ( int i = 1; i < BlocksVertexCount; i++ )
+	max_z = Max( max_z, vertices_i[ i ].z );
+
+    return max_z + rel_position_i.z;
+}
+
+Figure :: Figure( int x, int y, int z, Figures type, Material new_material )
+{
+    if ( Block :: BlockSize % 2 != 0 )
+    {
+	qDebug() << "Odd block size!\n";
+	QApplication :: exit( 1 );
+    }
+
+    position_i = Point3Di( x, y, z );
+    position_f = position_i;
     material = new_material;
 
     switch ( type )
     {
     case IFigure :
-	blocks[ 0 ] = new Block( 0.0f, Block :: BlockSize + Block :: BlockSize / 2, 0.0f, material );
-	blocks[ 1 ] = new Block( 0.0f, Block :: BlockSize / 2, 0.0f, material  );
-	blocks[ 2 ] = new Block( 0.0f, -Block :: BlockSize / 2, 0.0f, material );
-	blocks[ 3 ] = new Block( 0.0f, -( Block :: BlockSize + Block :: BlockSize / 2 ), 0.0f, material );
+	blocks[ 0 ] = new Block( -( Block :: BlockSize + Block :: BlockSize / 2 ), 0.0f, 0.0f, material );
+	blocks[ 1 ] = new Block( -( Block :: BlockSize / 2 ),			   0.0f, 0.0f, material  );
+	blocks[ 2 ] = new Block(    Block :: BlockSize / 2,			   0.0f, 0.0f, material );
+	blocks[ 3 ] = new Block(    Block :: BlockSize + Block :: BlockSize / 2,   0.0f, 0.0f, material );
 	break;
     case JFigure :
 	blocks[ 0 ] = new Block( 0.0f, Block :: BlockSize + Block :: BlockSize / 2, 0.0f, material );
@@ -275,7 +395,7 @@ void Figure :: Draw()
     glMaterialfv( GL_FRONT, GL_SPECULAR, material.GetMaterialForSpecular() );
 
     for ( int i = 0; i < BlocksCount; ++i )
-	blocks[ i ] -> Draw( position );
+	blocks[ i ] -> Draw( position_f );
 }
 
 void Figure :: RotateOnZY( float angle, bool change_const )
@@ -298,74 +418,140 @@ void Figure :: RotateOnXY( float angle, bool change_const )
 
 Point3Df Figure :: GetPosition()
 {
-    return position;
+    return position_f;
 }
 
 void Figure :: SetPosition( Point3Df new_position )
 {
-    position = new_position;
+    position_f = new_position;
 }
 
-float Figure :: LowerBoundX()
+float Figure :: LowerBoundXf()
 {
-    float min_x = blocks[ 0 ] -> LowerBoundX();
+    float min_x = blocks[ 0 ] -> LowerBoundXf();
 
     for ( int i = 1; i < BlocksCount; i++ )
-	min_x = Min( min_x, blocks[ i ] -> LowerBoundX() );
+	min_x = Min( min_x, blocks[ i ] -> LowerBoundXf() );
 
-    return min_x + position.x;
+    return min_x + position_f.x;
 }
 
-float Figure :: UpperBoundX()
+float Figure :: UpperBoundXf()
 {
-    float max_x = blocks[ 0 ] -> UpperBoundX();
+    float max_x = blocks[ 0 ] -> UpperBoundXf();
 
     for ( int i = 1; i < BlocksCount; i++ )
-	max_x = Max( max_x, blocks[ i ] -> UpperBoundX() );
+	max_x = Max( max_x, blocks[ i ] -> UpperBoundXf() );
 
-    return max_x + position.x;
+    return max_x + position_f.x;
 }
 
-float Figure :: LowerBoundY()
+float Figure :: LowerBoundYf()
 {
-    float min_y = blocks[ 0 ] -> LowerBoundY();
+    float min_y = blocks[ 0 ] -> LowerBoundYf();
 
     for ( int i = 1; i < BlocksCount; i++ )
-	min_y = Min( min_y, blocks[ i ] -> LowerBoundY() );
+	min_y = Min( min_y, blocks[ i ] -> LowerBoundYf() );
 
-    return min_y + position.y;
+    return min_y + position_f.y;
 }
 
-float Figure :: UpperBoundY()
+float Figure :: UpperBoundYf()
 {
-    float max_y = blocks[ 0 ] -> UpperBoundY();
+    float max_y = blocks[ 0 ] -> UpperBoundYf();
 
     for ( int i = 1; i < BlocksCount; i++ )
-	max_y = Max( max_y, blocks[ i ] -> UpperBoundY() );
+	max_y = Max( max_y, blocks[ i ] -> UpperBoundYf() );
 
-    return max_y + position.y;
+    return max_y + position_f.y;
 }
 
-float Figure :: LowerBoundZ()
+float Figure :: LowerBoundZf()
 {
-    float min_z = blocks[ 0 ] -> LowerBoundZ();
+    float min_z = blocks[ 0 ] -> LowerBoundZf();
 
     for ( int i = 1; i < BlocksCount; i++ )
-	min_z = Min( min_z, blocks[ i ] -> LowerBoundZ() );
+	min_z = Min( min_z, blocks[ i ] -> LowerBoundZf() );
 
-    return min_z + position.z;
+    return min_z + position_f.z;
 }
 
-float Figure :: UpperBoundZ()
+float Figure :: UpperBoundZf()
 {
-    float max_z = blocks[ 0 ] -> UpperBoundZ();
+    float max_z = blocks[ 0 ] -> UpperBoundZf();
 
     for ( int i = 1; i < BlocksCount; i++ )
-	max_z = Max( max_z, blocks[ i ] -> UpperBoundZ() );
+	max_z = Max( max_z, blocks[ i ] -> UpperBoundZf() );
 
-    return max_z + position.z;
+    return max_z + position_f.z;
 }
 
+int Figure :: LowerBoundXi()
+{
+    float min_x = blocks[ 0 ] -> LowerBoundXi();
 
+    for ( int i = 1; i < BlocksCount; i++ )
+	min_x = Min( min_x, blocks[ i ] -> LowerBoundXi() );
 
+    return min_x + position_i.x;
+}
 
+int Figure :: UpperBoundXi()
+{
+    float max_x = blocks[ 0 ] -> UpperBoundXi();
+
+    for ( int i = 1; i < BlocksCount; i++ )
+	max_x = Max( max_x, blocks[ i ] -> UpperBoundXi() );
+
+    return max_x + position_i.x;
+}
+
+int Figure :: LowerBoundYi()
+{
+    float min_y = blocks[ 0 ] -> LowerBoundYi();
+
+    for ( int i = 1; i < BlocksCount; i++ )
+	min_y = Min( min_y, blocks[ i ] -> LowerBoundYi() );
+
+    return min_y + position_i.y;
+}
+
+int Figure :: UpperBoundYi()
+{
+    float max_y = blocks[ 0 ] -> UpperBoundYf();
+
+    for ( int i = 1; i < BlocksCount; i++ )
+	max_y = Max( max_y, blocks[ i ] -> UpperBoundYi() );
+
+    return max_y + position_i.y;
+}
+
+int Figure :: LowerBoundZi()
+{
+    float min_z = blocks[ 0 ] -> LowerBoundZi();
+
+    for ( int i = 1; i < BlocksCount; i++ )
+	min_z = Min( min_z, blocks[ i ] -> LowerBoundZi() );
+
+    return min_z + position_i.z;
+}
+
+int Figure :: UpperBoundZi()
+{
+    int max_z = blocks[ 0 ] -> UpperBoundZi();
+
+    for ( int i = 1; i < BlocksCount; i++ )
+	max_z = Max( max_z, blocks[ i ] -> UpperBoundZi() );
+
+    return max_z + position_i.z;
+}
+
+Point3Di Figure :: GetBlockPositionByIndex( int index )
+{
+    return blocks[ index ] -> GetPosition();
+}
+
+Point3Di Block :: GetPosition() const
+{
+    return rel_position_i;
+}

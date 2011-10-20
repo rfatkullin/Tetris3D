@@ -28,13 +28,16 @@ void Game :: Start()
 {	
     srand( time( 0 ) );
     last_mouse_position =   Point3Df( 0.0f, 0.0f, 0.0f );
-    camera_position =	    SphericalCoor( pi / 4, pi / 4 );
-    current_figure =	    new Figure( 0.0f, 300.0f, -( Block :: BlockSize / 2 ), LFigure, materials[ rand() % 1/*MaterialsCount*/ ] );
-    is_pos_change =	    false;
-    rotating_step =	    0;
-    game_speed =	    FirstSpeed;
-    rotating =		    false;    
-    score =		    0;
+    camera_position     =   SphericalCoor( pi / 4, pi / 4 );
+    current_figure      =   GetNewFigure();
+    figure_down_steps	=   0;
+    next_figure         =   GetNewFigure();
+    is_pos_change       =   false;
+    rotating_step	=   0;
+    game_speed		=   FirstSpeed;
+    rotating		=   false;
+    score		=   0;
+    is_game		=   true;
 
     for ( int i = 0; i < FieldWidth; ++i )
 	for ( int j = 0; j < FieldLength; ++j )
@@ -44,6 +47,46 @@ void Game :: Start()
     for ( int i = 0; i < FieldWidth; ++i )
 	for ( int j = 0; j < FieldLength; ++j )
 	    field[ i ][ j ][ 0 ] =  new Block( i * Block :: BlockSize / 2, FieldPositionByY, j * Block :: BlockSize / 2, materials[ rand() % MaterialsCount ] );
+}
+
+Point2Df Game :: GetFigurePositionOnXZ( int width_x, int width_z )
+{
+    if ( width_x % 2 == 0 )
+    {
+	if ( width_z % 2 == 0 )
+	    return Point2Df( 0.0f, 0.0f );
+	else
+	    return Point2Df( 0.0f, Block :: BlockSize / 2 );
+    }
+    else
+    {
+	if ( width_z % 2 == 0 )
+	    return Point2Df( Block :: BlockSize / 2, 0.0f );
+	else
+	    return Point2Df( Block :: BlockSize / 2, Block :: BlockSize / 2 );
+    }
+}
+
+Figure* Game :: GetNewFigure()
+{
+    int lower_bound_x = current_figure -> LowerBoundXi();
+    int upper_bound_x = current_figure -> UpperBoundXi();
+    int lower_bound_y = current_figure -> LowerBoundYi();
+    int upper_bound_y = current_figure -> UpperBoundYi();
+    int lower_bound_z = current_figure -> LowerBoundZi();
+    int upper_bound_z = current_figure -> UpperBoundZi();
+    int y_position    = FieldHeight * Block :: BlockSize;
+
+    next_figure = new Figure( 0.0f, 0.0f, 0.0f, IFigure, materials[ rand() % 1/*MaterialsCount*/ ] );
+
+    Point2Df figure_position = GetFigurePositionOnXZ( upper_bound_x - lower_bound_x, upper_bound_z - lower_bound_z );
+
+    if ( ( upper_bound_y - lower_bound_y ) % 2 != 0 )
+	y_position += Block :: BlockSize / 2;
+
+    next_figure -> SetPosition( Point3Df( figure_position.x, y_position, figure_position.y ) );
+
+    return next_figure;
 }
 
 void Game :: MoveDownFigure()
@@ -62,9 +105,24 @@ void Game :: NextStep()
     //MoveDiwnFigure();
     //Move down the figure
 
-    Point3Df figure_position = current_figure -> GetPosition();
-    if ( figure_position.y - game_speed * 0.5f - Block :: BlockSize / 2 - Block :: BlockSize >= FieldLowerBoundY )
-	    current_figure -> SetPosition( Point3Df( figure_position.x, figure_position.y - game_speed * 0.5f,  figure_position.z ));
+    if ( is_game )
+    {
+	//figure_down_steps++;
+	Point3Df figure_position = current_figure -> GetPosition();
+	Point3Di blocks_position[ Figure :: BlocksCount ];
+	for ( int  i = 0; i < Figure :: BlocksCount; i++ )
+	    blocks_position[ i ] = figure_position + current_figure -> GetBlockPositionByIndex( i );
+
+	float y_lower_bound = current_figure -> LowerBoundYf();
+	if ( y_lower_bound - game_speed * 1 >= FieldLowerBoundYf )
+	    current_figure -> SetPosition( Point3Df( figure_position.x, figure_position.y - game_speed,  figure_position.z ));
+	else
+	{
+	    is_game = false;
+	    current_figure -> SetPosition( Point3Df( figure_position.x, figure_position.y - ( y_lower_bound - FieldLowerBoundYf ),  figure_position.z ));
+	}
+    }
+
 
     //Rotate the figure
     if ( rotating )
@@ -119,8 +177,8 @@ void Game :: DrawField()
 	glColor3f( 1.0f, 1.0f, 1.0f );
 	for ( int i = 0; i <= FieldWidth; i++ )
 	{
-	    glVertex3f( FieldLowerBoundX, FieldLowerBoundY, FieldLowerBoundZ + i * Block :: BlockSize );
-	    glVertex3f( FieldUpperBoundX, FieldLowerBoundY, FieldLowerBoundZ + i * Block :: BlockSize );
+	    glVertex3f( FieldLowerBoundX, FieldLowerBoundYf, FieldLowerBoundZ + i * Block :: BlockSize );
+	    glVertex3f( FieldUpperBoundX, FieldLowerBoundYf, FieldLowerBoundZ + i * Block :: BlockSize );
 	}
 
 	for ( int i = 0; i <= FieldLength; i++ )
@@ -154,6 +212,9 @@ void Game :: DrawWorld()
 {
     DrawField();
     current_figure -> Draw();
+//    for ( int i = 0; i < FieldWidth; ++i )
+//	for ( int j = 0; j < FieldLength; ++j )
+//	    field[ i ][ j ][ 0 ] -> Draw( Point3Df( 0.0f, 0.0f, 0.0f ));
 }
 
 float* Game :: GetLightPosition()
@@ -165,11 +226,11 @@ void Game :: ShiftFigureByXAxis( ShiftDirection shift_koeff )
 {
     Point3Df	position = current_figure -> GetPosition();
     float	max_x_pos = current_figure -> UpperBoundX();
-    float	min_x_pos = current_figure -> LowerBoundX();
+    float	min_x_pos = current_figure -> LowerBoundXf();
     float	shift = shift_koeff * Block :: BlockSize;
 
-    if ( ( Game :: FieldLowerBoundX <= min_x_pos + shift  ) && ( min_x_pos + shift <= Game :: FieldUpperBoundX ) &&
-	 ( Game :: FieldLowerBoundX <= max_x_pos + shift  ) && ( max_x_pos + shift <= Game :: FieldUpperBoundX )
+    if ( ( Game :: FieldLowerBoundXf <= min_x_pos + shift  ) && ( min_x_pos + shift <= Game :: FieldUpperBoundX ) &&
+	 ( Game :: FieldLowerBoundXf <= max_x_pos + shift  ) && ( max_x_pos + shift <= Game :: FieldUpperBoundX )
        )
 	position.x += shift;
 
@@ -180,11 +241,11 @@ void Game :: ShiftFigureByZAxis( ShiftDirection shift_koeff )
 {
     Point3Df	position = current_figure -> GetPosition();
     float	max_z_pos = current_figure -> UpperBoundZ();
-    float	min_z_pos = current_figure -> LowerBoundZ();
+    float	min_z_pos = current_figure -> LowerBoundZf();
     float	shift = shift_koeff * Block :: BlockSize;
 
-    if ( ( Game :: FieldLowerBoundZ <= min_z_pos + shift  ) && ( min_z_pos + shift <= Game :: FieldUpperBoundZ ) &&
-	 ( Game :: FieldLowerBoundZ <= max_z_pos + shift  ) && ( max_z_pos + shift <= Game :: FieldUpperBoundZ )
+    if ( ( Game :: FieldLowerBoundZf <= min_z_pos + shift  ) && ( min_z_pos + shift <= Game :: FieldUpperBoundZ ) &&
+	 ( Game :: FieldLowerBoundZf <= max_z_pos + shift  ) && ( max_z_pos + shift <= Game :: FieldUpperBoundZ )
        )
 	position.z += shift;
 
@@ -200,34 +261,32 @@ void Game :: Rotate( RotatePlane plane, RotateSide side )
 	rotating = true;
 
 	//Point3Df figure_pos = current_figure -> GetPosition();
-	float lower_bound_x = current_figure -> LowerBoundX();
-	float upper_bound_x = current_figure -> UpperBoundX();
-	float lower_bound_y = current_figure -> LowerBoundY();
-	float upper_bound_y = current_figure -> UpperBoundY();
-	float lower_bound_z = current_figure -> LowerBoundZ();
-	float upper_bound_z = current_figure -> UpperBoundZ();
+	int lower_bound_x = current_figure -> LowerBoundXf();
+	int upper_bound_x = current_figure -> UpperBoundX();
+	int lower_bound_y = current_figure -> LowerBoundYf();
+	int upper_bound_y = current_figure -> UpperBoundY();
+	int lower_bound_z = current_figure -> LowerBoundZf();
+	int upper_bound_z = current_figure -> UpperBoundZ();
 
 	pos_change_vec = Point3Df( 0.0f, 0.0f, 0.0f );
 	switch ( rotating_plane )
 	{
 	case PlaneXY :
-	    if ( ( ( int )( upper_bound_x - lower_bound_x ) / 2 % Block :: BlockSize != 0 ) ^
-		 ( ( int )( upper_bound_y - lower_bound_y ) / 2 % Block :: BlockSize != 0 ) )
+	    if ( ( ( upper_bound_x - lower_bound_x ) / 2 % Block :: BlockSize != 0 ) ^
+		 ( ( upper_bound_y - lower_bound_y ) / 2 % Block :: BlockSize != 0 ) )
 		pos_change_vec = Point3Df( 1.0f, 1.0f, 0.0f );
 	    break;
 	case PlaneZY :
-	    if ( ( ( int )( upper_bound_y - lower_bound_y ) / 2 % Block :: BlockSize != 0 ) ^
-		 ( ( int )( upper_bound_z - lower_bound_z ) / 2 % Block :: BlockSize != 0 ) )
+	    if ( ( ( upper_bound_y - lower_bound_y ) / 2 % Block :: BlockSize != 0 ) ^
+		 ( ( upper_bound_z - lower_bound_z ) / 2 % Block :: BlockSize != 0 ) )
 		pos_change_vec = Point3Df( 0.0f, 1.0f, 1.0f );
 	     break;
 	default :
-	    if ( ( ( int )( ( upper_bound_x - lower_bound_x ) / 2.0f + 0.5f ) % Block :: BlockSize != 0 ) ^
-		 ( ( int )( ( upper_bound_z - lower_bound_z ) / 2.0f + 0.5f ) % Block :: BlockSize != 0 ) )
+	    if ( ( ( upper_bound_x - lower_bound_x ) / 2 % Block :: BlockSize != 0 ) ^
+		 ( ( upper_bound_z - lower_bound_z ) / 2 % Block :: BlockSize != 0 ) )
 		pos_change_vec = Point3Df( 1.0f, 0.0f, 1.0f );
 	}
 	pos_change_vec = Block :: BlockSize / 2.0f * side / RotateStepsCount * pos_change_vec;
-	printf( "%d %d\n", ( int )( upper_bound_x - lower_bound_x ), ( int )( upper_bound_z - lower_bound_z ) );
-	printf( "%f %f %f\n", pos_change_vec.x, pos_change_vec.y, pos_change_vec.z );
     }
 }
 
