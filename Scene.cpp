@@ -1,5 +1,6 @@
 #include <QMouseEvent>
 #include <QKeyEvent>
+#include <QDebug>
 #include "Scene.h"
 #include "Geom.h"
 #include "Game.h"
@@ -49,9 +50,10 @@ void Scene :: resizeGL(int new_width, int new_height)
 
 void Scene :: paintGL()
 {
-    Point3Df camera_positon;
+     Point3Df camera_positon;
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     glMatrixMode( GL_MODELVIEW );
+
 
     camera_positon = game -> GetCameraPosition();
 
@@ -59,8 +61,9 @@ void Scene :: paintGL()
     glLoadIdentity();
     gluLookAt( 300.0f, 0.0f, 0.0f, 0, 0, 0, 0, 1, 0 );
     glColor3f( 1.0f, 1.0f, 1.0f );
-    renderText( 100, WindowHeight / 2 - 200, "ZY Plane" );
+    renderText( 100, WindowHeight / 2 - 200, "ZY Plane" );   
     game -> DrawWorld();
+
 
     glViewport( WindowWidth / 2, WindowHeight / 2, WindowWidth / 2, WindowHeight / 2 );
     glLoadIdentity();
@@ -136,7 +139,7 @@ void Scene :: keyPressEvent( QKeyEvent* keyboard )
 
 void Scene :: mousePressEvent( QMouseEvent* mouse )
 {
-    if ( mouse -> button() ==Qt :: LeftButton )
+    if ( mouse -> button() == Qt :: LeftButton )
 	game -> SetLastMousePosition( mouse -> globalX(), mouse -> globalY() );
 }
 

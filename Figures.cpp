@@ -7,21 +7,35 @@
 #include <stdio.h>
 #include "Figures.h"
 
+Point3Di Block :: vertices_i[ BlocksVertexCount ] = {
+	Point3Di( -Block :: BlockSize / 2,  Block :: BlockSize / 2, -Block :: BlockSize / 2 ),
+	Point3Di( -Block :: BlockSize / 2,  Block :: BlockSize / 2,  Block :: BlockSize / 2 ),
+	Point3Di(  Block :: BlockSize / 2,  Block :: BlockSize / 2,  Block :: BlockSize / 2 ),
+	Point3Di(  Block :: BlockSize / 2,  Block :: BlockSize / 2, -Block :: BlockSize / 2 ),
+	Point3Di(  Block :: BlockSize / 2, -Block :: BlockSize / 2, -Block :: BlockSize / 2 ),
+	Point3Di(  Block :: BlockSize / 2, -Block :: BlockSize / 2,  Block :: BlockSize / 2 ),
+	Point3Di( -Block :: BlockSize / 2, -Block :: BlockSize / 2,  Block :: BlockSize / 2 ),
+	Point3Di( -Block :: BlockSize / 2, -Block :: BlockSize / 2, -Block :: BlockSize / 2 )
+};
+
 Block :: Block( int new_x, int new_y, int new_z, Material new_material )
 {
-    rel_position_f = rel_position_i = Point3Di( new_x, new_y, new_z );
-    material = new_material;
+	rel_position_f = rel_position_i = Point3Di( new_x, new_y, new_z );
+	material = new_material;
 
-    vertices_f[ 0 ] = vertices_i[ 0 ] = Point3Di( -Block :: BlockSize / 2,  Block :: BlockSize / 2, -Block :: BlockSize / 2 );
-    vertices_f[ 1 ] = vertices_i[ 1 ] = Point3Di( -Block :: BlockSize / 2,  Block :: BlockSize / 2,  Block :: BlockSize / 2 );
-    vertices_f[ 2 ] = vertices_i[ 2 ] = Point3Di(  Block :: BlockSize / 2,  Block :: BlockSize / 2,  Block :: BlockSize / 2 );
-    vertices_f[ 3 ] = vertices_i[ 3 ] = Point3Di(  Block :: BlockSize / 2,  Block :: BlockSize / 2, -Block :: BlockSize / 2 );
-    vertices_f[ 4 ] = vertices_i[ 4 ] = Point3Di(  Block :: BlockSize / 2, -Block :: BlockSize / 2, -Block :: BlockSize / 2 );
-    vertices_f[ 5 ] = vertices_i[ 5 ] = Point3Di(  Block :: BlockSize / 2, -Block :: BlockSize / 2,  Block :: BlockSize / 2 );
-    vertices_f[ 6 ] = vertices_i[ 6 ] = Point3Di( -Block :: BlockSize / 2, -Block :: BlockSize / 2,  Block :: BlockSize / 2 );
-    vertices_f[ 7 ] = vertices_i[ 7 ] = Point3Di( -Block :: BlockSize / 2, -Block :: BlockSize / 2, -Block :: BlockSize / 2 );
-
+	for ( int i = 0; i < BlocksVertexCount; i++ )
+	vertices_f[ i ] = vertices_i[ i ];
 }
+
+Block :: Block( Point3Di new_position, Material new_material )
+{
+	rel_position_f = rel_position_i = new_position;
+	material = new_material;
+
+	for ( int i = 0; i < BlocksVertexCount; i++ )
+	vertices_f[ i ] = vertices_i[ i ];
+}
+
 
 void Block :: Rotate( float &a, float &b, float angle )
 {
@@ -35,6 +49,9 @@ void Block :: Rotate( float &a, float &b, float angle )
 
 void Block :: RotateOnZY( float angle, bool change_const )
 {
+
+    int		prev_z = 0;
+
     if ( !change_const )
     {
 	rel_position_f = rel_position_i;
@@ -47,30 +64,31 @@ void Block :: RotateOnZY( float angle, bool change_const )
 	}
     }
     else
-    {
-	Point3Di rotate_vec( 0, -1, 1 );
-	int	 prev_z;
+    {	
+	prev_z = prev_z = rel_position_i.z;
 
 	if ( angle > eps )
-	    rotate_vec = Point3Di( 0, 1, -1 );
-
-	prev_z = rel_position_i.z;
-	rel_position_i.z = rel_position_i.y * rotate_vec.y;
-	rel_position_i.y = prev_z * rotate_vec.z;
-	rel_position_f   = rel_position_i;
+	{
+	    rel_position_i.z =  rel_position_i.y;
+	    rel_position_i.y = -prev_z;
+	}
+	else
+	{
+	    rel_position_i.z = -rel_position_i.y;
+	    rel_position_i.y =  prev_z;
+	}
+	rel_position_f = rel_position_i;
 
 	for ( int i = 0; i < BlocksVertexCount; ++i )
-	{
-	    prev_z = vertices_i[ i ].z;
-	    vertices_i[ i ].z = vertices_i[ i ].y * rotate_vec.y;
-	    vertices_i[ i ].y = prev_z		  * rotate_vec.z;
 	    vertices_f[ i ] = vertices_i[ i ];
-	}
     }
+
 }
 
 void Block :: RotateOnZX( float angle, bool change_const )
 {
+    int	 prev_z = 0;
+
     if ( !change_const )
     {
 	rel_position_f = rel_position_i;
@@ -84,28 +102,29 @@ void Block :: RotateOnZX( float angle, bool change_const )
     }
     else
     {
-	Point3Di rotate_vec( 1, 0, -1 );
-	int	 prev_z = 0;
-	if ( angle > eps )
-	    rotate_vec = Point3Di( -1, 0, 1 );
-
 	prev_z = rel_position_i.z;
-	rel_position_i.z = rel_position_i.x * rotate_vec.x;
-	rel_position_i.x = prev_z		  * rotate_vec.z;
+
+	if ( angle > eps )
+	{
+	    rel_position_i.z =  rel_position_i.x;
+	    rel_position_i.x =  -prev_z;
+	}
+	else
+	{
+	    rel_position_i.z = -rel_position_i.x;
+	    rel_position_i.x =  prev_z;
+	}
 	rel_position_f   = rel_position_i;
 
 	for ( int i = 0; i < BlocksVertexCount; ++i )
-	{
-	    prev_z = vertices_i[ i ].z;
-	    vertices_i[ i ].z = vertices_i[ i ].x * rotate_vec.x;
-	    vertices_i[ i ].x = prev_z * rotate_vec.z;
 	    vertices_f[ i ] = vertices_i[ i ];
-	}
     }
 }
 
 void Block :: RotateOnXY( float angle, bool change_const )
 {
+    int prev_x = 0;
+
     if ( !change_const )
     {
 	rel_position_f = rel_position_i;
@@ -118,24 +137,23 @@ void Block :: RotateOnXY( float angle, bool change_const )
 	}
     }
     else
-    {
-	Point3Di rotate_vec( -1, 1, 0 );
-	int	 prev_x;
-	if ( angle > eps )
-	    rotate_vec = Point3Di( 1, -1, 0 );
-
+    {	
 	prev_x = rel_position_i.x;
-	rel_position_i.x = rel_position_i.y * rotate_vec.y;
-	rel_position_i.y = prev_x * rotate_vec.x;
+
+	if ( angle > eps )
+	{
+	    rel_position_i.x =  rel_position_i.y;
+	    rel_position_i.y = -prev_x;
+	}
+	else
+	{
+	    rel_position_i.x = -rel_position_i.y;
+	    rel_position_i.y =  prev_x;
+	}
 	rel_position_f   = rel_position_i;
 
 	for ( int i = 0; i < BlocksVertexCount; ++i )
-	{
-	    prev_x = vertices_i[ i ].x;
-	    vertices_i[ i ].x = vertices_i[ i ].y * rotate_vec.y;
-	    vertices_i[ i ].y = prev_x		  * rotate_vec.x;
 	    vertices_f[ i ] = vertices_i[ i ];
-	}
     }
 }
 
@@ -160,6 +178,10 @@ void Block :: Draw( Point3Df figure_location )
 	1)-,+,- 2)-,+,+ 3)+,+,+ 4)+,+,-
 	5)+,-,- 6)+,-,+ 7)-,-,+ 8)-,-,-
     */
+
+    glMaterialfv( GL_FRONT, GL_AMBIENT, material.GetMaterialForAmbient() );
+    glMaterialfv( GL_FRONT, GL_DIFFUSE, material.GetMaterialForDiffuse() );
+    glMaterialfv( GL_FRONT, GL_SPECULAR, material.GetMaterialForSpecular() );
 
     //Firts side
     DrawSide(	Point3Df( figure_location.x + rel_position_f.x + vertices_f[ 0 ].x, figure_location.y + rel_position_f.y + vertices_f[ 0 ].y, figure_location.z + rel_position_f.z + vertices_f[ 0 ].z ),
@@ -281,7 +303,7 @@ int Block :: UpperBoundXi()
     for ( int i = 1; i < BlocksVertexCount; i++ )
 	max_y = Max( max_y, vertices_i[ i ].y );
 
-    return max_y + rel_position_i.y;
+    return max_y + rel_position_i.x;
 }
 
 int Block :: LowerBoundYi()
@@ -324,7 +346,7 @@ int Block :: UpperBoundZi()
     return max_z + rel_position_i.z;
 }
 
-Figure :: Figure( int x, int y, int z, Figures type, Material new_material )
+Figure :: Figure( int x, int y, int z, Figures type, Material material )
 {
     if ( Block :: BlockSize % 2 != 0 )
     {
@@ -334,7 +356,7 @@ Figure :: Figure( int x, int y, int z, Figures type, Material new_material )
 
     position_i = Point3Di( x, y, z );
     position_f = position_i;
-    material = new_material;
+    //material = new_material;
 
     switch ( type )
     {
@@ -390,10 +412,6 @@ Figure :: ~Figure()
 
 void Figure :: Draw()
 {
-    glMaterialfv( GL_FRONT, GL_AMBIENT, material.GetMaterialForAmbient() );
-    glMaterialfv( GL_FRONT, GL_DIFFUSE, material.GetMaterialForDiffuse() );
-    glMaterialfv( GL_FRONT, GL_SPECULAR, material.GetMaterialForSpecular() );
-
     for ( int i = 0; i < BlocksCount; ++i )
 	blocks[ i ] -> Draw( position_f );
 }
@@ -416,14 +434,19 @@ void Figure :: RotateOnXY( float angle, bool change_const )
 	blocks[ i ] -> RotateOnXY( angle, change_const );
 }
 
-Point3Df Figure :: GetPosition()
+Point3Df Figure :: GetPositionF() const
 {
     return position_f;
 }
 
-void Figure :: SetPosition( Point3Df new_position )
+Point3Di Figure :: GetPositionI() const
 {
-    position_f = new_position;
+    return position_i;
+}
+
+void Figure :: SetPositionI( Point3Di new_position )
+{
+    position_f = position_i = new_position;
 }
 
 float Figure :: LowerBoundXf()
@@ -546,12 +569,31 @@ int Figure :: UpperBoundZi()
     return max_z + position_i.z;
 }
 
-Point3Di Figure :: GetBlockPositionByIndex( int index )
+Point3Di Figure :: GetBlockPositionByIndex( int index ) const
 {
-    return blocks[ index ] -> GetPosition();
+    return blocks[ index ] -> GetPositionI();
+}
+Material Figure :: GetBlockMaterialByIndex( int index ) const
+{
+	return blocks[ index ] -> GetMaterial();
 }
 
-Point3Di Block :: GetPosition() const
+Material Block :: GetMaterial() const
+{
+	return material;
+}
+
+Point3Df Block :: GetPositionF() const
+{
+    return rel_position_f;
+}
+
+Point3Di Block :: GetPositionI() const
 {
     return rel_position_i;
+}
+
+void Figure :: SetPositionF( Point3Df new_position )
+{
+    position_f = new_position;
 }

@@ -30,21 +30,21 @@ public:
 	void			Rotate( RotatePlane plane, RotateSide side );
 	void			DropDownFigure();
 private:
-	enum		    { FieldWidth = 4, FieldLength = 5, FieldHeight = 4, RotateStepsCount = 20 };
+	enum		    { FieldWidth = 4, FieldLength = 4, FieldHeight = 12, RotateStepsCount = 20 };
 	enum LightPosition  { LightPosByX = 0 , LightPosByY = 300, LightPosByZ = 300 };
 	enum GameSpeed	    { FirstSpeed = 1, SecondSpeed = 2, ThirdSpeed = 4, FourthSpeed = 8, FifthSpeed = 10, SixthSpeed = 12, SeventhSpeed = 14 };
-	enum		    { FieldLowerBoundX = -FieldLength * Block :: BlockSize / 2,
-			      FieldUpperBoundX =  FieldLength * Block :: BlockSize / 2,
-			      FieldLowerBoundY = -FieldHeight * Block :: BlockSize / 2,
-			      FieldUpperBoundY =  FieldHeight * Block :: BlockSize / 2,
-			      FieldLowerBoundZ = -FieldWidth  * Block :: BlockSize / 2,
-			      FieldUpperBoundZ =  FieldWidth  * Block :: BlockSize / 2 };
+	enum		    { FieldLowerBoundX =  0,
+			      FieldUpperBoundX =  FieldLength * Block :: BlockSize,
+			      FieldLowerBoundY =  0,
+			      FieldUpperBoundY =  FieldHeight * Block :: BlockSize,
+			      FieldLowerBoundZ =  0,
+			      FieldUpperBoundZ =  FieldLength * Block :: BlockSize };
 	static const float	CameraRadius;
 	static const float	CameraPosChangeKoeff;
 	static const int	FieldPositionByY;
 	static float		light_position[ 4 ];
 
-	Block*			field[ FieldWidth ][ FieldLength ][ FieldHeight ];
+	Block*			field[ FieldLength ][ FieldWidth ][ FieldHeight ];
 
 //Camera manipulating
 	SphericalCoor		camera_position;
@@ -61,15 +61,18 @@ private:
 	float			rotating_angle;
 	bool			rotating;
 	bool			is_pos_change;
+	int			figure_start_pos_y;
 	int			figure_down_steps;
 	int			rotating_step;
 //Rotating
 	RotatePlane		rotating_plane;
-	Point3Df		pos_change_vec;
+	Point3Di		figure_pos_correct_vec;
+	int			figure_pos_correct_step;
 	bool			CheckUpRotate();
 //Drawing
 	void			DrawField();
 	void			DrawInterface();
+	void			DrawBlocksOnTheField();
 };
 
 #endif

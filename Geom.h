@@ -15,6 +15,7 @@ struct Point3Df
 
     Point3Df( float new_x, float new_y, float new_z ) : x( new_x ), y( new_y ), z( new_z ) { }
     Point3Df() : x( 0.0f ), y( 0.0f ), z( 0.0f ) {}
+    Point3Df( const Point3Df& obj ) : x( obj.x ), y( obj.y ), z( obj.z ) { }
     Point3Df& operator = ( const Point3Df& right_obj );
     Point3Df& operator = ( const Point3Di& right_obj );
     Point3Df  operator - ( const Point3Df& right_obj );
