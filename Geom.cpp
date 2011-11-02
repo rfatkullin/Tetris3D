@@ -21,23 +21,11 @@ Point3Df& Point3Df :: operator = ( const Point3Di& right_obj )
 
 Point3Df Point3Df :: operator - ( const Point3Df& right_obj )
 {
-//    Point3Df tmp;
-//    tmp.x = x - right_obj.x;
-//    tmp.y = y - right_obj.y;
-//    tmp.z = z - right_obj.z;
-
-//    return tmp;
-    return Point3Df( x - right_obj.x, y - right_obj.y, z - right_obj.z );
+   return Point3Df( x - right_obj.x, y - right_obj.y, z - right_obj.z );
 }
 
 Point3Df Point3Df :: operator + ( const Point3Df& right_obj )
 {
-//    Point3Df tmp;
-//    tmp.x = x + right_obj.x;
-//    tmp.y = y + right_obj.y;
-//    tmp.z = z + right_obj.z;
-
-//    return tmp;
     return Point3Df( x + right_obj.x, y + right_obj.y, z + right_obj.z );
 }
 
@@ -46,6 +34,15 @@ Point3Di& Point3Di :: operator = ( const Point3Di& right_obj )
     x = right_obj.x;
     y = right_obj.y;
     z = right_obj.z;
+
+    return *this;
+}
+
+Point3Di& Point3Di :: operator = ( const Point3Df& right_obj )
+{
+    x = ( int )right_obj.x;
+    y = ( int )right_obj.y;
+    z = ( int )right_obj.z;
 
     return *this;
 }

@@ -31,6 +31,7 @@ struct Point3Di
     Point3Di( int new_x, int new_y, int new_z ) : x( new_x ), y( new_y ), z( new_z ) { }
     Point3Di() : x( 0 ), y( 0 ), z( 0 ) {}
     Point3Di& operator = ( const Point3Di& right_obj );
+    Point3Di& operator = ( const Point3Df& right_obj );
     Point3Di operator - ( const Point3Di& right_obj );
     Point3Di operator + ( const Point3Di& right_obj );
 };

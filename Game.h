@@ -73,6 +73,10 @@ private:
 	void			DrawField();
 	void			DrawInterface();
 	void			DrawBlocksOnTheField();
+//Collapse
+	bool			collapse;
+	void			CheckToCollapse();
+	int			collapse_steps_count;
 };
 
 #endif

@@ -30,7 +30,7 @@ void Game :: Start()
     last_mouse_position	    =   Point3Df( 0.0f, 0.0f, 0.0f );
     camera_position	    =   SphericalCoor( pi / 4, pi / 4 );
     current_figure	    =   GetNewFigure();
-    figure_start_pos_y	    =   current_figure -> GetPositionI().y;
+    figure_start_pos_y	    =   current_figure -> GetPosByYi();
     figure_down_steps	    =   0;
     next_figure		    =   GetNewFigure();
     is_pos_change	    =   false;
@@ -39,6 +39,7 @@ void Game :: Start()
     rotating		    =   false;
     score		    =   0;
     is_game		    =   true;
+    collapse		    =	false;
 
     srand( time( 0 ) );
 
@@ -72,7 +73,7 @@ Point2Df Game :: GetFigurePositionOnXZ( int width_x, int width_z )
 
 Figure* Game :: GetNewFigure()
 {
-    Point2Df figure_position;
+    Point2Df figure_pos;
     int lower_bound_x,
 	upper_bound_x,
 	lower_bound_y,
@@ -81,7 +82,7 @@ Figure* Game :: GetNewFigure()
 	upper_bound_z,
 	y_position  = FieldHeight * Block :: BlockSize;
 
-    next_figure = new Figure( 0.0f, 0.0f, 0.0f, LFigure, materials[ rand() % 1/*MaterialsCount*/ ] );
+    next_figure = new Figure( 0.0f, 0.0f, 0.0f, IFigure, materials[ rand() % 1/*MaterialsCount*/ ] );
     lower_bound_x = next_figure -> LowerBoundXi();
     upper_bound_x = next_figure -> UpperBoundXi();
     lower_bound_y = next_figure -> LowerBoundYi();
@@ -89,28 +90,77 @@ Figure* Game :: GetNewFigure()
     lower_bound_z = next_figure -> LowerBoundZi();
     upper_bound_z = next_figure -> UpperBoundZi();
 
-    figure_position = GetFigurePositionOnXZ( upper_bound_x - lower_bound_x, upper_bound_z - lower_bound_z );
+    figure_pos = GetFigurePositionOnXZ( upper_bound_x - lower_bound_x, upper_bound_z - lower_bound_z );
 
     if ( ( upper_bound_y - lower_bound_y ) % 2 != 0 )
 	y_position += Block :: BlockSize / 2;
 
-    next_figure -> SetPositionI( Point3Di( Block :: BlockSize * Game :: FieldLength / 2 + figure_position.x, y_position, Block :: BlockSize * Game :: FieldWidth / 2 + figure_position.y ) );
+    next_figure -> SetPosi( Point3Di( Block :: BlockSize * Game :: FieldLength / 2 + figure_pos.x, y_position, Block :: BlockSize * Game :: FieldWidth / 2 + figure_pos.y ) );
 
     return next_figure;
 }
 
 void Game :: MoveDownFigure()
 {
-//    Point3Df figure_position = current_figure -> GetPosition();
-//    current_figure -> SetPosition( Point3Df( figure_position.x, figure_position.y - game_speed * 0.5f,  figure_position.z ));
+//    Point3Df figure_pos = current_figure -> GetPosition();
+//    current_figure -> SetPosition( Point3Df( figure_pos.x, figure_pos.y - game_speed * 0.5f,  figure_pos.z ));
 
 //    for (  )
 }
 
+void Game :: CheckToCollapse()
+{
+    bool    full	= false;
+    int	    full_levels = 0;
+
+    for ( int k = 1; k < FieldHeight; ++k )
+    {
+	full = true;
+	for ( int i = 0; i < FieldLength; ++i )
+	    for ( int j = 0; j < FieldWidth; ++j )
+		if ( field[ i ][ j ][ k ] == NULL )
+		{
+		    full = false;
+		    break;
+		}
+	full_levels++;
+    }
+
+    for ( int k = FieldHeight; k > full_levels; k-- )
+	for ( int i = 0; i < FieldLength; ++i )
+	    for ( int j = 0; j < FieldWidth; ++j )
+	    {
+		 delete field[ i ][ j ][ k - full_levels ];
+		 field[ i ][ j ][ k - full_levels ] = field[ i ][ j ][ k ];
+		 field[ i ][ j ][ k ] = NULL;
+	    }
+    if ( full_levels > 0 )
+    {
+	collapse_steps_count = ( full_levels * Block :: BlockSize ) / SeventhSpeed + 1;
+	collapse = true;
+    }
+}
+
+void DoingCollapse( )
+{
+
+}
+/*
+void Game :: InCollapseShift()
+{
+
+}
+
+void Game :: FinalCollapseShift()
+{
+
+}
+*/
+
 void Game :: NextStep()
 {
-    Point3Di	figure_position;
-    Point3Di	block_position;
+    Point3Di	figure_pos;
+    Point3Di	block_pos;
     float	final_angle		= 0.0f;
     bool	state			= false;
     int		field_index_by_length	= 0;
@@ -119,23 +169,51 @@ void Game :: NextStep()
 
     if ( !is_game )
 	return;
-    if ( is_game )
+
+    if ( collapse )
+    {
+	collapse_steps_count--;
+
+	if ( collapse_steps_count > 0 )
+	    for ( int k = 0; k < FieldHeight; k++ )
+		for ( int i = 0; i < FieldLength; ++i )
+		    for ( int j = 0; j < FieldWidth; ++j )
+			if ( field[ i ][ j ][ k ] != NULL )
+			    field[ i ][ j ][ k ] -> SetPosi( field[ i ][ j ][ k ] -> GetPosi() - Point3Di( 0, game_speed, 0 ) );
+	else
+	{
+	    collapse = false;
+
+	    for ( int k = 0; k < FieldHeight; k++ )
+		for ( int i = 0; i < FieldLength; ++i )
+		    for ( int j = 0; j < FieldWidth; ++j )
+			if ( field[ i ][ j ][ k ] != NULL )
+			{
+			    block_pos =  field[ i ][ j ][ k ] -> GetPosi();
+			    field[ i ][ j ][ k ] -> SetPosi( block_pos.x,
+								  ( block_pos.y - game_speed + Block :: BlockSize / 2 ) / ( Block :: BlockSize / 2 ) * ( Block :: BlockSize / 2 ),
+								  block_pos.z );
+			}
+	}
+    }
+
+    if ( is_game && !collapse )
     {
 	figure_down_steps += game_speed;
-	figure_position = current_figure -> GetPositionI();
-	current_figure -> SetPositionI( Point3Di( figure_position.x, figure_start_pos_y - ( int )( 0.5 * figure_down_steps ), figure_position.z ) );
+	figure_pos = current_figure -> GetPosi();
+	current_figure -> SetPosi( Point3Di( figure_pos.x, figure_start_pos_y - ( int )( 0.5 * figure_down_steps ), figure_pos.z ) );
 
-	for ( int  i = 0; ( i < Figure :: BlocksCount ) && ( is_game ); i++ )
+	for ( unsigned int  i = 0; ( i < Figure :: BlocksCount ) && ( is_game ); i++ )
 	{
-	    block_position = figure_position + current_figure -> GetBlockPositionByIndex( i );
-	    field_index_by_length = block_position.x / Block :: BlockSize;
-	    field_index_by_height = block_position.y / Block :: BlockSize;
-	    field_index_by_width  = block_position.z / Block :: BlockSize;
+	    block_pos = figure_pos + current_figure -> GetBlockPosByIndex( i );
+	    field_index_by_length = block_pos.x / Block :: BlockSize;
+	    field_index_by_height = block_pos.y / Block :: BlockSize;
+	    field_index_by_width  = block_pos.z / Block :: BlockSize;
 
 	    for ( int j = FieldHeight - 1; j >= 0; j-- )
 		if ( field[ field_index_by_length ][ field_index_by_width ][ j ] != NULL )
 		{
-		    if ( block_position.y - Block :: BlockSize / 2 <= Game :: FieldLowerBoundY + ( j + 1 ) * Block :: BlockSize )
+		    if ( block_pos.y - Block :: BlockSize / 2 <= Game :: FieldLowerBoundY + ( j + 1 ) * Block :: BlockSize )
 		    {
 			is_game = false;
 			break;
@@ -145,20 +223,21 @@ void Game :: NextStep()
 
 	if ( !is_game )
 	{
-	    figure_position.y = figure_start_pos_y - ( int )( 0.5 * figure_down_steps ) / ( Block :: BlockSize / 2 ) * ( Block :: BlockSize / 2 );
-	    for ( int  i = 0; i < Figure :: BlocksCount; i++ )
+	    figure_pos.y = figure_start_pos_y - ( int )( 0.5 * figure_down_steps ) / ( Block :: BlockSize / 2 ) * ( Block :: BlockSize / 2 );
+	    for ( unsigned int  i = 0; i < Figure :: BlocksCount; i++ )
 	    {
-		block_position        = figure_position + current_figure -> GetBlockPositionByIndex( i );
-		field_index_by_length = block_position.x / Block :: BlockSize;
-		field_index_by_width  = block_position.z / Block :: BlockSize;
-		field_index_by_height = block_position.y / Block :: BlockSize;
+		block_pos        = figure_pos + current_figure -> GetBlockPosByIndex( i );
+		field_index_by_length = block_pos.x / Block :: BlockSize;
+		field_index_by_width  = block_pos.z / Block :: BlockSize;
+		field_index_by_height = block_pos.y / Block :: BlockSize;
 		field[ field_index_by_length ][ field_index_by_width ][ field_index_by_height ]
-		    = new Block( block_position.x,
-				 block_position.y,
-				 block_position.z,
+		    = new Block( block_pos.x,
+				 block_pos.y,
+				 block_pos.z,
 				 current_figure -> GetBlockMaterialByIndex( i )
 				);
 	    }
+	    //CheckToCollapse();
 	    delete current_figure;
 	    current_figure    = next_figure;
 	    next_figure	      = GetNewFigure();
@@ -176,7 +255,7 @@ void Game :: NextStep()
 	    //printf( "%f %f %f\n\n", pos_change_vec.x, pos_change_vec.y, pos_change_vec.z );
 	    rotating_step++;
 	    if ( rotating_step <= Block :: BlockSize / 2 )
-		current_figure -> SetPositionI( current_figure -> GetPositionI() + figure_pos_correct_vec );
+		current_figure -> SetPosi( current_figure -> GetPosi() + figure_pos_correct_vec );
 	    final_angle = rotating_step * rotating_angle;
 	    if ( rotating_step == RotateStepsCount )
 	    {
@@ -289,7 +368,7 @@ void Game :: ShiftFigureByXAxis( ShiftDirection shift_koeff )
 	  ( lower_bound_x + shift         <= Game :: FieldUpperBoundX   ) &&
 	  ( Game :: FieldLowerBoundX      <= upper_bound_x + shift      ) &&
 	  ( upper_bound_x + shift         <= Game :: FieldUpperBoundX   ) )
-		current_figure -> SetPositionI( current_figure -> GetPositionI() + Point3Di( shift, 0, 0 ) );
+		current_figure -> SetPosi( current_figure -> GetPosi() + Point3Di( shift, 0, 0 ) );
 }
 
 void Game :: ShiftFigureByZAxis( ShiftDirection shift_koeff )
@@ -302,7 +381,7 @@ void Game :: ShiftFigureByZAxis( ShiftDirection shift_koeff )
 	  ( lower_bound_z + shift		 <= Game :: FieldUpperBoundZ   ) &&
 	  ( Game :: FieldLowerBoundZ     <= upper_bound_z + shift      ) &&
 	  ( upper_bound_z + shift        <= Game :: FieldUpperBoundZ   ) )
-		current_figure -> SetPositionI( current_figure -> GetPositionI() + Point3Di( 0, 0, shift ) );
+		current_figure -> SetPosi( current_figure -> GetPosi() + Point3Di( 0, 0, shift ) );
 }
 
 void Game :: Rotate( RotatePlane plane, RotateSide side )
