@@ -123,19 +123,29 @@ void Game :: CheckToCollapse()
 		    full = false;
 		    break;
 		}
-	full_levels++;
+	if ( full )
+	    full_levels++;
     }
 
-    for ( int k = FieldHeight; k > full_levels; k-- )
-	for ( int i = 0; i < FieldLength; ++i )
-	    for ( int j = 0; j < FieldWidth; ++j )
-	    {
-		 delete field[ i ][ j ][ k - full_levels ];
-		 field[ i ][ j ][ k - full_levels ] = field[ i ][ j ][ k ];
-		 field[ i ][ j ][ k ] = NULL;
-	    }
     if ( full_levels > 0 )
     {
+	for ( int k = 1; k < FieldHeight; k++ )
+	{
+	    if ( k < full_levels + 1 )
+		for ( int i = 0; i < FieldLength; ++i )
+		    for ( int j = 0; j < FieldWidth; ++j )
+		    {
+			 delete field[ i ][ j ][ k ];
+			field[ i ][ j ][ k ] = NULL;
+		    }
+	    else
+		for ( int i = 0; i < FieldLength; ++i )
+		    for ( int j = 0; j < FieldWidth; ++j )
+		    {
+			field[ i ][ j ][ k - full_levels ] = field[ i ][ j ][ k ];
+			field[ i ][ j ][ k ] = NULL;
+		    }
+	}
 	collapse_steps_count = ( full_levels * Block :: BlockSize ) / SeventhSpeed + 1;
 	collapse = true;
     }
@@ -175,23 +185,25 @@ void Game :: NextStep()
 	collapse_steps_count--;
 
 	if ( collapse_steps_count > 0 )
-	    for ( int k = 0; k < FieldHeight; k++ )
+	{
+	    for ( int k = 1; k < FieldHeight; k++ )
 		for ( int i = 0; i < FieldLength; ++i )
 		    for ( int j = 0; j < FieldWidth; ++j )
 			if ( field[ i ][ j ][ k ] != NULL )
-			    field[ i ][ j ][ k ] -> SetPosi( field[ i ][ j ][ k ] -> GetPosi() - Point3Di( 0, game_speed, 0 ) );
+			    field[ i ][ j ][ k ] -> SetPosi( field[ i ][ j ][ k ] -> GetPosi() - Point3Di( 0, SeventhSpeed, 0 ) );
+	}
 	else
 	{
 	    collapse = false;
 
-	    for ( int k = 0; k < FieldHeight; k++ )
+	    for ( int k = 1; k < FieldHeight; k++ )
 		for ( int i = 0; i < FieldLength; ++i )
 		    for ( int j = 0; j < FieldWidth; ++j )
 			if ( field[ i ][ j ][ k ] != NULL )
 			{
 			    block_pos =  field[ i ][ j ][ k ] -> GetPosi();
 			    field[ i ][ j ][ k ] -> SetPosi( block_pos.x,
-								  ( block_pos.y - game_speed + Block :: BlockSize / 2 ) / ( Block :: BlockSize / 2 ) * ( Block :: BlockSize / 2 ),
+								  ( block_pos.y - SeventhSpeed + Block :: BlockSize / 2 ) / ( Block :: BlockSize / 2 ) * ( Block :: BlockSize / 2 ),
 								  block_pos.z );
 			}
 	}
@@ -237,7 +249,7 @@ void Game :: NextStep()
 				 current_figure -> GetBlockMaterialByIndex( i )
 				);
 	    }
-	    //CheckToCollapse();
+	    CheckToCollapse();
 	    delete current_figure;
 	    current_figure    = next_figure;
 	    next_figure	      = GetNewFigure();

@@ -693,5 +693,5 @@ Point3Di Figure :: GetBlockPosByIndex( int index ) const
 
 Material Figure :: GetBlockMaterialByIndex( int index ) const
 {
-	return blocks[ index ] -> GetMaterial();
+    return blocks[ index ] -> GetMaterial();
 }
