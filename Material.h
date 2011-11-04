@@ -19,4 +19,32 @@ public :
 	const float* GetMaterialForSpecular();
 };
 
+const int	MaterialsCount = 6;
+const Material	materials[ MaterialsCount ] = {
+    Material(  0.0f, 1.0f, 0.0f, 1.0f,
+               0.0f, 1.0f, 0.0f, 1.0f,
+               0.0f, 0.0f, 0.0f, 1.0f
+            ),
+    Material(  1.0f, 0.0f, 0.0f, 1.0f,
+               1.0f, 0.0f, 0.0f, 1.0f,
+               0.2f, 0.2f, 0.2f, 1.0f
+            ),
+    Material(  0.0f, 0.0f, 1.0f, 1.0f,
+               0.0f, 0.0f, 1.0f, 1.0f,
+               0.2f, 0.2f, 0.2f, 1.0f
+            ),
+    Material(  1.0f, 0.0f, 1.0f, 1.0f,
+               1.0f, 0.0f, 1.0f, 1.0f,
+               0.2f, 0.2f, 0.2f, 1.0f
+            ),
+    Material(  1.0f, 1.0f, 0.0f, 1.0f,
+               1.0f, 1.0f, 0.0f, 1.0f,
+               0.2f, 0.2f, 0.2f, 1.0f
+            ),
+    Material(  0.0f, 1.0f, 1.0f, 1.0f,
+               0.0f, 1.0f, 1.0f, 1.0f,
+               0.2f, 0.2f, 0.2f, 1.0f
+            )
+    };
+
 #endif

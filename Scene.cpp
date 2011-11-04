@@ -2,7 +2,6 @@
 #include <QKeyEvent>
 #include <QDebug>
 #include "Scene.h"
-#include "Geom.h"
 #include "Game.h"
 
 Scene :: Scene( QWidget* pwgt ) : QGLWidget( pwgt )
@@ -56,7 +55,7 @@ void Scene :: paintGL()
 
 
     camera_positon = game -> GetCameraPosition();
-
+/*
     glViewport( 0, WindowHeight / 2, WindowWidth / 2, WindowHeight / 2 );
     glLoadIdentity();
     gluLookAt( 300.0f, 0.0f, 0.0f, 0, 0, 0, 0, 1, 0 );
@@ -78,8 +77,8 @@ void Scene :: paintGL()
     glColor3f( 1.0f, 1.0f, 1.0f );
     renderText( 100, WindowHeight - 200, "XY Plane" );
     game -> DrawWorld();
-
-    glViewport( WindowWidth / 2, 0, WindowWidth / 2, WindowHeight / 2 );
+*/
+    glViewport( 0, 0, WindowWidth , WindowHeight );
     glLoadIdentity();
     gluLookAt( camera_positon.x, camera_positon.y, camera_positon.z, 0, 0, 0, 0, 1, 0 );
     glColor3f( 1.0f, 1.0f, 1.0f );
@@ -132,6 +131,9 @@ void Scene :: keyPressEvent( QKeyEvent* keyboard )
 	case Qt :: Key_E :
 	    game -> Rotate( Game :: PlaneZX, Game :: RotateByAntiClockWise );
 	    break;
+        case Qt :: Key_P :
+            game -> SetGameSpeed( Game :: ZeroSpeed );
+            break;
 	default:
 	    break;
     }

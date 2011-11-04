@@ -1,5 +1,5 @@
 #include <math.h>
-#include "Geom.h"
+#include "Geometry.h"
 
 Point3Df& Point3Df :: operator = ( const Point3Df& right_obj )
 {
@@ -109,4 +109,43 @@ float Min( float a, float b )
     return b;
 }
 
+float   ScalarMul( const Point3Df& a, const Point3Df& b )
+{
+    return a.x * b.x + a.y * b.y + a.z * b.z;
+}
 
+float   ScalarMul( const Point3Di& a, const Point3Di& b )
+{
+    return ScalarMul( Point3Df( a ), Point3Df( b ) );
+}
+
+Point3Df VectorMul( const Point3Df& a, const Point3Df& b )
+{
+    return Point3Df( a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x );
+}
+
+Point3Di VectorMul( const Point3Di& a, const Point3Di& b )
+{
+    return Point3Di( a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x );
+}
+
+
+float   MixedMul( const Point3Df& a, const Point3Df& b, const Point3Df& c )
+{
+    return ScalarMul( a, VectorMul( b, c ) );
+}
+
+float   MixedMul( const Point3Di& a, const Point3Di& b, const Point3Di& c )
+{
+    return ScalarMul( a, VectorMul( b, c ) );
+}
+
+float Point3Df :: Length()
+{
+    return x * x + y * y + z * z;
+}
+
+int Point3Di :: Length()
+{
+    return x * x + y * y + z * z;
+}

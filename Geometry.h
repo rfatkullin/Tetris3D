@@ -5,22 +5,7 @@
 const float pi = 3.141592653f;
 const float eps = 1e-5f;
 
-struct Point3Di;
-
-struct Point3Df
-{
-    float x;
-    float y;
-    float z;
-
-    Point3Df( float new_x, float new_y, float new_z ) : x( new_x ), y( new_y ), z( new_z ) { }
-    Point3Df() : x( 0.0f ), y( 0.0f ), z( 0.0f ) {}
-    Point3Df( const Point3Df& obj ) : x( obj.x ), y( obj.y ), z( obj.z ) { }
-    Point3Df& operator = ( const Point3Df& right_obj );
-    Point3Df& operator = ( const Point3Di& right_obj );
-    Point3Df  operator - ( const Point3Df& right_obj );
-    Point3Df  operator + ( const Point3Df& right_obj );
-};
+struct Point3Df;
 
 struct Point3Di
 {
@@ -34,6 +19,26 @@ struct Point3Di
     Point3Di& operator = ( const Point3Df& right_obj );
     Point3Di operator - ( const Point3Di& right_obj );
     Point3Di operator + ( const Point3Di& right_obj );
+
+    int   Length();
+};
+
+struct Point3Df
+{
+    float x;
+    float y;
+    float z;
+
+    Point3Df( float new_x, float new_y, float new_z ) : x( new_x ), y( new_y ), z( new_z ) { }
+    Point3Df() : x( 0.0f ), y( 0.0f ), z( 0.0f ) {}
+    Point3Df( const Point3Df& obj ) : x( obj.x ), y( obj.y ), z( obj.z ) { }
+    Point3Df( const Point3Di& obj ) : x( obj.x ), y( obj.y ), z( obj.z ) { }
+    Point3Df& operator = ( const Point3Df& right_obj );
+    Point3Df& operator = ( const Point3Di& right_obj );
+    Point3Df  operator - ( const Point3Df& right_obj );
+    Point3Df  operator + ( const Point3Df& right_obj );
+
+    float   Length();
 };
 
 struct Point2Df
@@ -61,8 +66,15 @@ struct SphericalCoor
     SphericalCoor() : teta( 0.0f ), alpha( 0.0f ) { }
 };
 
-bool	InRange( float x, float a, float b );
-float	Max( float a, float b );
-float	Min( float a, float b );
+Point3Df    VectorMul( Point3Df& a, Point3Df& b );
+Point3Di    VectorMul( Point3Di& a, Point3Di& b );
+float       Max( float a, float b );
+float       Min( float a, float b );
+float       MixedMul( const Point3Df& a, const Point3Df& b, const Point3Df& c );
+float       MixedMul( const Point3Di& a, const Point3Di& b, const Point3Di& c );
+float       ScalarMul( const Point3Df& a, const  Point3Df& b );
+float       ScalarMul( const Point3Di& a, const Point3Di& b );
+bool        InRange( float x, float a, float b );
+
 
 #endif

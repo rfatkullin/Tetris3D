@@ -15,18 +15,34 @@ TEMPLATE = app
 
 SOURCES += \
     Material.cpp \
-    Geom.cpp \
-    Figures.cpp \
     Game.cpp \
     main.cpp \
-    Scene.cpp
+    Scene.cpp \
+    GameObjects.cpp \
+    Geometry.cpp \
+    GeomEntity.cpp \
+    PhisEntity.cpp
 
 HEADERS += \
     Material.h \
-    Geom.h \
     Game.h \
-    Figures.h \
-    Scene.h
+    Scene.h \
+    GameObjects.h \
+    Geometry.h \
+    GeomEntity.h \
+    PhisEntity.h
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

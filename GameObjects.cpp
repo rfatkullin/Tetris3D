@@ -5,138 +5,7 @@
 #include <QGLWidget>
 #include <QDebug>
 #include <stdio.h>
-#include "Figures.h"
-
-//GeomEntity
-
-GeomEntity :: GeomEntity( int new_x, int new_y, int new_z, Material new_material )
-{
-    material = new_material;
-    pos_i    = Point3Di( new_x, new_y, new_z );
-    pos_f    = pos_i;
-
-}
-
-GeomEntity :: GeomEntity( float new_x, float new_y, float new_z, Material new_material )
-{
-    material = new_material;
-    pos_i = Point3Di( ( int )new_x, ( int )new_y, ( int )new_z );
-    pos_i = pos_f;
-}
-
-GeomEntity :: GeomEntity( Point3Di new_pos, Material new_material )
-{
-    material = new_material;
-    pos_i = new_pos;
-    pos_f = new_pos;
-}
-
-GeomEntity :: GeomEntity( Point3Df new_pos, Material new_material )
-{
-    material = new_material;
-    pos_i = new_pos;
-    pos_f = new_pos;
-}
-
-
-Point3Df GeomEntity :: GetPosf() const
-{
-    return pos_f;
-}
-
-Point3Di GeomEntity :: GetPosi() const
-{
-    return pos_i;
-}
-
-float GeomEntity :: GetPosByXf() const
-{
-    return pos_f.x;
-}
-
-float GeomEntity :: GetPosByYf() const
-{
-    return pos_f.y;
-}
-
-float GeomEntity :: GetPosByZf() const
-{
-    return pos_f.z;
-}
-
-int GeomEntity :: GetPosByXi() const
-{
-    return pos_i.x;
-}
-
-int GeomEntity :: GetPosByYi() const
-{
-    return pos_i.y;
-}
-
-int GeomEntity :: GetPosByZi() const
-{
-    return pos_i.z;
-}
-
-void GeomEntity :: SetPosByXi( int new_x )
-{
-    pos_i.x = new_x;
-}
-
-void GeomEntity :: SetPosByYi( int new_y )
-{
-    pos_i.y = new_y;
-}
-
-void GeomEntity :: SetPosByZi( int new_z )
-{
-    pos_i.z = new_z;
-}
-
- void GeomEntity :: SetPosByXf( float new_x )
- {
-    pos_f.x = new_x;
- }
-
-void GeomEntity :: SetPosByYf( float new_y )
-{
-    pos_f.y = new_y;
-}
-
-void GeomEntity :: SetPosByZf( float new_z )
-{
-    pos_f.z = new_z;
-}
-
-void GeomEntity :: SetPosi( int new_x, int new_y, int new_z )
-{
-    pos_i = Point3Di( new_x, new_y, new_z );
-    pos_f = pos_i;
-}
-
-void GeomEntity :: SetPosf( float new_x, float new_y, float new_z )
-{
-    pos_f.x = new_x;
-    pos_f.y = new_y;
-    pos_f.z = new_z;
-}
-
-void GeomEntity :: SetPosi( Point3Di new_pos )
-{
-    pos_i = new_pos;
-    pos_f = new_pos;
-}
-
-void GeomEntity :: SetPosf( Point3Df new_pos )
-{
-    pos_f = new_pos;
-}
-
-Material GeomEntity :: GetMaterial()  const
-{
-    return material;
-}
+#include "GameObjects.h"
 
 //Block
 
@@ -151,18 +20,29 @@ Point3Di Block :: vertices_i[ BlocksVertexCount ] = {
 	Point3Di( -Block :: BlockSize / 2, -Block :: BlockSize / 2, -Block :: BlockSize / 2 )
 };
 
-Block :: Block( int new_x, int new_y, int new_z, Material new_material ) : GeomEntity( new_x, new_y, new_z, new_material )
+Block :: Block() : GeomEntity( 0, 0, 0 ), PhisEntity( materials[ 3 ] )
 {
-	for ( unsigned int i = 0; i < BlocksVertexCount; i++ )
-	    vertices_f[ i ] = vertices_i[ i ];
+     for ( unsigned int i = 0; i < BlocksVertexCount; i++ )
+        vertices_f[ i ] = vertices_i[ i ];
 }
 
-Block :: Block( Point3Di new_pos, Material new_material ) : GeomEntity( new_pos, new_material )
+Block :: Block( int new_x, int new_y, int new_z, Material new_material ) : GeomEntity( new_x, new_y, new_z ), PhisEntity( new_material )
 {
-	for ( unsigned int i = 0; i < BlocksVertexCount; i++ )
-	vertices_f[ i ] = vertices_i[ i ];
+    for ( unsigned int i = 0; i < BlocksVertexCount; i++ )
+        vertices_f[ i ] = vertices_i[ i ];
 }
 
+Block :: Block( Point3Di new_pos, Material new_material ) : GeomEntity( new_pos ), PhisEntity( new_material )
+{
+    for ( unsigned int i = 0; i < BlocksVertexCount; i++ )
+        vertices_f[ i ] = vertices_i[ i ];
+}
+
+Block :: Block( const Block& block) : GeomEntity( block.pos_i ), PhisEntity( block.material )
+{
+     for ( unsigned int i = 0; i < BlocksVertexCount; i++ )
+        vertices_f[ i ] = vertices_i[ i ] = block.vertices_i[ i ];
+}
 
 void Block :: Rotate( float &a, float &b, float angle )
 {
@@ -478,10 +358,47 @@ int Block :: UpperBoundZi()
     return max_z + pos_i.z;
 }
 
+ bool Block :: PointIn( Point3Df point )
+ {
+    return     ( MixedMul( vertices_f[ 1 ] - vertices_f[ 0 ],
+                           vertices_f[ 2 ] - vertices_f[ 0 ],
+                           point           - vertices_f[ 0 ] ) < eps ) &&
+               ( MixedMul( vertices_f[ 2 ] - vertices_f[ 1 ],
+                           vertices_f[ 6 ] - vertices_f[ 1 ],
+                           point           - vertices_f[ 1 ] ) < eps ) &&
+               ( MixedMul( vertices_f[ 3 ] - vertices_f[ 2 ],
+                           vertices_f[ 5 ] - vertices_f[ 2 ],
+                           point           - vertices_f[ 2 ] ) < eps ) &&
+               ( MixedMul( vertices_f[ 0 ] - vertices_f[ 3 ],
+                           vertices_f[ 4 ] - vertices_f[ 3 ],
+                           point           - vertices_f[ 3 ] ) < eps ) &&
+               ( MixedMul( vertices_f[ 1 ] - vertices_f[ 0 ],
+                           vertices_f[ 7 ] - vertices_f[ 0 ],
+                           point           - vertices_f[ 0 ] ) < eps ) &&
+               ( MixedMul( vertices_f[ 5 ] - vertices_f[ 6 ],
+                           vertices_f[ 7 ] - vertices_f[ 6 ],
+                           point           - vertices_f[ 6 ] ) < eps );
+
+}
+
+bool Block :: PointIn( Point3Di point )
+{
+    return PointIn( Point3Df( point ) );
+}
+
+bool Block :: IsIntersect( Block& block )
+{
+    for ( int i = 0; i < BlocksVertexCount; i++ )
+        if ( block.PointIn( vertices_f[ i ] ) || PointIn( block.vertices_f[ i ] ) )
+            return true;
+
+    return false;
+}
+
 
 //Figure
 
-Figure :: Figure( int x, int y, int z, Figures type, Material material ) : GeomEntity( x, y, z, material )
+Figure :: Figure( int x, int y, int z, Figures type, Material material ) : GeomEntity( x, y, z ), PhisEntity( material )
 {
     if ( Block :: BlockSize % 2 != 0 )
     {
@@ -533,6 +450,12 @@ Figure :: Figure( int x, int y, int z, Figures type, Material material ) : GeomE
 	blocks[ 2 ] = new Block( 0.0f, -Block :: BlockSize / 2, 0.0f, material );
 	blocks[ 3 ] = new Block( Block :: BlockSize, -Block :: BlockSize / 2, 0.0f, material );
     }
+}
+
+Figure :: Figure( const Figure& fig ) : GeomEntity( fig.pos_i ), PhisEntity( material )
+{
+    for ( unsigned int i = 0; i < BlocksCount; i++ )
+        blocks[ i ] = new Block( fig.blocks[ i ] -> GetPosi(), fig.blocks[ i ] -> GetMaterial() );
 }
 
 Figure :: ~Figure()
@@ -686,12 +609,68 @@ int Figure :: UpperBoundZi()
     return max_z + pos_i.z;
 }
 
-Point3Di Figure :: GetBlockPosByIndex( int index ) const
+Point3Di Figure :: GetBlockPosByIndexi( int index ) const
 {
     return blocks[ index ] -> GetPosi();
+}
+
+Point3Df Figure :: GetBlockPosByIndexf( int index ) const
+{
+    return blocks[ index ] -> GetPosf();
 }
 
 Material Figure :: GetBlockMaterialByIndex( int index ) const
 {
     return blocks[ index ] -> GetMaterial();
 }
+
+bool Figure :: IsIntersectWithBlock( Block& block )
+{
+    for ( unsigned int i = 0; i < BlocksCount; i++ )
+        if ( blocks[ i ] -> IsIntersect( block ) )
+            return true;
+    return false;
+}
+
+void Figure :: SetBlocksAbsCoor()
+{
+    for ( unsigned int i = 0; i < BlocksCount; i++ )
+        blocks[ i ] -> SetPosf( blocks[ i ] -> GetPosf() + pos_f );
+}
+
+void Figure :: SetBlocksRelCoor()
+{
+    for ( unsigned int i = 0; i < BlocksCount; i++ )
+        blocks[ i ] -> SetPosf( blocks[ i ] -> GetPosf() - pos_f );
+}
+
+void Block :: SetVerAbsCoor()
+{
+    for ( int i = 0; i < BlocksVertexCount; i++ )
+        vertices_f[ i ] = vertices_f[ i ] + pos_f;
+}
+
+void Block :: SetVerRelCoor()
+{
+     for ( int i = 0; i < BlocksVertexCount; i++ )
+        vertices_f[ i ] = vertices_f[ i ] - pos_f;
+}
+
+void Figure :: SetVerAbsCoor()
+{
+    for ( int i = 0; i < BlocksCount; i++ )
+    {
+        blocks[ i ] -> SetPosf( blocks[ i ] -> GetPosf() + pos_f );
+        blocks[ i ] -> SetVerAbsCoor();
+    }
+}
+
+void Figure :: SetVerRelCoor()
+{
+     for ( int i = 0; i < BlocksCount; i++ )
+    {
+        blocks[ i ] -> SetPosf( blocks[ i ] -> GetPosf() - pos_f );
+        blocks[ i ] -> SetVerRelCoor();
+    }
+}
+
