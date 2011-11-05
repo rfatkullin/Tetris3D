@@ -9,7 +9,7 @@ GeomEntity :: GeomEntity( int new_x, int new_y, int new_z )
 
 GeomEntity :: GeomEntity( float new_x, float new_y, float new_z )
 {
-    pos_i = Point3Di( ( int )new_x, ( int )new_y, ( int )new_z );
+    pos_f = Point3Df( new_x, new_y, new_z );
     pos_i = pos_f;
 }
 

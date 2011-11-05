@@ -12,6 +12,8 @@ class Block : public GeomEntity, public PhisEntity
 public :
     static const unsigned int	BlocksVertexCount = 8;
     static const int		BlockSize = 32;		//Must be even
+    static const double         SafetyDistanceBetweenBlocks;
+    static const double         NonSafetyDistanceBetweenBlocks;
 private :
     static Point3Di		vertices_i[ BlocksVertexCount ];
     Point3Df			vertices_f[ BlocksVertexCount ];
@@ -21,12 +23,16 @@ private :
 
 public:
                                 Block();
-				Block( int new_x, int new_y, int new_z, Material new_material );
-				Block( Point3Di new_Pos, Material new_material );
+                                Block( int new_x, int new_y, int new_z, Material new_material );
+                                Block( float new_x, float new_y, float new_z, Material new_material );
+                                Block( Point3Di new_Pos, Material new_material );
+                                Block( Point3Df new_Pos, Material new_material );
                                 Block( const Block& block);
+
 
     bool                        PointIn( Point3Df point );
     bool                        PointIn( Point3Di point );
+    bool                        CheckEdgesAveragePoint( Block& block );
     bool                        IsIntersect( Block& block );
     void                        Draw( Point3Df figure_location  );
 

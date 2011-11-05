@@ -247,11 +247,11 @@ void Game :: CheckToCollapse()
 		for ( int i = 0; i < FieldLength; ++i )
 		    for ( int j = 0; j < FieldWidth; ++j )
 		    {
-                        field[ i ][ j ][ k - full_levels + 1 ] = field[ i ][ j ][ k ];
+                        field[ i ][ j ][ k - full_levels ] = field[ i ][ j ][ k ];
 			field[ i ][ j ][ k ] = NULL;
 		    }
 	}
-	collapse_steps_count = ( full_levels * Block :: BlockSize ) / SeventhSpeed + 1;
+        collapse_steps_count = ( full_levels * Block :: BlockSize ) / FirstSpeed + 1;
 	collapse = true;
         count_of_blocks	-= FieldLength * FieldWidth * full_levels;
     }
@@ -280,7 +280,7 @@ void Game :: NextStep()
 		for ( int i = 0; i < FieldLength; ++i )
 		    for ( int j = 0; j < FieldWidth; ++j )
 			if ( field[ i ][ j ][ k ] != NULL )
-			    field[ i ][ j ][ k ] -> SetPosi( field[ i ][ j ][ k ] -> GetPosi() - Point3Di( 0, SeventhSpeed, 0 ) );
+                            field[ i ][ j ][ k ] -> SetPosi( field[ i ][ j ][ k ] -> GetPosi() - Point3Di( 0, FirstSpeed, 0 ) );
 	}
 	else
 	{
@@ -293,19 +293,22 @@ void Game :: NextStep()
 			{
 			    block_pos =  field[ i ][ j ][ k ] -> GetPosi();
 			    field[ i ][ j ][ k ] -> SetPosi( block_pos.x,
-								  ( block_pos.y - SeventhSpeed + Block :: BlockSize / 2 ) / ( Block :: BlockSize / 2 ) * ( Block :: BlockSize / 2 ),
+                                                                  ( block_pos.y - FirstSpeed + Block :: BlockSize / 2 ) / ( Block :: BlockSize / 2 ) * ( Block :: BlockSize / 2 ),
 								  block_pos.z );
 			}
 	}
     }
 
-    if ( is_game && !collapse )
+    if ( is_game )
     {
-	figure_down_steps += game_speed;
-	figure_pos = current_figure -> GetPosi();
-	current_figure -> SetPosi( Point3Di( figure_pos.x, figure_start_pos_y - ( int )( 0.5 * figure_down_steps ), figure_pos.z ) );
-
-	for ( unsigned int  i = 0; ( i < Figure :: BlocksCount ) && ( is_game ); i++ )
+        figure_down_steps++;
+        if ( figure_down_steps == 2 )
+        {
+            current_figure -> SetPosi( current_figure -> GetPosi() - Point3Di( 0, game_speed, 0 ) );
+            figure_down_steps = 0;
+        }
+        figure_pos = current_figure -> GetPosi();
+        for ( unsigned int  i = 0; ( i < Figure :: BlocksCount ) && ( is_game ); i++ )
 	{
             block_pos = figure_pos + current_figure -> GetBlockPosByIndexi( i );
 	    field_index_by_length = block_pos.x / Block :: BlockSize;
@@ -331,8 +334,9 @@ void Game :: NextStep()
 
 	if ( !is_game )
 	{
-	    figure_pos.y = figure_start_pos_y - ( int )( 0.5 * figure_down_steps ) / ( Block :: BlockSize / 2 ) * ( Block :: BlockSize / 2 );
-	    for ( unsigned int  i = 0; i < Figure :: BlocksCount; i++ )
+            current_figure -> SetPosByYi( ( current_figure -> GetPosByYi() + game_speed ) / ( Block :: BlockSize / 2 ) * ( Block :: BlockSize / 2  ) );
+            figure_pos = current_figure -> GetPosi();
+            for ( unsigned int  i = 0; i < Figure :: BlocksCount; i++ )
 	    {
                 block_pos        = figure_pos + current_figure -> GetBlockPosByIndexi( i );
 		field_index_by_length = block_pos.x / Block :: BlockSize;
@@ -455,8 +459,14 @@ void Game :: DrawWorld()
     DrawBlocksOnTheField();
     if ( current_figure != NULL )
 	current_figure -> Draw();
-    //for ( int i = 0; i < BorderBlocksCount; i++ )
-      //  field_block_border[ i ] -> Draw();
+  /*  for ( int i = 169; i < 299; i += 2 )
+        field_block_border[ i ] -> Draw();
+    for ( int i = 323; i < 379; i += 2 )
+        field_block_border[ i ] -> Draw();
+    for ( int i = 405; i < 479; i += 2 )
+        field_block_border[ i ] -> Draw();
+    */
+
     //DrawInterface();
 }
 

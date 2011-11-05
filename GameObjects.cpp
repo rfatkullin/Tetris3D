@@ -7,6 +7,9 @@
 #include <stdio.h>
 #include "GameObjects.h"
 
+const double Block :: SafetyDistanceBetweenBlocks = 3.0f * Block :: BlockSize * Block :: BlockSize;
+const double Block :: NonSafetyDistanceBetweenBlocks = Block :: BlockSize * Block :: BlockSize;
+
 //Block
 
 Point3Di Block :: vertices_i[ BlocksVertexCount ] = {
@@ -42,6 +45,18 @@ Block :: Block( const Block& block) : GeomEntity( block.pos_i ), PhisEntity( blo
 {
      for ( unsigned int i = 0; i < BlocksVertexCount; i++ )
         vertices_f[ i ] = vertices_i[ i ] = block.vertices_i[ i ];
+}
+
+Block :: Block( float new_x, float new_y, float new_z, Material new_material )  : GeomEntity( new_x, new_y, new_z ), PhisEntity( new_material )
+{
+     for ( unsigned int i = 0; i < BlocksVertexCount; i++ )
+        vertices_f[ i ] = vertices_i[ i ];
+}
+
+Block :: Block( Point3Df new_Pos, Material new_material ) : GeomEntity( new_Pos ), PhisEntity( new_material )
+{
+     for ( unsigned int i = 0; i < BlocksVertexCount; i++ )
+        vertices_f[ i ] = vertices_i[ i ];
 }
 
 void Block :: Rotate( float &a, float &b, float angle )
@@ -360,30 +375,46 @@ int Block :: UpperBoundZi()
 
  bool Block :: PointIn( Point3Df point )
  {
-    return     ( MixedMul( vertices_f[ 1 ] - vertices_f[ 0 ],
-                           vertices_f[ 2 ] - vertices_f[ 0 ],
-                           point           - vertices_f[ 0 ] ) < eps ) &&
-               ( MixedMul( vertices_f[ 2 ] - vertices_f[ 1 ],
-                           vertices_f[ 6 ] - vertices_f[ 1 ],
-                           point           - vertices_f[ 1 ] ) < eps ) &&
-               ( MixedMul( vertices_f[ 3 ] - vertices_f[ 2 ],
-                           vertices_f[ 5 ] - vertices_f[ 2 ],
-                           point           - vertices_f[ 2 ] ) < eps ) &&
-               ( MixedMul( vertices_f[ 0 ] - vertices_f[ 3 ],
-                           vertices_f[ 4 ] - vertices_f[ 3 ],
-                           point           - vertices_f[ 3 ] ) < eps ) &&
-               ( MixedMul( vertices_f[ 1 ] - vertices_f[ 0 ],
-                           vertices_f[ 7 ] - vertices_f[ 0 ],
-                           point           - vertices_f[ 0 ] ) < eps ) &&
-               ( MixedMul( vertices_f[ 5 ] - vertices_f[ 6 ],
-                           vertices_f[ 7 ] - vertices_f[ 6 ],
-                           point           - vertices_f[ 6 ] ) < eps );
 
+   return   ( MixedMul( point           - vertices_f[ 0 ],
+                        vertices_f[ 1 ] - vertices_f[ 0 ],
+                        vertices_f[ 3 ] - vertices_f[ 0 ] ) < -eps ) &&
+            ( MixedMul( point           - vertices_f[ 1 ],
+                        vertices_f[ 6 ] - vertices_f[ 1 ],
+                        vertices_f[ 2 ] - vertices_f[ 1 ] ) < -eps ) &&
+            ( MixedMul( point           - vertices_f[ 2 ],
+                        vertices_f[ 5 ] - vertices_f[ 2 ],
+                        vertices_f[ 3 ] - vertices_f[ 2 ] ) < -eps ) &&
+            ( MixedMul( point           - vertices_f[ 3 ],
+                        vertices_f[ 4 ] - vertices_f[ 3 ],
+                        vertices_f[ 0 ] - vertices_f[ 3 ] ) < -eps ) &&
+            ( MixedMul( point           - vertices_f[ 0 ],
+                        vertices_f[ 7 ] - vertices_f[ 0 ],
+                        vertices_f[ 1 ] - vertices_f[ 0 ] ) < -eps ) &&
+            ( MixedMul( point           - vertices_f[ 6 ],
+                        vertices_f[ 7 ] - vertices_f[ 6 ],
+                        vertices_f[ 5 ] - vertices_f[ 6 ] ) < -eps );
 }
 
 bool Block :: PointIn( Point3Di point )
 {
     return PointIn( Point3Df( point ) );
+}
+
+bool Block :: CheckEdgesAveragePoint( Block& block )
+{
+    return block.PointIn( 0.5f * ( vertices_f[ 1 ] - vertices_f[ 0 ] ) + vertices_f[ 0 ] ) ||
+           block.PointIn( 0.5f * ( vertices_f[ 2 ] - vertices_f[ 1 ] ) + vertices_f[ 1 ] ) ||
+           block.PointIn( 0.5f * ( vertices_f[ 3 ] - vertices_f[ 2 ] ) + vertices_f[ 2 ] ) ||
+           block.PointIn( 0.5f * ( vertices_f[ 0 ] - vertices_f[ 3 ] ) + vertices_f[ 3 ] ) ||
+           block.PointIn( 0.5f * ( vertices_f[ 6 ] - vertices_f[ 7 ] ) + vertices_f[ 7 ] ) ||
+           block.PointIn( 0.5f * ( vertices_f[ 5 ] - vertices_f[ 6 ] ) + vertices_f[ 6 ] ) ||
+           block.PointIn( 0.5f * ( vertices_f[ 4 ] - vertices_f[ 5 ] ) + vertices_f[ 5 ] ) ||
+           block.PointIn( 0.5f * ( vertices_f[ 7 ] - vertices_f[ 4 ] ) + vertices_f[ 4 ] ) ||
+           block.PointIn( 0.5f * ( vertices_f[ 7 ] - vertices_f[ 0 ] ) + vertices_f[ 0 ] ) ||
+           block.PointIn( 0.5f * ( vertices_f[ 6 ] - vertices_f[ 1 ] ) + vertices_f[ 1 ] ) ||
+           block.PointIn( 0.5f * ( vertices_f[ 5 ] - vertices_f[ 2 ] ) + vertices_f[ 2 ] ) ||
+           block.PointIn( 0.5f * ( vertices_f[ 4 ] - vertices_f[ 3 ] ) + vertices_f[ 3 ] );
 }
 
 bool Block :: IsIntersect( Block& block )
@@ -392,9 +423,8 @@ bool Block :: IsIntersect( Block& block )
         if ( block.PointIn( vertices_f[ i ] ) || PointIn( block.vertices_f[ i ] ) )
             return true;
 
-    return false;
+    return this -> CheckEdgesAveragePoint( block ) || block.CheckEdgesAveragePoint( *this );
 }
-
 
 //Figure
 
@@ -409,46 +439,46 @@ Figure :: Figure( int x, int y, int z, Figures type, Material material ) : GeomE
     switch ( type )
     {
     case IFigure :
-	blocks[ 0 ] = new Block( -( Block :: BlockSize + Block :: BlockSize / 2 ), 0.0f, 0.0f, material );
-	blocks[ 1 ] = new Block( -( Block :: BlockSize / 2 ),			   0.0f, 0.0f, material  );
-	blocks[ 2 ] = new Block(    Block :: BlockSize / 2,			   0.0f, 0.0f, material );
-	blocks[ 3 ] = new Block(    Block :: BlockSize + Block :: BlockSize / 2,   0.0f, 0.0f, material );
+        blocks[ 0 ] = new Block( -( Block :: BlockSize + Block :: BlockSize / 2 ), 0, 0, material );
+        blocks[ 1 ] = new Block( -( Block :: BlockSize / 2 ),			   0, 0, material  );
+        blocks[ 2 ] = new Block(    Block :: BlockSize / 2,			   0, 0, material );
+        blocks[ 3 ] = new Block(    Block :: BlockSize + Block :: BlockSize / 2,   0, 0, material );
 	break;
     case JFigure :
-	blocks[ 0 ] = new Block( 0.0f, Block :: BlockSize + Block :: BlockSize / 2, 0.0f, material );
-	blocks[ 1 ] = new Block( 0.0f, Block :: BlockSize / 2, 0.0f, material );
-	blocks[ 2 ] = new Block( 0.0f, -Block :: BlockSize / 2, 0.0f, material );
-	blocks[ 3 ] = new Block( Block :: BlockSize, -( Block :: BlockSize + Block :: BlockSize / 2 ), 0.0f, material );
+        blocks[ 0 ] = new Block( 0, Block :: BlockSize + Block :: BlockSize / 2, 0, material );
+        blocks[ 1 ] = new Block( 0, Block :: BlockSize / 2, 0, material );
+        blocks[ 2 ] = new Block( 0, -Block :: BlockSize / 2, 0, material );
+        blocks[ 3 ] = new Block( Block :: BlockSize, -( Block :: BlockSize + Block :: BlockSize / 2 ), 0, material );
 	break;
     case LFigure :
-	blocks[ 0 ] = new Block(  Block :: BlockSize / 2,  Block :: BlockSize, 0.0f, material );
-	blocks[ 1 ] = new Block(  Block :: BlockSize / 2,  0.0f,	       0.0f, material );
-	blocks[ 2 ] = new Block(  Block :: BlockSize / 2, -Block :: BlockSize, 0.0f, material );
-	blocks[ 3 ] = new Block( -Block :: BlockSize / 2, -Block :: BlockSize, 0.0f, material );
+        blocks[ 0 ] = new Block(  Block :: BlockSize / 2,  Block :: BlockSize, 0, material );
+        blocks[ 1 ] = new Block(  Block :: BlockSize / 2,  0,	       0, material );
+        blocks[ 2 ] = new Block(  Block :: BlockSize / 2, -Block :: BlockSize, 0, material );
+        blocks[ 3 ] = new Block( -Block :: BlockSize / 2, -Block :: BlockSize, 0, material );
 	break;
     case OFigure :
-	blocks[ 0 ] = new Block( -Block :: BlockSize / 2, Block :: BlockSize / 2, 0.0f, material );
-	blocks[ 1 ] = new Block( Block :: BlockSize / 2, Block :: BlockSize / 2, 0.0f, material );
-	blocks[ 2 ] = new Block( Block :: BlockSize / 2, -Block :: BlockSize / 2, 0.0f, material );
-	blocks[ 3 ] = new Block( -Block :: BlockSize / 2, -Block :: BlockSize / 2, 0.0f, material );
+        blocks[ 0 ] = new Block( -Block :: BlockSize / 2, Block :: BlockSize / 2, 0, material );
+        blocks[ 1 ] = new Block( Block :: BlockSize / 2, Block :: BlockSize / 2, 0, material );
+        blocks[ 2 ] = new Block( Block :: BlockSize / 2, -Block :: BlockSize / 2, 0, material );
+        blocks[ 3 ] = new Block( -Block :: BlockSize / 2, -Block :: BlockSize / 2, 0, material );
 	break;
     case SFigure :
-	blocks[ 0 ] = new Block( Block :: BlockSize + Block :: BlockSize / 2, Block :: BlockSize / 2, 0.0f, material );
-	blocks[ 1 ] = new Block( 0.0f, Block :: BlockSize / 2, 0.0f, material );
-	blocks[ 2 ] = new Block( 0.0f, -Block :: BlockSize / 2, 0.0f, material );
-	blocks[ 3 ] = new Block( -( Block :: BlockSize + Block :: BlockSize / 2 ), -Block :: BlockSize + Block :: BlockSize / 2, 0.0f, material );
+        blocks[ 0 ] = new Block( Block :: BlockSize + Block :: BlockSize / 2, Block :: BlockSize / 2, 0, material );
+        blocks[ 1 ] = new Block( 0, Block :: BlockSize / 2, 0, material );
+        blocks[ 2 ] = new Block( 0, -Block :: BlockSize / 2, 0, material );
+        blocks[ 3 ] = new Block( -( Block :: BlockSize + Block :: BlockSize / 2 ), -Block :: BlockSize + Block :: BlockSize / 2, 0, material );
 	break;
     case TFigure :
-	blocks[ 0 ] = new Block( Block :: BlockSize, Block :: BlockSize / 2, 0.0f, material );
-	blocks[ 1 ] = new Block( 0.0f, Block :: BlockSize / 2, 0.0f, material );
-	blocks[ 2 ] = new Block( -Block :: BlockSize, Block :: BlockSize / 2, 0.0f, material );
-	blocks[ 3 ] = new Block( 0.0f, -Block :: BlockSize / 2, 0.0f, material );
+        blocks[ 0 ] = new Block( Block :: BlockSize, Block :: BlockSize / 2, 0, material );
+        blocks[ 1 ] = new Block( 0, Block :: BlockSize / 2, 0, material );
+        blocks[ 2 ] = new Block( -Block :: BlockSize, Block :: BlockSize / 2, 0, material );
+        blocks[ 3 ] = new Block( 0, -Block :: BlockSize / 2, 0, material );
 	break;
     default : //ZFigure :
-	blocks[ 0 ] = new Block( -Block :: BlockSize, Block :: BlockSize / 2, 0.0f, material );
-	blocks[ 1 ] = new Block( 0.0f, Block :: BlockSize / 2, 0.0f, material );
-	blocks[ 2 ] = new Block( 0.0f, -Block :: BlockSize / 2, 0.0f, material );
-	blocks[ 3 ] = new Block( Block :: BlockSize, -Block :: BlockSize / 2, 0.0f, material );
+        blocks[ 0 ] = new Block( -Block :: BlockSize, Block :: BlockSize / 2, 0, material );
+        blocks[ 1 ] = new Block( 0, Block :: BlockSize / 2, 0, material );
+        blocks[ 2 ] = new Block( 0, -Block :: BlockSize / 2, 0, material );
+        blocks[ 3 ] = new Block( Block :: BlockSize, -Block :: BlockSize / 2, 0, material );
     }
 }
 
@@ -626,9 +656,17 @@ Material Figure :: GetBlockMaterialByIndex( int index ) const
 
 bool Figure :: IsIntersectWithBlock( Block& block )
 {
+    float distance = 0.0f;
     for ( unsigned int i = 0; i < BlocksCount; i++ )
+    {
+        distance = ( block.GetPosf() - blocks[ i ] -> GetPosf() ).Length();
+        if ( distance - eps > Block :: SafetyDistanceBetweenBlocks )
+            continue;
+        if ( distance < Block :: NonSafetyDistanceBetweenBlocks - eps )
+            return true;
         if ( blocks[ i ] -> IsIntersect( block ) )
             return true;
+    }
     return false;
 }
 

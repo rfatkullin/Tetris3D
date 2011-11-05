@@ -30,7 +30,7 @@ public:
 	void			Rotate( RotatePlane plane, RotateSide side );
 	void			DropDownFigure();
 private:
-        enum		    { FieldWidth = 10, FieldLength = 10, FieldHeight = 12, RotateStepsCount = 20 };
+        enum		    { FieldWidth = 4, FieldLength = 4, FieldHeight = 12, RotateStepsCount = 20 };
 	enum		    { CollFieldLength = 6, CollFieldWidth = 6, CollFieldHeight = FieldHeight };
 	enum LightPosition  { LightPosByX = 0 , LightPosByY = 300, LightPosByZ = 300 };
         enum		    { FieldLowerBoundX =  0,
