@@ -29,30 +29,41 @@ public:
 	void			ShiftFigureByZAxis( ShiftDirection shift );
 	void			Rotate( RotatePlane plane, RotateSide side );
 	void			DropDownFigure();
+
+        enum		    { Width             = 12,
+                              Length            = 12,
+			      Height            = 20,
+                              FieldBeginX       = 1,
+                              FieldBeginY       = 1,
+                              FieldBeginZ       = 1,
+                              FieldEndX         = Length - 1,
+                              FieldEndY         = Height - 1,
+                              FieldEndZ         = Width - 1,
+			      FieldLowerBoundX  = FieldBeginX * Block :: BlockSize,
+			      FieldUpperBoundX  = FieldEndX   * Block :: BlockSize,
+			      FieldLowerBoundY  = FieldBeginY * Block :: BlockSize,
+			      FieldUpperBoundY  = FieldEndY   * Block :: BlockSize,
+			      FieldLowerBoundZ  = FieldBeginZ * Block :: BlockSize,
+			      FieldUpperBoundZ  = FieldEndZ   * Block :: BlockSize,
+                              RotateStepsCount  = 20,
+			      BSize             = Block :: BlockSize
+                            };
 private:
-        enum		    { FieldWidth = 4, FieldLength = 4, FieldHeight = 12, RotateStepsCount = 20 };
-	enum		    { CollFieldLength = 6, CollFieldWidth = 6, CollFieldHeight = FieldHeight };
-	enum LightPosition  { LightPosByX = 0 , LightPosByY = 300, LightPosByZ = 300 };
-        enum		    { FieldLowerBoundX =  0,
-			      FieldUpperBoundX =  FieldLength * Block :: BlockSize,
-			      FieldLowerBoundY =  0,
-			      FieldUpperBoundY =  FieldHeight * Block :: BlockSize,
-			      FieldLowerBoundZ =  0,
-			      FieldUpperBoundZ =  FieldLength * Block :: BlockSize };
-        static const float      SafetyDistance;
+        enum LightPosition  { LightPosByX = 0 , LightPosByY = 300, LightPosByZ = 300 };
+        static const int        SafetyDistance;
         static const float	CameraRadius;
 	static const float	CameraPosChangeKoeff;
 	static const int	FieldPositionByY;
 	static float		light_position[ 4 ];
-        static const int        BorderBlocksCount = 2 * FieldLength * FieldHeight + 2 * FieldWidth * FieldHeight + FieldLength * FieldWidth;
-        Block*                  field_block_border[ BorderBlocksCount ];
 
-
-	Block*			field[ FieldLength ][ FieldWidth ][ FieldHeight ];
-        int			count_of_blocks;
+        //Block*                  field_block_border[ BorderBlocksCount ];
+        Block*			field[ Length ][ Height ][ Width ];
+        int			count_of_blocks_on_field;
 //Camera manipulating
 	SphericalCoor		camera_position;
 	Point3Df		last_mouse_position;
+        //float			SetAngleToRange( float angle );
+	float			Sign( float a );
 //Figures
 	Figure*			current_figure;
 	Figure*			next_figure;

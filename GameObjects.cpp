@@ -707,8 +707,108 @@ void Figure :: SetVerRelCoor()
 {
      for ( int i = 0; i < BlocksCount; i++ )
     {
-        blocks[ i ] -> SetPosf( blocks[ i ] -> GetPosf() - pos_f );
         blocks[ i ] -> SetVerRelCoor();
+        blocks[ i ] -> SetPosf( blocks[ i ] -> GetPosf() - pos_f );
     }
+}
+
+bool Figure :: CheckToCollisonWithBlocks( std :: vector < Block >& collision_blocks )
+{
+    bool collision          = false;
+    int  count_of_blocks    = collision_blocks.size();
+
+    SetVerAbsCoor();
+
+    for ( int i = 0; i < count_of_blocks; ++i )
+    {
+        collision_blocks[ i ].SetVerAbsCoor();
+        if ( IsIntersectWithBlock( collision_blocks[ i ] ) )
+        {
+            collision = true;
+            break;
+        }
+        collision_blocks[ i ].SetVerRelCoor();
+    }
+
+    SetVerRelCoor();
+
+    return collision;
+}
+
+Point3Di Figure :: GetLeftMostBlockPosi()
+{
+    int current_block_x_pos = 0;
+    int index_of_block      = 0;
+    int min_x_pos           = blocks[ 0 ] -> GetPosByXi();
+
+    for ( int i = 1; i < BlocksCount; i++ )
+    {
+        current_block_x_pos = blocks[ i ] -> GetPosByXi();
+        if ( min_x_pos > current_block_x_pos )
+        {
+            index_of_block = i;
+            min_x_pos = current_block_x_pos;
+        }
+    }
+
+    return blocks[ index_of_block ] -> GetPosi() + pos_i;
+}
+
+Point3Di Figure :: GetRightMostBlockPosi()
+{
+    int current_block_x_pos = 0;
+    int index_of_block      = 0;
+    int max_x_pos           = blocks[ 0 ] -> GetPosByXi();
+
+    for ( int i = 1; i < BlocksCount; i++ )
+    {
+        current_block_x_pos = blocks[ i ] -> GetPosByXi();
+        if ( max_x_pos < current_block_x_pos )
+        {
+            index_of_block = i;
+            max_x_pos = current_block_x_pos;
+        }
+    }
+
+    return blocks[ index_of_block ] -> GetPosi() + pos_i;
+}
+
+
+Point3Di Figure :: GetBackMostBlockPosi()
+{
+    int current_block_z_pos = 0;
+    int index_of_block      = 0;
+    int min_z_pos           = blocks[ 0 ] -> GetPosByZi();
+
+    for ( int i = 1; i < BlocksCount; i++ )
+    {
+        current_block_z_pos = blocks[ i ] -> GetPosByZi();
+        if ( min_z_pos > current_block_z_pos )
+        {
+            index_of_block = i;
+            min_z_pos = current_block_z_pos;
+        }
+    }
+
+    return blocks[ index_of_block ] -> GetPosi() + pos_i;
+}
+
+Point3Di Figure :: GetAheadMostBlockPosi()
+{
+    int current_block_z_pos = 0;
+    int index_of_block      = 0;
+    int max_z_pos           = blocks[ 0 ] -> GetPosByZi();
+
+    for ( int i = 1; i < BlocksCount; i++ )
+    {
+        current_block_z_pos = blocks[ i ] -> GetPosByZi();
+        if ( max_z_pos < current_block_z_pos )
+        {
+            index_of_block = i;
+            max_z_pos = current_block_z_pos;
+        }
+    }
+
+    return blocks[ index_of_block ] -> GetPosi() + pos_i;
 }
 

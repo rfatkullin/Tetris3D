@@ -1,3 +1,4 @@
+#include <vector>
 #include "GeomEntity.h"
 #include "PhisEntity.h"
 #include "Material.h"
@@ -75,10 +76,16 @@ public :
 
     Point3Di			GetBlockPosByIndexi( int index ) const;
     Point3Df			GetBlockPosByIndexf( int index ) const;
+    Point3Di                    GetLeftMostBlockPosi();
+    Point3Di                    GetRightMostBlockPosi();
+    Point3Di                    GetBackMostBlockPosi();
+    Point3Di                    GetAheadMostBlockPosi();
     Material			GetBlockMaterialByIndex( int index ) const;
     bool                        IsIntersectWithBlock( Block& block );
+    bool                        CheckToCollisonWithBlocks( std :: vector < Block >& blocks );
     void                        SetBlocksAbsCoor();
     void                        SetBlocksRelCoor();
+
     virtual float		LowerBoundXf();
     virtual float		UpperBoundXf();
     virtual float		LowerBoundYf();
