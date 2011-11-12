@@ -9,8 +9,8 @@ private :
 	float material_for_diffuse[ 4 ];
 	float material_for_specular[ 4 ];
 public :
-	Material(){}
-	Material( float a_r, float a_g, float a_b, float a_a,
+        Material();
+        Material( float a_r, float a_g, float a_b, float a_a,
 		  float d_r, float d_g, float d_b, float d_a,
 		  float s_r, float s_g, float s_b, float s_a
 		);
@@ -19,7 +19,7 @@ public :
 	const float* GetMaterialForSpecular();
 };
 
-const int	MaterialsCount = 6;
+const int	MaterialsCount = 8;
 const Material	materials[ MaterialsCount ] = {
     Material(  0.0f, 1.0f, 0.0f, 1.0f,
                0.0f, 1.0f, 0.0f, 1.0f,
@@ -44,7 +44,15 @@ const Material	materials[ MaterialsCount ] = {
     Material(  0.0f, 1.0f, 1.0f, 1.0f,
                0.0f, 1.0f, 1.0f, 1.0f,
 	       0.0f, 0.0f, 0.0f, 1.0f
-            )
+            ),
+    Material(  1.0f, 1.0f, 1.0f, 1.0f, //For bottom blocks
+               1.0f, 1.0f, 1.0f, 1.0f,
+               0.0f, 0.0f, 0.0f, 1.0f
+            ),
+    Material(  0.5f, 0.5f, 0.5f, 1.0f, //For bottom platform
+               0.5f, 0.5f, 0.5f, 1.0f,
+               0.0f, 0.0f, 0.0f, 1.0f
+        )
     };
 
 #endif

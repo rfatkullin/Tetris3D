@@ -30,8 +30,8 @@ public:
 	void			Rotate( RotatePlane plane, RotateSide side );
 	void			DropDownFigure();
 
-        enum		    { Width             = 12,
-                              Length            = 12,
+        enum		    { Width             = 8,
+                              Length            = 8,
 			      Height            = 20,
                               FieldBeginX       = 1,
                               FieldBeginY       = 1,
@@ -93,6 +93,11 @@ private:
 	bool			collapse;
 	void			CheckToCollapse();
 	int			collapse_steps_count;
+//Selecting block to show where will fall the figure
+        static const int        MaxSelectBlockCount = 4;
+        Point3Di                select_blocks_pos[ MaxSelectBlockCount ];
+        Material                select_blocks_materials[ MaxSelectBlockCount ];
+        void                    ChangeSelectBlocks();
 };
 
 #endif

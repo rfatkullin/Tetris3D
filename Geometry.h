@@ -13,7 +13,7 @@ struct Point3Di
     int y;
     int z;
 
-    Point3Di( int new_x, int new_y, int new_z ) : x( new_x ), y( new_y ), z( new_z ) { }
+    Point3Di( int new_x, int new_y, int new_z );// : x( new_x ), y( new_y ), z( new_z ) { }
     Point3Di() : x( 0 ), y( 0 ), z( 0 ) {}
     Point3Di& operator = ( const Point3Di& right_obj );
     Point3Di& operator = ( const Point3Df& right_obj );
@@ -66,15 +66,19 @@ struct SphericalCoor
     SphericalCoor() : teta( 0.0f ), alpha( 0.0f ) { }
 };
 
-Point3Df    VectorMul( Point3Df& a, Point3Df& b );
-Point3Di    VectorMul( Point3Di& a, Point3Di& b );
-float       Max( float a, float b );
-float       Min( float a, float b );
-float       MixedMul( const Point3Df& a, const Point3Df& b, const Point3Df& c );
-float       MixedMul( const Point3Di& a, const Point3Di& b, const Point3Di& c );
-float       ScalarMul( const Point3Df& a, const  Point3Df& b );
-float       ScalarMul( const Point3Di& a, const Point3Di& b );
-bool        InRange( float x, float a, float b );
-
+class Geometry
+{
+public :
+    static Point3Di    VectorMul( const Point3Di& a, const Point3Di& b );
+    static Point3Df    VectorMul( const Point3Df& a, const Point3Df& b );
+    static float       Max( float a, float b );
+    static float       Min( float a, float b );
+    static float       MixedMul( const Point3Df& a, const Point3Df& b, const Point3Df& c );
+    static float       MixedMul( const Point3Di& a, const Point3Di& b, const Point3Di& c );
+    static float       ScalarMul( const Point3Df& a, const  Point3Df& b );
+    static float       ScalarMul( const Point3Di& a, const Point3Di& b );
+    static bool        InRange( float x, float a, float b );
+    static int         Sign( float a );
+};
 
 #endif

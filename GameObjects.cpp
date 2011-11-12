@@ -12,8 +12,9 @@ const double Block :: NonSafetyDistanceBetweenBlocks = Block :: BlockSize * Bloc
 
 //Block
 
-Point3Di Block :: vertices_i[ BlocksVertexCount ] = {
-	Point3Di( -Block :: BlockSize / 2,  Block :: BlockSize / 2, -Block :: BlockSize / 2 ),
+//Point3Di Block ::
+const Point3Di vertices_i[ 8 ] = {
+        Point3Di( -Block :: BlockSize / 2,  Block :: BlockSize / 2, -Block :: BlockSize / 2 ),
 	Point3Di( -Block :: BlockSize / 2,  Block :: BlockSize / 2,  Block :: BlockSize / 2 ),
 	Point3Di(  Block :: BlockSize / 2,  Block :: BlockSize / 2,  Block :: BlockSize / 2 ),
 	Point3Di(  Block :: BlockSize / 2,  Block :: BlockSize / 2, -Block :: BlockSize / 2 ),
@@ -44,7 +45,7 @@ Block :: Block( Point3Di new_pos, Material new_material ) : GeomEntity( new_pos 
 Block :: Block( const Block& block) : GeomEntity( block.pos_i ), PhisEntity( block.material )
 {
      for ( unsigned int i = 0; i < BlocksVertexCount; i++ )
-        vertices_f[ i ] = vertices_i[ i ] = block.vertices_i[ i ];
+        vertices_f[ i ] = block.vertices_f[ i ];
 }
 
 Block :: Block( float new_x, float new_y, float new_z, Material new_material )  : GeomEntity( new_x, new_y, new_z ), PhisEntity( new_material )
@@ -212,45 +213,45 @@ void Block :: Draw( Point3Df fig_pos )
 
     //Firts side
     DrawSide(	Point3Df( fig_pos.x + pos_f.x + vertices_f[ 0 ].x, fig_pos.y + pos_f.y + vertices_f[ 0 ].y, fig_pos.z + pos_f.z + vertices_f[ 0 ].z ),
-		Point3Df( fig_pos.x + pos_f.x + vertices_f[ 1 ].x, fig_pos.y + pos_f.y + vertices_f[ 1 ].y, fig_pos.z + pos_f.z + vertices_f[ 1 ].z ),
-		Point3Df( fig_pos.x + pos_f.x + vertices_f[ 2 ].x, fig_pos.y + pos_f.y + vertices_f[ 2 ].y, fig_pos.z + pos_f.z + vertices_f[ 2 ].z ),
-		Point3Df( fig_pos.x + pos_f.x + vertices_f[ 3 ].x, fig_pos.y + pos_f.y + vertices_f[ 3 ].y, fig_pos.z + pos_f.z + vertices_f[ 3 ].z )
-	    );
+                Point3Df( fig_pos.x + pos_f.x + vertices_f[ 1 ].x, fig_pos.y + pos_f.y + vertices_f[ 1 ].y, fig_pos.z + pos_f.z + vertices_f[ 1 ].z ),
+                Point3Df( fig_pos.x + pos_f.x + vertices_f[ 2 ].x, fig_pos.y + pos_f.y + vertices_f[ 2 ].y, fig_pos.z + pos_f.z + vertices_f[ 2 ].z ),
+                Point3Df( fig_pos.x + pos_f.x + vertices_f[ 3 ].x, fig_pos.y + pos_f.y + vertices_f[ 3 ].y, fig_pos.z + pos_f.z + vertices_f[ 3 ].z )
+            );
 
     //Second side
     DrawSide(	Point3Df( fig_pos.x + pos_f.x + vertices_f[ 1 ].x, fig_pos.y + pos_f.y + vertices_f[ 1 ].y, fig_pos.z + pos_f.z + vertices_f[ 1 ].z ),
-		Point3Df( fig_pos.x + pos_f.x + vertices_f[ 6 ].x, fig_pos.y + pos_f.y + vertices_f[ 6 ].y, fig_pos.z + pos_f.z + vertices_f[ 6 ].z ),
-		Point3Df( fig_pos.x + pos_f.x + vertices_f[ 5 ].x, fig_pos.y + pos_f.y + vertices_f[ 5 ].y, fig_pos.z + pos_f.z + vertices_f[ 5 ].z ),
-		Point3Df( fig_pos.x + pos_f.x + vertices_f[ 2 ].x, fig_pos.y + pos_f.y + vertices_f[ 2 ].y, fig_pos.z + pos_f.z + vertices_f[ 2 ].z )
-	    );
+                Point3Df( fig_pos.x + pos_f.x + vertices_f[ 6 ].x, fig_pos.y + pos_f.y + vertices_f[ 6 ].y, fig_pos.z + pos_f.z + vertices_f[ 6 ].z ),
+                Point3Df( fig_pos.x + pos_f.x + vertices_f[ 5 ].x, fig_pos.y + pos_f.y + vertices_f[ 5 ].y, fig_pos.z + pos_f.z + vertices_f[ 5 ].z ),
+                Point3Df( fig_pos.x + pos_f.x + vertices_f[ 2 ].x, fig_pos.y + pos_f.y + vertices_f[ 2 ].y, fig_pos.z + pos_f.z + vertices_f[ 2 ].z )
+            );
 
     //Third side
     DrawSide(	Point3Df( fig_pos.x + pos_f.x + vertices_f[ 2 ].x, fig_pos.y + pos_f.y + vertices_f[ 2 ].y, fig_pos.z + pos_f.z + vertices_f[ 2 ].z ),
-		Point3Df( fig_pos.x + pos_f.x + vertices_f[ 5 ].x, fig_pos.y + pos_f.y + vertices_f[ 5 ].y, fig_pos.z + pos_f.z + vertices_f[ 5 ].z ),
-		Point3Df( fig_pos.x + pos_f.x + vertices_f[ 4 ].x, fig_pos.y + pos_f.y + vertices_f[ 4 ].y, fig_pos.z + pos_f.z + vertices_f[ 4 ].z ),
-		Point3Df( fig_pos.x + pos_f.x + vertices_f[ 3 ].x, fig_pos.y + pos_f.y + vertices_f[ 3 ].y, fig_pos.z + pos_f.z + vertices_f[ 3 ].z )
-	    );
+                Point3Df( fig_pos.x + pos_f.x + vertices_f[ 5 ].x, fig_pos.y + pos_f.y + vertices_f[ 5 ].y, fig_pos.z + pos_f.z + vertices_f[ 5 ].z ),
+                Point3Df( fig_pos.x + pos_f.x + vertices_f[ 4 ].x, fig_pos.y + pos_f.y + vertices_f[ 4 ].y, fig_pos.z + pos_f.z + vertices_f[ 4 ].z ),
+                Point3Df( fig_pos.x + pos_f.x + vertices_f[ 3 ].x, fig_pos.y + pos_f.y + vertices_f[ 3 ].y, fig_pos.z + pos_f.z + vertices_f[ 3 ].z )
+            );
 
     //Fourth side
     DrawSide(	Point3Df( fig_pos.x + pos_f.x + vertices_f[ 6 ].x, fig_pos.y + pos_f.y + vertices_f[ 6 ].y, fig_pos.z + pos_f.z + vertices_f[ 6 ].z ),
-		Point3Df( fig_pos.x + pos_f.x + vertices_f[ 7 ].x, fig_pos.y + pos_f.y + vertices_f[ 7 ].y, fig_pos.z + pos_f.z + vertices_f[ 7 ].z ),
-		Point3Df( fig_pos.x + pos_f.x + vertices_f[ 4 ].x, fig_pos.y + pos_f.y + vertices_f[ 4 ].y, fig_pos.z + pos_f.z + vertices_f[ 4 ].z ),
-		Point3Df( fig_pos.x + pos_f.x + vertices_f[ 5 ].x, fig_pos.y + pos_f.y + vertices_f[ 5 ].y, fig_pos.z + pos_f.z + vertices_f[ 5 ].z )
-	    );
+                Point3Df( fig_pos.x + pos_f.x + vertices_f[ 7 ].x, fig_pos.y + pos_f.y + vertices_f[ 7 ].y, fig_pos.z + pos_f.z + vertices_f[ 7 ].z ),
+                Point3Df( fig_pos.x + pos_f.x + vertices_f[ 4 ].x, fig_pos.y + pos_f.y + vertices_f[ 4 ].y, fig_pos.z + pos_f.z + vertices_f[ 4 ].z ),
+                Point3Df( fig_pos.x + pos_f.x + vertices_f[ 5 ].x, fig_pos.y + pos_f.y + vertices_f[ 5 ].y, fig_pos.z + pos_f.z + vertices_f[ 5 ].z )
+            );
 
     //Fifth side
     DrawSide(	Point3Df( fig_pos.x + pos_f.x + vertices_f[ 0 ].x, fig_pos.y + pos_f.y + vertices_f[ 0 ].y, fig_pos.z + pos_f.z + vertices_f[ 0 ].z ),
-		Point3Df( fig_pos.x + pos_f.x + vertices_f[ 7 ].x, fig_pos.y + pos_f.y + vertices_f[ 7 ].y, fig_pos.z + pos_f.z + vertices_f[ 7 ].z ),
-		Point3Df( fig_pos.x + pos_f.x + vertices_f[ 6 ].x, fig_pos.y + pos_f.y + vertices_f[ 6 ].y, fig_pos.z + pos_f.z + vertices_f[ 6 ].z ),
-		Point3Df( fig_pos.x + pos_f.x + vertices_f[ 1 ].x, fig_pos.y + pos_f.y + vertices_f[ 1 ].y, fig_pos.z + pos_f.z + vertices_f[ 1 ].z )
-	    );
+                Point3Df( fig_pos.x + pos_f.x + vertices_f[ 7 ].x, fig_pos.y + pos_f.y + vertices_f[ 7 ].y, fig_pos.z + pos_f.z + vertices_f[ 7 ].z ),
+                Point3Df( fig_pos.x + pos_f.x + vertices_f[ 6 ].x, fig_pos.y + pos_f.y + vertices_f[ 6 ].y, fig_pos.z + pos_f.z + vertices_f[ 6 ].z ),
+                Point3Df( fig_pos.x + pos_f.x + vertices_f[ 1 ].x, fig_pos.y + pos_f.y + vertices_f[ 1 ].y, fig_pos.z + pos_f.z + vertices_f[ 1 ].z )
+            );
 
     //Sixth side
     DrawSide(	Point3Df( fig_pos.x + pos_f.x + vertices_f[ 3 ].x, fig_pos.y + pos_f.y + vertices_f[ 3 ].y, fig_pos.z + pos_f.z + vertices_f[ 3 ].z ),
-		Point3Df( fig_pos.x + pos_f.x + vertices_f[ 4 ].x, fig_pos.y + pos_f.y + vertices_f[ 4 ].y, fig_pos.z + pos_f.z + vertices_f[ 4 ].z ),
-		Point3Df( fig_pos.x + pos_f.x + vertices_f[ 7 ].x, fig_pos.y + pos_f.y + vertices_f[ 7 ].y, fig_pos.z + pos_f.z + vertices_f[ 7 ].z ),
-		Point3Df( fig_pos.x + pos_f.x + vertices_f[ 0 ].x, fig_pos.y + pos_f.y + vertices_f[ 0 ].y, fig_pos.z + pos_f.z + vertices_f[ 0 ].z )
-	    );
+                Point3Df( fig_pos.x + pos_f.x + vertices_f[ 4 ].x, fig_pos.y + pos_f.y + vertices_f[ 4 ].y, fig_pos.z + pos_f.z + vertices_f[ 4 ].z ),
+                Point3Df( fig_pos.x + pos_f.x + vertices_f[ 7 ].x, fig_pos.y + pos_f.y + vertices_f[ 7 ].y, fig_pos.z + pos_f.z + vertices_f[ 7 ].z ),
+                Point3Df( fig_pos.x + pos_f.x + vertices_f[ 0 ].x, fig_pos.y + pos_f.y + vertices_f[ 0 ].y, fig_pos.z + pos_f.z + vertices_f[ 0 ].z )
+            );
 }
 
 float Block :: LowerBoundXf()
@@ -258,7 +259,7 @@ float Block :: LowerBoundXf()
     float min_x = vertices_f[ 0 ].x;
 
     for ( unsigned int i = 1; i < BlocksVertexCount; i++ )
-	min_x = Min( min_x, vertices_f[ i ].x );
+        min_x = Geometry :: Min( min_x, vertices_f[ i ].x );
 
     return min_x + pos_f.x;
 }
@@ -268,7 +269,7 @@ float Block :: UpperBoundXf()
     float max_x = vertices_f[ 0 ].x;
 
     for ( unsigned int i = 1; i < BlocksVertexCount; i++ )
-	max_x = Max( max_x, vertices_f[ i ].x );
+        max_x = Geometry :: Max( max_x, vertices_f[ i ].x );
 
     return max_x + pos_f.x;
 }
@@ -278,7 +279,7 @@ float Block :: LowerBoundYf()
     float min_y = vertices_f[ 0 ].y;
 
     for ( unsigned int i = 1; i < BlocksVertexCount; i++ )
-	min_y = Min( min_y, vertices_f[ i ].y );
+        min_y = Geometry :: Min( min_y, vertices_f[ i ].y );
 
     return min_y + pos_f.y;
 }
@@ -288,7 +289,7 @@ float Block :: UpperBoundYf()
     float max_y = vertices_f[ 0 ].y;
 
     for ( unsigned int i = 1; i < BlocksVertexCount; i++ )
-	max_y = Max( max_y, vertices_f[ i ].y );
+        max_y = Geometry :: Max( max_y, vertices_f[ i ].y );
 
     return max_y + pos_f.y;
 }
@@ -298,7 +299,7 @@ float Block :: LowerBoundZf()
     float min_z = vertices_f[ 0 ].z;
 
     for ( unsigned int i = 1; i < BlocksVertexCount; i++ )
-	min_z = Min( min_z, vertices_f[ i ].z );
+        min_z = Geometry :: Min( min_z, vertices_f[ i ].z );
 
     return min_z + pos_f.z;
 }
@@ -308,7 +309,7 @@ float Block :: UpperBoundZf()
     float max_z = vertices_f[ 0 ].z;
 
     for ( unsigned int i = 1; i < BlocksVertexCount; i++ )
-	max_z = Max( max_z, vertices_f[ i ].z );
+        max_z = Geometry :: Max( max_z, vertices_f[ i ].z );
 
     return max_z + pos_f.z;
 }
@@ -318,7 +319,7 @@ int Block :: LowerBoundXi()
     int min_x = vertices_i[ 0 ].x;
 
     for ( unsigned int i = 1; i < BlocksVertexCount; i++ )
-	min_x = Min( min_x, vertices_i[ i ].x );
+        min_x = Geometry :: Min( min_x, vertices_i[ i ].x );
 
     return min_x + pos_i.x;
 }
@@ -328,7 +329,7 @@ int Block :: UpperBoundXi()
     int max_y = vertices_i[ 0 ].y;
 
     for ( unsigned int i = 1; i < BlocksVertexCount; i++ )
-	max_y = Max( max_y, vertices_i[ i ].y );
+        max_y = Geometry :: Max( max_y, vertices_i[ i ].y );
 
     return max_y + pos_i.x;
 }
@@ -338,7 +339,7 @@ int Block :: LowerBoundYi()
     int min_y = vertices_i[ 0 ].y;
 
     for ( unsigned int i = 1; i < BlocksVertexCount; i++ )
-	min_y = Min( min_y, vertices_i[ i ].y );
+        min_y = Geometry :: Min( min_y, vertices_i[ i ].y );
 
     return min_y + pos_i.y;
 }
@@ -348,7 +349,7 @@ int Block :: UpperBoundYi()
     int max_y = vertices_i[ 0 ].y;
 
     for ( unsigned int i = 1; i < BlocksVertexCount; i++ )
-	max_y = Max( max_y, vertices_i[ i ].y );
+        max_y = Geometry :: Max( max_y, vertices_i[ i ].y );
 
     return max_y + pos_i.y;
 }
@@ -358,7 +359,7 @@ int Block :: LowerBoundZi()
     int min_z = vertices_i[ 0 ].z;
 
     for ( unsigned int i = 1; i < BlocksVertexCount; i++ )
-	min_z = Min( min_z, vertices_i[ i ].z );
+        min_z = Geometry :: Min( min_z, vertices_i[ i ].z );
 
     return min_z + pos_i.z;
 }
@@ -368,7 +369,7 @@ int Block :: UpperBoundZi()
     int max_z = vertices_i[ 0 ].z;
 
     for ( unsigned int i = 1; i < BlocksVertexCount; i++ )
-	max_z = Max( max_z, vertices_i[ i ].z );
+        max_z = Geometry :: Max( max_z, vertices_i[ i ].z );
 
     return max_z + pos_i.z;
 }
@@ -376,24 +377,24 @@ int Block :: UpperBoundZi()
  bool Block :: PointIn( Point3Df point )
  {
 
-   return   ( MixedMul( point           - vertices_f[ 0 ],
-                        vertices_f[ 1 ] - vertices_f[ 0 ],
-                        vertices_f[ 3 ] - vertices_f[ 0 ] ) < -eps ) &&
-            ( MixedMul( point           - vertices_f[ 1 ],
-                        vertices_f[ 6 ] - vertices_f[ 1 ],
-                        vertices_f[ 2 ] - vertices_f[ 1 ] ) < -eps ) &&
-            ( MixedMul( point           - vertices_f[ 2 ],
-                        vertices_f[ 5 ] - vertices_f[ 2 ],
-                        vertices_f[ 3 ] - vertices_f[ 2 ] ) < -eps ) &&
-            ( MixedMul( point           - vertices_f[ 3 ],
-                        vertices_f[ 4 ] - vertices_f[ 3 ],
-                        vertices_f[ 0 ] - vertices_f[ 3 ] ) < -eps ) &&
-            ( MixedMul( point           - vertices_f[ 0 ],
-                        vertices_f[ 7 ] - vertices_f[ 0 ],
-                        vertices_f[ 1 ] - vertices_f[ 0 ] ) < -eps ) &&
-            ( MixedMul( point           - vertices_f[ 6 ],
-                        vertices_f[ 7 ] - vertices_f[ 6 ],
-                        vertices_f[ 5 ] - vertices_f[ 6 ] ) < -eps );
+   return   ( Geometry :: MixedMul( point           - vertices_f[ 0 ],
+                                    vertices_f[ 1 ] - vertices_f[ 0 ],
+                                    vertices_f[ 3 ] - vertices_f[ 0 ] ) < -eps ) &&
+            ( Geometry :: MixedMul( point           - vertices_f[ 1 ],
+                                    vertices_f[ 6 ] - vertices_f[ 1 ],
+                                    vertices_f[ 2 ] - vertices_f[ 1 ] ) < -eps ) &&
+            ( Geometry :: MixedMul( point           - vertices_f[ 2 ],
+                                    vertices_f[ 5 ] - vertices_f[ 2 ],
+                                    vertices_f[ 3 ] - vertices_f[ 2 ] ) < -eps ) &&
+            ( Geometry :: MixedMul( point           - vertices_f[ 3 ],
+                                    vertices_f[ 4 ] - vertices_f[ 3 ],
+                                    vertices_f[ 0 ] - vertices_f[ 3 ] ) < -eps ) &&
+            ( Geometry :: MixedMul( point           - vertices_f[ 0 ],
+                                    vertices_f[ 7 ] - vertices_f[ 0 ],
+                                    vertices_f[ 1 ] - vertices_f[ 0 ] ) < -eps ) &&
+            ( Geometry :: MixedMul( point           - vertices_f[ 6 ],
+                                    vertices_f[ 7 ] - vertices_f[ 6 ],
+                                    vertices_f[ 5 ] - vertices_f[ 6 ] ) < -eps );
 }
 
 bool Block :: PointIn( Point3Di point )
@@ -419,7 +420,7 @@ bool Block :: CheckEdgesAveragePoint( Block& block )
 
 bool Block :: IsIntersect( Block& block )
 {
-    for ( int i = 0; i < BlocksVertexCount; i++ )
+    for ( unsigned int i = 0; i < BlocksVertexCount; i++ )
         if ( block.PointIn( vertices_f[ i ] ) || PointIn( block.vertices_f[ i ] ) )
             return true;
 
@@ -524,7 +525,7 @@ float Figure :: LowerBoundXf()
     float min_x = blocks[ 0 ] -> LowerBoundXf();
 
     for ( unsigned int i = 1; i < BlocksCount; i++ )
-	min_x = Min( min_x, blocks[ i ] -> LowerBoundXf() );
+        min_x = Geometry :: Min( min_x, blocks[ i ] -> LowerBoundXf() );
 
     return min_x + pos_f.x;
 }
@@ -534,7 +535,7 @@ float Figure :: UpperBoundXf()
     float max_x = blocks[ 0 ] -> UpperBoundXf();
 
     for ( unsigned int i = 1; i < BlocksCount; i++ )
-	max_x = Max( max_x, blocks[ i ] -> UpperBoundXf() );
+        max_x = Geometry :: Max( max_x, blocks[ i ] -> UpperBoundXf() );
 
     return max_x + pos_f.x;
 }
@@ -544,7 +545,7 @@ float Figure :: LowerBoundYf()
     float min_y = blocks[ 0 ] -> LowerBoundYf();
 
     for ( unsigned int i = 1; i < BlocksCount; i++ )
-	min_y = Min( min_y, blocks[ i ] -> LowerBoundYf() );
+        min_y = Geometry :: Min( min_y, blocks[ i ] -> LowerBoundYf() );
 
     return min_y + pos_f.y;
 }
@@ -554,7 +555,7 @@ float Figure :: UpperBoundYf()
     float max_y = blocks[ 0 ] -> UpperBoundYf();
 
     for ( unsigned int i = 1; i < BlocksCount; i++ )
-	max_y = Max( max_y, blocks[ i ] -> UpperBoundYf() );
+        max_y = Geometry :: Max( max_y, blocks[ i ] -> UpperBoundYf() );
 
     return max_y + pos_f.y;
 }
@@ -564,7 +565,7 @@ float Figure :: LowerBoundZf()
     float min_z = blocks[ 0 ] -> LowerBoundZf();
 
     for ( unsigned int i = 1; i < BlocksCount; i++ )
-	min_z = Min( min_z, blocks[ i ] -> LowerBoundZf() );
+        min_z = Geometry :: Min( min_z, blocks[ i ] -> LowerBoundZf() );
 
     return min_z + pos_f.z;
 }
@@ -574,7 +575,7 @@ float Figure :: UpperBoundZf()
     float max_z = blocks[ 0 ] -> UpperBoundZf();
 
     for ( unsigned int i = 1; i < BlocksCount; i++ )
-	max_z = Max( max_z, blocks[ i ] -> UpperBoundZf() );
+        max_z = Geometry :: Max( max_z, blocks[ i ] -> UpperBoundZf() );
 
     return max_z + pos_f.z;
 }
@@ -584,7 +585,7 @@ int Figure :: LowerBoundXi()
     float min_x = blocks[ 0 ] -> LowerBoundXi();
 
     for ( unsigned int i = 1; i < BlocksCount; i++ )
-	min_x = Min( min_x, blocks[ i ] -> LowerBoundXi() );
+        min_x = Geometry :: Min( min_x, blocks[ i ] -> LowerBoundXi() );
 
     return min_x + pos_i.x;
 }
@@ -594,7 +595,7 @@ int Figure :: UpperBoundXi()
     float max_x = blocks[ 0 ] -> UpperBoundXi();
 
     for ( unsigned int i = 1; i < BlocksCount; i++ )
-	max_x = Max( max_x, blocks[ i ] -> UpperBoundXi() );
+        max_x = Geometry :: Max( max_x, blocks[ i ] -> UpperBoundXi() );
 
     return max_x + pos_i.x;
 }
@@ -604,7 +605,7 @@ int Figure :: LowerBoundYi()
     float min_y = blocks[ 0 ] -> LowerBoundYi();
 
     for ( unsigned int i = 1; i < BlocksCount; i++ )
-	min_y = Min( min_y, blocks[ i ] -> LowerBoundYi() );
+        min_y = Geometry :: Min( min_y, blocks[ i ] -> LowerBoundYi() );
 
     return min_y + pos_i.y;
 }
@@ -614,7 +615,7 @@ int Figure :: UpperBoundYi()
     float max_y = blocks[ 0 ] -> UpperBoundYf();
 
     for ( unsigned int i = 1; i < BlocksCount; i++ )
-	max_y = Max( max_y, blocks[ i ] -> UpperBoundYi() );
+        max_y = Geometry :: Max( max_y, blocks[ i ] -> UpperBoundYi() );
 
     return max_y + pos_i.y;
 }
@@ -624,7 +625,7 @@ int Figure :: LowerBoundZi()
     float min_z = blocks[ 0 ] -> LowerBoundZi();
 
     for ( unsigned int i = 1; i < BlocksCount; i++ )
-	min_z = Min( min_z, blocks[ i ] -> LowerBoundZi() );
+        min_z = Geometry :: Min( min_z, blocks[ i ] -> LowerBoundZi() );
 
     return min_z + pos_i.z;
 }
@@ -634,7 +635,7 @@ int Figure :: UpperBoundZi()
     int max_z = blocks[ 0 ] -> UpperBoundZi();
 
     for ( unsigned int i = 1; i < BlocksCount; i++ )
-	max_z = Max( max_z, blocks[ i ] -> UpperBoundZi() );
+        max_z = Geometry :: Max( max_z, blocks[ i ] -> UpperBoundZi() );
 
     return max_z + pos_i.z;
 }
@@ -684,19 +685,19 @@ void Figure :: SetBlocksRelCoor()
 
 void Block :: SetVerAbsCoor()
 {
-    for ( int i = 0; i < BlocksVertexCount; i++ )
+    for ( unsigned int i = 0; i < BlocksVertexCount; i++ )
         vertices_f[ i ] = vertices_f[ i ] + pos_f;
 }
 
 void Block :: SetVerRelCoor()
 {
-     for ( int i = 0; i < BlocksVertexCount; i++ )
+     for ( unsigned int i = 0; i < BlocksVertexCount; i++ )
         vertices_f[ i ] = vertices_f[ i ] - pos_f;
 }
 
 void Figure :: SetVerAbsCoor()
 {
-    for ( int i = 0; i < BlocksCount; i++ )
+    for ( unsigned int i = 0; i < BlocksCount; i++ )
     {
         blocks[ i ] -> SetPosf( blocks[ i ] -> GetPosf() + pos_f );
         blocks[ i ] -> SetVerAbsCoor();
@@ -705,7 +706,7 @@ void Figure :: SetVerAbsCoor()
 
 void Figure :: SetVerRelCoor()
 {
-     for ( int i = 0; i < BlocksCount; i++ )
+     for ( unsigned int i = 0; i < BlocksCount; i++ )
     {
         blocks[ i ] -> SetVerRelCoor();
         blocks[ i ] -> SetPosf( blocks[ i ] -> GetPosf() - pos_f );
@@ -741,7 +742,7 @@ Point3Di Figure :: GetLeftMostBlockPosi()
     int index_of_block      = 0;
     int min_x_pos           = blocks[ 0 ] -> GetPosByXi();
 
-    for ( int i = 1; i < BlocksCount; i++ )
+    for ( unsigned int i = 1; i < BlocksCount; i++ )
     {
         current_block_x_pos = blocks[ i ] -> GetPosByXi();
         if ( min_x_pos > current_block_x_pos )
@@ -760,7 +761,7 @@ Point3Di Figure :: GetRightMostBlockPosi()
     int index_of_block      = 0;
     int max_x_pos           = blocks[ 0 ] -> GetPosByXi();
 
-    for ( int i = 1; i < BlocksCount; i++ )
+    for ( unsigned int i = 1; i < BlocksCount; i++ )
     {
         current_block_x_pos = blocks[ i ] -> GetPosByXi();
         if ( max_x_pos < current_block_x_pos )
@@ -780,7 +781,7 @@ Point3Di Figure :: GetBackMostBlockPosi()
     int index_of_block      = 0;
     int min_z_pos           = blocks[ 0 ] -> GetPosByZi();
 
-    for ( int i = 1; i < BlocksCount; i++ )
+    for ( unsigned int i = 1; i < BlocksCount; i++ )
     {
         current_block_z_pos = blocks[ i ] -> GetPosByZi();
         if ( min_z_pos > current_block_z_pos )
@@ -799,7 +800,7 @@ Point3Di Figure :: GetAheadMostBlockPosi()
     int index_of_block      = 0;
     int max_z_pos           = blocks[ 0 ] -> GetPosByZi();
 
-    for ( int i = 1; i < BlocksCount; i++ )
+    for ( unsigned int i = 1; i < BlocksCount; i++ )
     {
         current_block_z_pos = blocks[ i ] -> GetPosByZi();
         if ( max_z_pos < current_block_z_pos )

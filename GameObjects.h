@@ -16,7 +16,6 @@ public :
     static const double         SafetyDistanceBetweenBlocks;
     static const double         NonSafetyDistanceBetweenBlocks;
 private :
-    static Point3Di		vertices_i[ BlocksVertexCount ];
     Point3Df			vertices_f[ BlocksVertexCount ];
 
     void			Rotate  ( float &a, float &b, float angle );

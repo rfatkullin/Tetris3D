@@ -80,7 +80,7 @@ void Scene :: paintGL()
 */
     glViewport( 0, 0, WindowWidth , WindowHeight );
     glLoadIdentity();
-     glScaled( 0.5f, 0.5f, 0.5f );
+    glScaled( 0.5f, 0.5f, 0.5f );
     gluLookAt( camera_positon.x, camera_positon.y, camera_positon.z, ( Game :: Length / 2  ) * Block :: BlockSize, 0, ( Game :: Width / 2  ) * Block :: BlockSize, 0, 1, 0 );
 
     glColor3f( 1.0f, 1.0f, 1.0f );

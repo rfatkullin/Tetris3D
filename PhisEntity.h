@@ -10,6 +10,7 @@ protected:
 public:
                     PhisEntity( Material new_material );
     Material        GetMaterial()  const;
+    void            SetMaterial( Material new_material );
 
     virtual void    Draw() = 0;
 };

@@ -29,6 +29,13 @@ Point3Df Point3Df :: operator + ( const Point3Df& right_obj )
     return Point3Df( x + right_obj.x, y + right_obj.y, z + right_obj.z );
 }
 
+Point3Di :: Point3Di( int new_x, int new_y, int new_z )
+{
+    x = new_x;
+    y = new_y;
+    z = new_z;
+}
+
 Point3Di& Point3Di :: operator = ( const Point3Di& right_obj )
 {
     x = right_obj.x;
@@ -90,52 +97,59 @@ Point2Df Point2Df :: operator + ( const Point2Df& right_obj )
     return Point2Df( x + right_obj.x, y + right_obj.y );
 }
 
-bool InRange( float x, float a, float b )
+int Geometry :: Sign( float a )
+{
+    if ( a < eps )
+        return -1;
+    return 1;
+}
+
+bool Geometry :: InRange( float x, float a, float b )
 {
 	return ( x >= a + eps ) && ( x <= b - eps );
 }
 
-float Max( float a, float b )
+float Geometry :: Max( float a, float b )
 {
     if ( a < b - eps )
 	return b;
     return a;
 }
 
-float Min( float a, float b )
+float Geometry :: Min( float a, float b )
 {
     if ( a < b - eps )
 	return a;
     return b;
 }
 
-float   ScalarMul( const Point3Df& a, const Point3Df& b )
+float Geometry :: ScalarMul( const Point3Df& a, const Point3Df& b )
 {
     return a.x * b.x + a.y * b.y + a.z * b.z;
 }
 
-float   ScalarMul( const Point3Di& a, const Point3Di& b )
+float Geometry :: ScalarMul( const Point3Di& a, const Point3Di& b )
 {
     return ScalarMul( Point3Df( a ), Point3Df( b ) );
 }
 
-Point3Df VectorMul( const Point3Df& a, const Point3Df& b )
+Point3Df Geometry :: VectorMul( const Point3Df& a, const Point3Df& b )
 {
     return Point3Df( a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x );
 }
 
-Point3Di VectorMul( const Point3Di& a, const Point3Di& b )
+Point3Di Geometry :: VectorMul( const Point3Di& a, const Point3Di& b )
 {
     return Point3Di( a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x );
 }
 
 
-float   MixedMul( const Point3Df& a, const Point3Df& b, const Point3Df& c )
+float Geometry :: MixedMul( const Point3Df& a, const Point3Df& b, const Point3Df& c )
 {
     return ScalarMul( a, VectorMul( b, c ) );
 }
 
-float   MixedMul( const Point3Di& a, const Point3Di& b, const Point3Di& c )
+float Geometry :: MixedMul( const Point3Di& a, const Point3Di& b, const Point3Di& c )
 {
     return ScalarMul( a, VectorMul( b, c ) );
 }

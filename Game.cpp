@@ -20,6 +20,11 @@ void Game :: InitializeStaticData()
 
 Game :: Game()
 {
+    Point3Di fig_pos;
+    Point3Di block_pos;
+    int      block_length_pos;
+    int      block_width_pos;
+
     InitializeStaticData();
     Start();
 
@@ -39,16 +44,30 @@ Game :: Game()
     }
 
      for ( int i = 0; i < Length; ++i )
-	for ( int j = 0; j < Width; ++j )
-	    field[ i ][ 0 ][ j ]	  =  new Block( BSize / 2 + i * BSize, BSize / 2,                           BSize / 2 + j * BSize, materials[ 3 ] );
+        for ( int j = 0; j < Width; ++j )
+            field[ i ][ 0 ][ j ]	  =  new Block( BSize / 2 + i * BSize, BSize / 2,                           BSize / 2 + j * BSize, materials[ 3 ] );
 
      for ( int i = 0; i < Length; ++i )
-	for ( int j = 0; j < Width; ++j )
-	    field[ i ][ Height - 1 ][ j ] =  new Block( BSize / 2 + i * BSize, BSize / 2 + ( Height - 1 ) * BSize,  BSize / 2 + j * BSize, materials[ 3 ] );
+        for ( int j = 0; j < Width; ++j )
+            field[ i ][ Height - 1 ][ j ] =  new Block( BSize / 2 + i * BSize, BSize / 2 + ( Height - 1 ) * BSize,  BSize / 2 + j * BSize, materials[ 3 ] );
+
+    //Select blocks
+
+    fig_pos = current_figure -> GetPosi();
+    for ( int i = 0; i < Figure :: BlocksCount; i++ )
+    {
+        block_pos = current_figure -> GetBlockPosByIndexi( i ) + fig_pos;
+        block_length_pos = block_pos.x / Game :: BSize;
+        block_width_pos  = block_pos.z / Game :: BSize;
+
+        select_blocks_pos[ i ] = Point3Di( block_length_pos, 0, block_width_pos );
+        select_blocks_materials[ i ] = field[ block_length_pos ][ 0 ][ block_width_pos ] -> GetMaterial();
+        field[ block_length_pos ][ 0 ][ block_width_pos ] -> SetMaterial( materials[ 7 ] );
+    }
 }
 
 void Game :: Start()
-{	
+{
     figure_pos_correct_step     =   0;
     last_mouse_position         =   Point3Df( 0.0f, 0.0f, 0.0f );
     camera_position             =   SphericalCoor( pi / 4, pi / 4 );
@@ -64,7 +83,6 @@ void Game :: Start()
     score                       =   0;
     is_game                     =   true;
     collapse                    =   false;
-
 
     srand( time( 0 ) );
 
@@ -208,7 +226,7 @@ void Game :: CheckToCollapse()
     {
         for ( int k = FieldBeginY; k < FieldEndY; k++ )
 	{
-            if ( k < full_levels )
+            if ( k < full_levels + FieldBeginY )
                 for ( int i = FieldBeginX; i < FieldEndX; ++i )
                     for ( int j = FieldBeginZ; j < FieldEndZ; ++j )
 		    {
@@ -245,30 +263,25 @@ void Game :: NextStep()
     if ( collapse )
     {
 	collapse_steps_count--;
+        if ( collapse_steps_count < 0 )
+            collapse = false;
 
-	if ( collapse_steps_count > 0 )
-	{
-            for ( int k = FieldBeginY; k < FieldEndY; k++ )
-                for ( int i = FieldBeginX; i < FieldEndX; ++i )
-                    for ( int j = FieldBeginZ; j < FieldEndZ; ++j )
-                        if ( field[ i ][ k ][ j ] != NULL )
+        for ( int k = FieldBeginY; k < FieldEndY; k++ )
+            for ( int i = FieldBeginX; i < FieldEndX; ++i )
+                for ( int j = FieldBeginZ; j < FieldEndZ; ++j )
+                    if ( field[ i ][ k ][ j ] != NULL )
+                    {
+                        if ( collapse )
                             field[ i ][ k ][ j ] -> SetPosi( field[ i ][ k ][ j ] -> GetPosi() - Point3Di( 0, FirstSpeed, 0 ) );
-	}
-	else
-	{
-	    collapse = false;
-
-            for ( int k = FieldBeginY; k < FieldEndY; k++ )
-                for ( int i = FieldBeginX; i < FieldEndX; ++i )
-                    for ( int j = FieldBeginZ; j < FieldEndZ; ++j )
-                        if ( field[ i ][ k ][ j ] != NULL )
-			{
+                        else
+                        {
                             block_pos =  field[ i ][ k ][ j ] -> GetPosi();
                             field[ i ][ k ][ j ] -> SetPosi( block_pos.x,
-                                                                  ( block_pos.y - FirstSpeed + BSize / 2 ) / ( BSize / 2 ) * ( BSize / 2 ),
-								  block_pos.z );
-			}
-	}
+                                                             ( block_pos.y - FirstSpeed + BSize / 2 ) / ( BSize / 2 ) * ( BSize / 2 ),
+                                                             block_pos.z );
+                        }
+
+                    }
     }
 
     if ( is_game )
@@ -320,6 +333,7 @@ void Game :: NextStep()
 	    CheckToCollapse();
 	    delete current_figure;
 	    current_figure    = next_figure;
+            ChangeSelectBlocks();
 	    next_figure	      = GetNewFigure();
 	    figure_down_steps = 0;
 	    game_speed	      = FirstSpeed;
@@ -353,6 +367,9 @@ void Game :: NextStep()
 	    default :
 		current_figure -> RotateOnZX( final_angle, state );
 	    }
+
+            if ( !rotating )
+                ChangeSelectBlocks();
 	}
     }
 }
@@ -413,7 +430,7 @@ void Game :: DrawBlocksOnTheField()
 
     for ( int i = FieldBeginX; i < FieldEndX; ++i )
 	for ( int j = FieldBeginZ; j < FieldEndZ; ++j )
-	    for ( int k = FieldBeginY; k < FieldEndY; ++k )
+            for ( int k = FieldBeginY - 1; k < FieldEndY; ++k )
                 if ( field[ i ][ k ][ j ] != NULL )
                     field[ i ][ k ][ j ] -> Draw( rel_position );
 }
@@ -456,6 +473,8 @@ void Game :: ShiftFigureByXAxis( ShiftDirection shift )
     current_figure -> SetPosi( current_figure -> GetPosi() + Point3Di( shift * BSize, 0, 0 ) );
     if ( current_figure -> CheckToCollisonWithBlocks( collision_block ) )
         current_figure -> SetPosi( current_figure -> GetPosi() - Point3Di( shift * BSize, 0, 0 ) );
+    else
+        ChangeSelectBlocks();
 }
 
 void Game :: ShiftFigureByZAxis( ShiftDirection shift )
@@ -476,6 +495,8 @@ void Game :: ShiftFigureByZAxis( ShiftDirection shift )
     current_figure -> SetPosi( current_figure -> GetPosi() + Point3Di( 0, 0, shift * BSize ) );
     if ( current_figure -> CheckToCollisonWithBlocks( collision_block ) )
         current_figure -> SetPosi( current_figure -> GetPosi() - Point3Di( 0, 0, shift * BSize ) );
+    else
+        ChangeSelectBlocks();
 }
 
 void Game :: Rotate( RotatePlane plane, RotateSide side )
@@ -516,7 +537,7 @@ void Game :: Rotate( RotatePlane plane, RotateSide side )
 	figure_pos_correct_step = 0;
 
         if ( CheckToRotate( plane, rotating_angle ) )
-            rotating = false;
+            rotating = false;        
     }
 }
 
@@ -525,42 +546,25 @@ void Game :: DropDownFigure()
     game_speed = SeventhSpeed;
 }
 
-float Game :: Sign( float a )
-{
-    if ( a < eps )
-	return -1;
-    return 1;
-}
-
-//float Game :: SetAngleToRange( float angle )
-//{
-//    int sign = Sign( angle );
-
-//    if ( !InRange( sign * angle,   ) )
-//        return angle - sign;
-//    return angle;
-//}
 
 void Game :: ChangeCameraPosition( float x, float y )
 {
     float next_teta       = camera_position.teta  + CameraPosChangeKoeff * y;
-    float next_alpha      = camera_position.alpha + CameraPosChangeKoeff * x;
-    float next_alpha_sign = Sign( next_alpha );
+    float next_alpha      = camera_position.alpha - CameraPosChangeKoeff * x;
+    int   next_alpha_sign = Geometry :: Sign( next_alpha );
 
-    if ( InRange( next_teta, -pi / 2, pi / 2 ) )
+    if ( Geometry :: InRange( next_teta, -pi / 2, pi / 2 ) )
         camera_position.teta  = next_teta;
 
-    if ( !InRange( next_alpha_sign * next_alpha, 0.0, 2 * pi ) )
+    if ( !Geometry :: InRange( next_alpha_sign * next_alpha, 0.0, 2 * pi ) )
         next_alpha -= next_alpha_sign * 2 * pi;
-    camera_position.alpha = next_alpha;
-
-    printf( "%f %f\n", camera_position.teta, camera_position.alpha );
+    camera_position.alpha = next_alpha;   
 }
 
 Point3Df Game :: GetCameraPosition()
 {
     float cos_teta = cos( camera_position.teta );
-    return Point3Df(  cos_teta * sin( camera_position.alpha ) * CameraRadius, sin( camera_position.teta ) * CameraRadius, cos_teta * cos( camera_position.alpha ) * CameraRadius );
+    return Point3Df(   ( Game :: Length / 2  ) * BSize + cos_teta * sin( camera_position.alpha ) * CameraRadius, sin( camera_position.teta ) * CameraRadius,  ( Game :: Width / 2  ) * BSize + cos_teta * cos( camera_position.alpha ) * CameraRadius );
 }
 
 void Game :: SetLastMousePosition( float x, float y )
@@ -579,3 +583,33 @@ Point3Df Game :: GetLastMousePosition( )
     game_speed = new_game_speed;
  }
 
+void Game :: ChangeSelectBlocks()
+{    
+    Point3Di fig_pos;
+    Point3Di block_pos;
+    int      block_length_pos;
+    int      block_width_pos;
+
+    for ( int i = 0; i < Figure :: BlocksCount; i++ )
+         if ( field [ select_blocks_pos[ i ].x ][ select_blocks_pos[ i ].y ] [ select_blocks_pos[ i ].z ] != NULL )
+                    field [ select_blocks_pos[ i ].x ][ select_blocks_pos[ i ].y ] [ select_blocks_pos[ i ].z ] -> SetMaterial( select_blocks_materials[ i ] );
+
+    fig_pos = current_figure -> GetPosi();
+    for ( int i = 0; i < Figure :: BlocksCount; i++ )
+    {
+        block_pos = current_figure -> GetBlockPosByIndexi( i ) + fig_pos;
+        block_length_pos = block_pos.x / Game :: BSize;
+        block_width_pos  = block_pos.z / Game :: BSize;
+
+        for ( int j = FieldEndY - 1; j >= 0; j-- )
+            if ( field[ block_length_pos ][ j ][ block_width_pos ] != NULL )
+            {
+                select_blocks_pos[ i ] = Point3Di( block_length_pos, j, block_width_pos );
+                select_blocks_materials[ i ] = field[ block_length_pos ][ j ][ block_width_pos ] -> GetMaterial();
+                break;
+            }
+    }
+
+     for ( int i = 0; i < Figure :: BlocksCount; i++ )
+        field [ select_blocks_pos[ i ].x ][ select_blocks_pos[ i ].y ] [ select_blocks_pos[ i ].z ] -> SetMaterial( materials[ 7  ] );
+}

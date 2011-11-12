@@ -35,3 +35,9 @@ const float* Material :: GetMaterialForSpecular()
 {
     return material_for_specular;
 }
+
+Material :: Material()
+{
+    for ( int i = 0; i < 4; i++ )
+        material_for_ambient[ i ] = material_for_diffuse[ i ] = material_for_specular[ i ] = 0.0f;
+}
