@@ -49,8 +49,8 @@ const Material	materials[ MaterialsCount ] = {
                1.0f, 1.0f, 1.0f, 1.0f,
                0.0f, 0.0f, 0.0f, 1.0f
             ),
-    Material(  0.5f, 0.5f, 0.5f, 1.0f, //For bottom platform
-               0.5f, 0.5f, 0.5f, 1.0f,
+    Material(  1.0f, 1.0f, 1.0f, 1.0f, //For bottom platform
+               1.0f, 1.0f, 1.0f, 1.0f,
                0.0f, 0.0f, 0.0f, 1.0f
         )
     };

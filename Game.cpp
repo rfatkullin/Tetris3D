@@ -7,7 +7,7 @@
 const int       Game :: SafetyDistance = 16.0 * BSize * BSize;
 const float	Game :: CameraPosChangeKoeff =	0.01f;
 const float	Game :: CameraRadius = 1000.0f;
-const int	Game :: FieldPositionByY = -200;
+//const int	Game :: FieldPositionByY = -600;
 float		Game :: light_position[ 4 ];
 
 void Game :: InitializeStaticData()
@@ -20,54 +20,16 @@ void Game :: InitializeStaticData()
 
 Game :: Game()
 {
-    Point3Di fig_pos;
-    Point3Di block_pos;
-    int      block_length_pos;
-    int      block_width_pos;
-
     InitializeStaticData();
-    Start();
-
-    for ( int i = 1; i < Height; ++i )
-    {
-	for ( int j = 0; j < Length; ++j )
-	{
-	    field[ j ][ i ][ 0 ]         = new Block( BSize / 2 + j * BSize, BSize / 2 + i * BSize,  BSize / 2 , materials[ 3 ] );
-	    field[ j ][ i ][ Width - 1 ] = new Block( BSize / 2 + j * BSize, BSize / 2 + i * BSize,  BSize / 2 + ( Width - 1 ) * BSize, materials[ 3 ] );
-	}
-
-	for ( int j = 0; j < Width; ++j )
-	{
-	    field[ 0 ][ i ][ j ]          = new Block( BSize / 2,                          BSize / 2 + i * BSize, BSize / 2 + j * BSize, materials[ 3 ] );
-	    field[ Length - 1 ][ i ][ j ] = new Block( BSize / 2 + ( Length - 1 ) * BSize, BSize / 2 + i * BSize, BSize / 2 + j * BSize, materials[ 3 ] );
-	}
-    }
-
-     for ( int i = 0; i < Length; ++i )
-        for ( int j = 0; j < Width; ++j )
-            field[ i ][ 0 ][ j ]	  =  new Block( BSize / 2 + i * BSize, BSize / 2,                           BSize / 2 + j * BSize, materials[ 3 ] );
-
-     for ( int i = 0; i < Length; ++i )
-        for ( int j = 0; j < Width; ++j )
-            field[ i ][ Height - 1 ][ j ] =  new Block( BSize / 2 + i * BSize, BSize / 2 + ( Height - 1 ) * BSize,  BSize / 2 + j * BSize, materials[ 3 ] );
-
-    //Select blocks
-
-    fig_pos = current_figure -> GetPosi();
-    for ( int i = 0; i < Figure :: BlocksCount; i++ )
-    {
-        block_pos = current_figure -> GetBlockPosByIndexi( i ) + fig_pos;
-        block_length_pos = block_pos.x / Game :: BSize;
-        block_width_pos  = block_pos.z / Game :: BSize;
-
-        select_blocks_pos[ i ] = Point3Di( block_length_pos, 0, block_width_pos );
-        select_blocks_materials[ i ] = field[ block_length_pos ][ 0 ][ block_width_pos ] -> GetMaterial();
-        field[ block_length_pos ][ 0 ][ block_width_pos ] -> SetMaterial( materials[ 7 ] );
-    }
+    Start();   
 }
 
 void Game :: Start()
 {
+    Point3Di fig_pos;
+    Point3Di block_pos;
+    int      block_length_pos;
+    int      block_width_pos;
     figure_pos_correct_step     =   0;
     last_mouse_position         =   Point3Df( 0.0f, 0.0f, 0.0f );
     camera_position             =   SphericalCoor( pi / 4, pi / 4 );
@@ -83,6 +45,7 @@ void Game :: Start()
     score                       =   0;
     is_game                     =   true;
     collapse                    =   false;
+    count_of_shift_checks       =   0;
 
     srand( time( 0 ) );
 
@@ -90,6 +53,42 @@ void Game :: Start()
         for ( int j = 0; j < Width; ++j )
             for ( int k = 0; k < Height; ++k )
                 field[ i ][ k ][ j ] = NULL;
+     for ( int i = 1; i < Height; ++i )
+    {
+        for ( int j = 0; j < Length; ++j )
+        {
+            field[ j ][ i ][ 0 ]         = new Block( BSize / 2 + j * BSize, BSize / 2 + i * BSize,  BSize / 2 , materials[ 3 ] );
+            field[ j ][ i ][ Width - 1 ] = new Block( BSize / 2 + j * BSize, BSize / 2 + i * BSize,  BSize / 2 + ( Width - 1 ) * BSize, materials[ 3 ] );
+        }
+
+        for ( int j = 0; j < Width; ++j )
+        {
+            field[ 0 ][ i ][ j ]          = new Block( BSize / 2,                          BSize / 2 + i * BSize, BSize / 2 + j * BSize, materials[ 3 ] );
+            field[ Length - 1 ][ i ][ j ] = new Block( BSize / 2 + ( Length - 1 ) * BSize, BSize / 2 + i * BSize, BSize / 2 + j * BSize, materials[ 3 ] );
+        }
+    }
+
+     for ( int i = 0; i < Length; ++i )
+        for ( int j = 0; j < Width; ++j )
+            field[ i ][ 0 ][ j ]	  = new Block( BSize / 2 + i * BSize, BSize / 2,                           BSize / 2 + j * BSize, materials[ 3 ] );
+
+     for ( int i = 0; i < Length; ++i )
+        for ( int j = 0; j < Width; ++j )
+            field[ i ][ Height - 1 ][ j ] = new Block( BSize / 2 + i * BSize, BSize / 2 + ( Height - 1 ) * BSize,  BSize / 2 + j * BSize, materials[ 3 ] );
+
+    //Select blocks
+
+    fig_pos = current_figure -> GetPosi();
+    for ( unsigned int i = 0; i < Figure :: BlocksCount; i++ )
+    {
+        block_pos = current_figure -> GetBlockPosByIndexi( i ) + fig_pos;
+        block_length_pos = block_pos.x / Game :: BSize;
+        block_width_pos  = block_pos.z / Game :: BSize;
+
+        select_blocks_pos[ i ] = Point3Di( block_length_pos, 0, block_width_pos );
+        select_blocks_materials[ i ] = field[ block_length_pos ][ 0 ][ block_width_pos ] -> GetMaterial();
+        field[ block_length_pos ][ 0 ][ block_width_pos ] -> SetMaterial( materials[ 7 ] );
+    }
  }
 
 Point2Df Game :: GetFigurePositionOnXZ( int width_x, int width_z )
@@ -291,8 +290,41 @@ void Game :: NextStep()
         {
             current_figure -> SetPosi( current_figure -> GetPosi() - Point3Di( 0, game_speed, 0 ) );
             figure_down_steps = 0;
+     /*       old_fig_y_pos = current_figure -> GetPosByYi();
+            if ( need_shift )
+            {
+
+                switch ( shift_axis )
+                {
+                    case XAxis :
+                        ShiftFigureByXAxis( shift_direction );
+                        break;
+                    case ZAxis :
+                        ShiftFigureByZAxis( shift_direction );
+                        break;
+                }
+                need_shift = false;
+            }
+       */
         }
         figure_pos = current_figure -> GetPosi();
+        //printf( "%d\n", figure_pos.y );
+
+        if ( count_of_shift_checks > 0 )
+        {
+            count_of_shift_checks--;
+            switch ( shift_axis )
+                {
+                    case XAxis :
+                        ShiftFigureByXAxis( shift_direction );
+                        break;
+                    case ZAxis :
+                        ShiftFigureByZAxis( shift_direction );
+                        break;
+                    default :
+                        break;
+                }
+        }
 
         //Detecting when figure must stop
         for ( unsigned int  i = 0; ( i < Figure :: BlocksCount ) && ( is_game ); i++ )
@@ -336,7 +368,7 @@ void Game :: NextStep()
             ChangeSelectBlocks();
 	    next_figure	      = GetNewFigure();
 	    figure_down_steps = 0;
-	    game_speed	      = FirstSpeed;
+            game_speed	      = FirstSpeed;
 	    is_game	      = true;
             count_of_blocks_on_field += Figure :: BlocksCount;
 	    if ( ( !collapse ) && ( field_index_by_height == FieldEndY - 2 ) )
@@ -471,10 +503,13 @@ void Game :: ShiftFigureByXAxis( ShiftDirection shift )
                 collision_block.push_back( Block( *field[ x_coor_collision_blocks + shift ][ i ][ j ] ) );
 
     current_figure -> SetPosi( current_figure -> GetPosi() + Point3Di( shift * BSize, 0, 0 ) );
-    if ( current_figure -> CheckToCollisonWithBlocks( collision_block ) )
+    if ( current_figure -> CheckToCollisonWithBlocks( collision_block ) ) //Cancel shift
         current_figure -> SetPosi( current_figure -> GetPosi() - Point3Di( shift * BSize, 0, 0 ) );
     else
+    {
+        count_of_shift_checks = 0;
         ChangeSelectBlocks();
+    }
 }
 
 void Game :: ShiftFigureByZAxis( ShiftDirection shift )
@@ -493,10 +528,13 @@ void Game :: ShiftFigureByZAxis( ShiftDirection shift )
               collision_block.push_back( Block( *field[ j ][ i ][ z_coor_collision_blocks + shift ] ) );
 
     current_figure -> SetPosi( current_figure -> GetPosi() + Point3Di( 0, 0, shift * BSize ) );
-    if ( current_figure -> CheckToCollisonWithBlocks( collision_block ) )
+    if ( current_figure -> CheckToCollisonWithBlocks( collision_block ) ) //Cancel shift
         current_figure -> SetPosi( current_figure -> GetPosi() - Point3Di( 0, 0, shift * BSize ) );
     else
+    {
+        count_of_shift_checks = 0;
         ChangeSelectBlocks();
+    }
 }
 
 void Game :: Rotate( RotatePlane plane, RotateSide side )
@@ -590,12 +628,12 @@ void Game :: ChangeSelectBlocks()
     int      block_length_pos;
     int      block_width_pos;
 
-    for ( int i = 0; i < Figure :: BlocksCount; i++ )
+    for ( unsigned int i = 0; i < Figure :: BlocksCount; i++ )
          if ( field [ select_blocks_pos[ i ].x ][ select_blocks_pos[ i ].y ] [ select_blocks_pos[ i ].z ] != NULL )
                     field [ select_blocks_pos[ i ].x ][ select_blocks_pos[ i ].y ] [ select_blocks_pos[ i ].z ] -> SetMaterial( select_blocks_materials[ i ] );
 
     fig_pos = current_figure -> GetPosi();
-    for ( int i = 0; i < Figure :: BlocksCount; i++ )
+    for ( unsigned int i = 0; i < Figure :: BlocksCount; i++ )
     {
         block_pos = current_figure -> GetBlockPosByIndexi( i ) + fig_pos;
         block_length_pos = block_pos.x / Game :: BSize;
@@ -610,6 +648,23 @@ void Game :: ChangeSelectBlocks()
             }
     }
 
-     for ( int i = 0; i < Figure :: BlocksCount; i++ )
+     for ( unsigned int i = 0; i < Figure :: BlocksCount; i++ )
         field [ select_blocks_pos[ i ].x ][ select_blocks_pos[ i ].y ] [ select_blocks_pos[ i ].z ] -> SetMaterial( materials[ 7  ] );
+}
+
+void Game :: SetShift( Axises axis, ShiftDirection direction )
+{
+   shift_axis = axis;
+   shift_direction = direction;
+   count_of_shift_checks = 5;
+}
+
+void Game :: ChangePause()
+{
+    is_game = !is_game;
+}
+
+bool Game :: IsPause()
+{
+    return !is_game;
 }

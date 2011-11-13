@@ -9,6 +9,7 @@ public:
 	Game();
 	enum	RotatePlane	{ PlaneXY, PlaneZY, PlaneZX };
 	enum	RotateSide	{ RotateByClockWise = -1, RotateByAntiClockWise = 1 };
+        enum    Axises          { XAxis, YAxis, ZAxis };
 	enum	ShiftDirection	{ ShiftRight = 1, ShiftLeft = -1, ShiftBack = -1, ShiftAhead = 1 };
         enum    GameSpeed       { ZeroSpeed = 0, FirstSpeed = 1, SecondSpeed = 2, ThirdSpeed = 4, FourthSpeed = 8, FifthSpeed = 10, SixthSpeed = 12, SeventhSpeed = 14 };
 
@@ -29,9 +30,12 @@ public:
 	void			ShiftFigureByZAxis( ShiftDirection shift );
 	void			Rotate( RotatePlane plane, RotateSide side );
 	void			DropDownFigure();
+        void                    ChangePause();
+        bool                    IsPause();
+        void                    SetShift( Axises axis, ShiftDirection direction );
 
-        enum		    { Width             = 8,
-                              Length            = 8,
+        enum		    { Width             = 12,
+                              Length            = 12,
 			      Height            = 20,
                               FieldBeginX       = 1,
                               FieldBeginY       = 1,
@@ -53,7 +57,7 @@ private:
         static const int        SafetyDistance;
         static const float	CameraRadius;
 	static const float	CameraPosChangeKoeff;
-	static const int	FieldPositionByY;
+        //static const int	FieldPositionByY;
 	static float		light_position[ 4 ];
 
         //Block*                  field_block_border[ BorderBlocksCount ];
@@ -98,6 +102,10 @@ private:
         Point3Di                select_blocks_pos[ MaxSelectBlockCount ];
         Material                select_blocks_materials[ MaxSelectBlockCount ];
         void                    ChangeSelectBlocks();
+//Shift
+        int                     count_of_shift_checks;
+        Axises                  shift_axis;
+        ShiftDirection          shift_direction;
 };
 
 #endif

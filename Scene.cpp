@@ -14,6 +14,8 @@ Scene :: Scene( QWidget* pwgt ) : QGLWidget( pwgt )
 	diffuse_light[ i ] = 0.0f;
 	speculaer_light[ i ] = 0.0f;
     }
+    scene_width  = WindowWidth;
+    scene_height = WindowHeight;
 }
 
 Scene :: ~Scene()
@@ -36,15 +38,18 @@ void Scene :: initializeGL()
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glOrtho( -WindowWidth / 2, WindowWidth / 2, -WindowHeight / 2, WindowHeight / 2, 0, 3000);
-    glViewport( 0, 0, WindowWidth / 2, WindowHeight / 2 );
+    //glViewport( 0, 0, WindowWidth / 2, WindowHeight / 2 );
 }
 
-void Scene :: resizeGL(int new_width, int new_height)
+void Scene :: resizeGL( int new_width, int new_height )
 {
-    //glMatrixMode( GL_MODELVIEW );
-    //glViewport( 0, 0, new_width, new_height );
-    //paintGL();
+    resize( new_width, new_height );
+}
 
+void Scene :: resize( int new_width, int new_height )
+{
+    scene_width = new_width;
+    scene_height = new_height;
 }
 
 void Scene :: paintGL()
@@ -55,36 +60,40 @@ void Scene :: paintGL()
 
 
     camera_positon = game -> GetCameraPosition();
-/*
-    glViewport( 0, WindowHeight / 2, WindowWidth / 2, WindowHeight / 2 );
-    glLoadIdentity();
-    gluLookAt( 300.0f, 0.0f, 0.0f, 0, 0, 0, 0, 1, 0 );
-    glColor3f( 1.0f, 1.0f, 1.0f );
-    renderText( 100, WindowHeight / 2 - 200, "ZY Plane" );   
-    game -> DrawWorld();
+
+//    glViewport( 0, WindowHeight / 2, WindowWidth / 2, WindowHeight / 2 );
+//    glLoadIdentity();
+//    glScaled( 0.5f, 0.5f, 0.5f );
+//    gluLookAt( 300.0f, 0.0f, 0.0f, 0, 0, 0, 0, 1, 0 );
+//    glColor3f( 1.0f, 1.0f, 1.0f );
+//    renderText( 100, WindowHeight / 2 - 200, "ZY Plane" );
+//    game -> DrawWorld();
 
 
-    glViewport( WindowWidth / 2, WindowHeight / 2, WindowWidth / 2, WindowHeight / 2 );
-    glLoadIdentity();
-    gluLookAt( 0.0f, 300.0f, 0.0f, 0, 0, 0, 1, 0, 0 );
-    glColor3f( 1.0f, 1.0f, 1.0f );
-    renderText( WindowWidth / 2 + 100, WindowHeight / 2 - 200, "ZX Plane" );
-    game -> DrawWorld();
+//    glViewport( WindowWidth / 2, WindowHeight / 2, WindowWidth / 2, WindowHeight / 2 );
+//    glLoadIdentity();
+//    glScaled( 0.5f, 0.5f, 0.5f );
+//    gluLookAt( 0.0f, 300.0f, 0.0f, 0, 0, 0, 1, 0, 0 );
+//    glColor3f( 1.0f, 1.0f, 1.0f );
+//    renderText( WindowWidth / 2 + 100, WindowHeight / 2 - 200, "ZX Plane" );
+//    game -> DrawWorld();
 
-    glViewport( 0, 0, WindowWidth / 2, WindowHeight / 2 );
-    glLoadIdentity();
-    gluLookAt( 0.0f, 0.0f, 300.0f, 0, 0, 0, 0, 1, 0 );
-    glColor3f( 1.0f, 1.0f, 1.0f );
-    renderText( 100, WindowHeight - 200, "XY Plane" );
-    game -> DrawWorld();
-*/
-    glViewport( 0, 0, WindowWidth , WindowHeight );
+//    glViewport( 0, 0, WindowWidth / 2, WindowHeight / 2 );
+//    glLoadIdentity();
+//    //glScaled( 0.5f, 0.5f, 0.5f );
+//    gluLookAt( 0.0f, 0.0f, 300.0f, 0, 0, 0, 0, 1, 0 );
+//    glColor3f( 1.0f, 1.0f, 1.0f );
+//    renderText( 100, WindowHeight - 200, "XY Plane" );
+//    game -> DrawWorld();
+
+    glViewport( 0, 0, scene_width, scene_height );
     glLoadIdentity();
     glScaled( 0.5f, 0.5f, 0.5f );
-    gluLookAt( camera_positon.x, camera_positon.y, camera_positon.z, ( Game :: Length / 2  ) * Block :: BlockSize, 0, ( Game :: Width / 2  ) * Block :: BlockSize, 0, 1, 0 );
+    gluLookAt( camera_positon.x, camera_positon.y, camera_positon.z, ( Game :: Length / 2  ) * Block :: BlockSize, ( Game :: Height / 2  ) * Block :: BlockSize, ( Game :: Width / 2  ) * Block :: BlockSize, 0, 1, 0 );
 
     glColor3f( 1.0f, 1.0f, 1.0f );
-    renderText( WindowWidth / 2 + 100, WindowHeight - 200, "3D Model" );
+    renderText( 10, 20, "3D Model" );
+    renderText( 10, scene_height - 10, "PAUSE - P" );
     game -> DrawWorld();
 
     glLightfv( GL_LIGHT0, GL_POSITION, game -> GetLightPosition() );
@@ -97,23 +106,38 @@ void Scene :: keyPressEvent( QKeyEvent* keyboard )
 {
     switch ( keyboard -> key() )
     {
+        case Qt :: Key_P :
+            game -> ChangePause();
+            return;
+            break;
+        case Qt :: Key_Escape :
+            exit( 0 );
+            break;
+        default:
+            break;
+    }
+
+    if ( game -> IsPause() )
+        return;
+
+    switch ( keyboard -> key() )
+    {
 	case Qt :: Key_Escape :
-	    exit( 0 );
-	    break;
+
 	case Qt :: Key_Space :
 	    game -> DropDownFigure();
 	    break;
-       case Qt :: Key_Right :
-	    game -> ShiftFigureByXAxis( Game :: ShiftRight );
+       case Qt :: Key_Right :            
+            game -> SetShift( Game :: XAxis, Game :: ShiftRight );
 	    break;
 	case Qt :: Key_Left :
-	    game -> ShiftFigureByXAxis( Game :: ShiftLeft );
+            game -> SetShift( Game :: XAxis, Game :: ShiftLeft );           
 	    break;
 	case Qt :: Key_Up :
-	    game -> ShiftFigureByZAxis( Game :: ShiftBack );
+            game -> SetShift( Game :: ZAxis, Game :: ShiftBack );            
 	    break;
 	case Qt :: Key_Down :
-	    game -> ShiftFigureByZAxis( Game :: ShiftAhead );
+            game -> SetShift( Game :: ZAxis, Game :: ShiftAhead );           
 	    break;
 	case Qt :: Key_D :
 	    game -> Rotate( Game :: PlaneXY, Game :: RotateByClockWise );
@@ -132,10 +156,7 @@ void Scene :: keyPressEvent( QKeyEvent* keyboard )
 	    break;
 	case Qt :: Key_E :
 	    game -> Rotate( Game :: PlaneZX, Game :: RotateByAntiClockWise );
-	    break;
-        case Qt :: Key_P :
-            game -> SetGameSpeed( Game :: ZeroSpeed );
-            break;
+	    break;       
 	default:
 	    break;
     }
@@ -173,4 +194,8 @@ void Scene :: SetLigthOption( float ambient[ 4 ], float diffuse[ 4 ], float spec
     glLightfv( GL_LIGHT0, GL_SPECULAR, speculaer_light );
 }
 
-
+void Scene :: set3D( bool is_3d)
+{
+    if ( is_3d )
+        exit( 0 );
+}

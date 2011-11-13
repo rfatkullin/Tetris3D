@@ -21,7 +21,8 @@ SOURCES += \
     GameObjects.cpp \
     Geometry.cpp \
     GeomEntity.cpp \
-    PhisEntity.cpp
+    PhisEntity.cpp \
+    MainWindow.cpp
 
 HEADERS += \
     Material.h \
@@ -30,7 +31,10 @@ HEADERS += \
     GameObjects.h \
     Geometry.h \
     GeomEntity.h \
-    PhisEntity.h
+    PhisEntity.h \
+    MainWindow.h
+
+
 
 
 
