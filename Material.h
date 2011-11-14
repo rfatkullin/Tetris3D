@@ -20,6 +20,7 @@ public :
 };
 
 const int	MaterialsCount = 8;
+
 const Material	materials[ MaterialsCount ] = {
     Material(  0.0f, 1.0f, 0.0f, 1.0f,
                0.0f, 1.0f, 0.0f, 1.0f,
@@ -45,12 +46,12 @@ const Material	materials[ MaterialsCount ] = {
                0.0f, 1.0f, 1.0f, 1.0f,
 	       0.0f, 0.0f, 0.0f, 1.0f
             ),
-    Material(  1.0f, 1.0f, 1.0f, 1.0f, //For bottom blocks
+    Material(  1.0f, 1.0f, 1.0f, 1.0f, //For select blocks
                1.0f, 1.0f, 1.0f, 1.0f,
                0.0f, 0.0f, 0.0f, 1.0f
             ),
-    Material(  1.0f, 1.0f, 1.0f, 1.0f, //For bottom platform
-               1.0f, 1.0f, 1.0f, 1.0f,
+    Material(  0.2f, 0.2f, 0.2f, 1.0f, //For bottom platform
+               0.2f, 0.2f, 0.2f, 1.0f,
                0.0f, 0.0f, 0.0f, 1.0f
         )
     };

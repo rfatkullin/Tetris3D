@@ -7,8 +7,8 @@
 const int       Game :: SafetyDistance = 16.0 * BSize * BSize;
 const float	Game :: CameraPosChangeKoeff =	0.01f;
 const float	Game :: CameraRadius = 1000.0f;
-//const int	Game :: FieldPositionByY = -600;
 float		Game :: light_position[ 4 ];
+Figures         Game :: game_figures[ Game :: FiguresMaxCnt ];
 
 void Game :: InitializeStaticData()
 {
@@ -16,12 +16,24 @@ void Game :: InitializeStaticData()
     light_position[ 1 ] = LightPosByY;
     light_position[ 2 ] = LightPosByZ;
     light_position[ 3 ] = 1.0f;
+
+    game_figures[ 0 ] = IFigure;
+    game_figures[ 1 ] = JFigure;
+    game_figures[ 2 ] = LFigure;
+    game_figures[ 3 ] = OFigure;
+    game_figures[ 4 ] = SFigure;
+    game_figures[ 5 ] = TFigure;
+    game_figures[ 6 ] = ZFigure;
 }
 
-Game :: Game()
+Game :: Game() : QObject()
 {
     InitializeStaticData();
-    Start();   
+
+    present_figures.clear();
+    for ( int i = 0; i < FiguresMaxCnt; i++ )
+        present_figures.push_back( game_figures[ i ] );
+    Start();
 }
 
 void Game :: Start()
@@ -57,27 +69,26 @@ void Game :: Start()
     {
         for ( int j = 0; j < Length; ++j )
         {
-            field[ j ][ i ][ 0 ]         = new Block( BSize / 2 + j * BSize, BSize / 2 + i * BSize,  BSize / 2 , materials[ 3 ] );
-            field[ j ][ i ][ Width - 1 ] = new Block( BSize / 2 + j * BSize, BSize / 2 + i * BSize,  BSize / 2 + ( Width - 1 ) * BSize, materials[ 3 ] );
+            field[ j ][ i ][ 0 ]         = new Block( BSize / 2 + j * BSize, BSize / 2 + i * BSize,  BSize / 2 , materials[ BottomFiguresMaterial ] );
+            field[ j ][ i ][ Width - 1 ] = new Block( BSize / 2 + j * BSize, BSize / 2 + i * BSize,  BSize / 2 + ( Width - 1 ) * BSize, materials[ BottomFiguresMaterial ] );
         }
 
         for ( int j = 0; j < Width; ++j )
         {
-            field[ 0 ][ i ][ j ]          = new Block( BSize / 2,                          BSize / 2 + i * BSize, BSize / 2 + j * BSize, materials[ 3 ] );
-            field[ Length - 1 ][ i ][ j ] = new Block( BSize / 2 + ( Length - 1 ) * BSize, BSize / 2 + i * BSize, BSize / 2 + j * BSize, materials[ 3 ] );
+            field[ 0 ][ i ][ j ]          = new Block( BSize / 2,                          BSize / 2 + i * BSize, BSize / 2 + j * BSize, materials[ BottomFiguresMaterial ] );
+            field[ Length - 1 ][ i ][ j ] = new Block( BSize / 2 + ( Length - 1 ) * BSize, BSize / 2 + i * BSize, BSize / 2 + j * BSize, materials[ BottomFiguresMaterial ] );
         }
     }
 
      for ( int i = 0; i < Length; ++i )
         for ( int j = 0; j < Width; ++j )
-            field[ i ][ 0 ][ j ]	  = new Block( BSize / 2 + i * BSize, BSize / 2,                           BSize / 2 + j * BSize, materials[ 3 ] );
+            field[ i ][ 0 ][ j ]	  = new Block( BSize / 2 + i * BSize, BSize / 2,                           BSize / 2 + j * BSize, materials[ BottomFiguresMaterial ] );
 
      for ( int i = 0; i < Length; ++i )
         for ( int j = 0; j < Width; ++j )
-            field[ i ][ Height - 1 ][ j ] = new Block( BSize / 2 + i * BSize, BSize / 2 + ( Height - 1 ) * BSize,  BSize / 2 + j * BSize, materials[ 3 ] );
+            field[ i ][ Height - 1 ][ j ] = new Block( BSize / 2 + i * BSize, BSize / 2 + ( Height - 1 ) * BSize,  BSize / 2 + j * BSize, materials[ BottomFiguresMaterial ] );
 
     //Select blocks
-
     fig_pos = current_figure -> GetPosi();
     for ( unsigned int i = 0; i < Figure :: BlocksCount; i++ )
     {
@@ -87,8 +98,9 @@ void Game :: Start()
 
         select_blocks_pos[ i ] = Point3Di( block_length_pos, 0, block_width_pos );
         select_blocks_materials[ i ] = field[ block_length_pos ][ 0 ][ block_width_pos ] -> GetMaterial();
-        field[ block_length_pos ][ 0 ][ block_width_pos ] -> SetMaterial( materials[ 7 ] );
     }
+    for ( unsigned int i = 0; i < Figure :: BlocksCount; i++ )
+        field[ select_blocks_pos[ i ].x ][ select_blocks_pos[ i ].y ][ select_blocks_pos[ i ].z ] -> SetMaterial( materials[ SelectFigureMaterial ] );
  }
 
 Point2Df Game :: GetFigurePositionOnXZ( int width_x, int width_z )
@@ -120,7 +132,7 @@ Figure* Game :: GetNewFigure()
 	upper_bound_z,
 	y_position  = ( Height - 3 )  * BSize;
 
-    next_figure = new Figure( 0.0f, 0.0f, 0.0f, IFigure, materials[ rand() % 1/*MaterialsCount*/ ] );
+    next_figure = new Figure( 0.0f, 0.0f, 0.0f, present_figures[ 3/*rand() % present_figures.size()*/ ], materials[ rand() % FiguresMaterials ] );
     lower_bound_x = next_figure -> LowerBoundXi();
     upper_bound_x = next_figure -> UpperBoundXi();
     lower_bound_y = next_figure -> LowerBoundYi();
@@ -406,7 +418,7 @@ void Game :: NextStep()
     }
 }
 
-void Game :: DrawField()
+void Game :: DrawField() const
 {
     //Camera( +, +, + ) and looking ( 0, 0, 0 )
     glDisable( GL_LIGHTING );
@@ -456,7 +468,7 @@ void Game :: DrawField()
     glEnable( GL_LIGHTING );
 }
 
-void Game :: DrawBlocksOnTheField()
+void Game :: DrawBlocksOnTheField() const
 {
     Point3Df rel_position( 0.0f, 0.0f, 0.0f );
 
@@ -467,12 +479,12 @@ void Game :: DrawBlocksOnTheField()
                     field[ i ][ k ][ j ] -> Draw( rel_position );
 }
 
-void Game :: DrawInterface()
+void Game :: DrawInterface() const
 {
 
 }
 
-void Game :: DrawWorld()
+void Game :: DrawWorld() const
 {
     DrawField();
     DrawBlocksOnTheField();
@@ -481,7 +493,7 @@ void Game :: DrawWorld()
       //DrawInterface();
 }
 
-float* Game :: GetLightPosition()
+float* Game :: GetLightPosition() const
 {
     return light_position;    
 }
@@ -599,7 +611,7 @@ void Game :: ChangeCameraPosition( float x, float y )
     camera_position.alpha = next_alpha;   
 }
 
-Point3Df Game :: GetCameraPosition()
+Point3Df Game :: GetCameraPosition() const
 {
     float cos_teta = cos( camera_position.teta );
     return Point3Df(   ( Game :: Length / 2  ) * BSize + cos_teta * sin( camera_position.alpha ) * CameraRadius, sin( camera_position.teta ) * CameraRadius,  ( Game :: Width / 2  ) * BSize + cos_teta * cos( camera_position.alpha ) * CameraRadius );
@@ -649,7 +661,7 @@ void Game :: ChangeSelectBlocks()
     }
 
      for ( unsigned int i = 0; i < Figure :: BlocksCount; i++ )
-        field [ select_blocks_pos[ i ].x ][ select_blocks_pos[ i ].y ] [ select_blocks_pos[ i ].z ] -> SetMaterial( materials[ 7  ] );
+        field [ select_blocks_pos[ i ].x ][ select_blocks_pos[ i ].y ] [ select_blocks_pos[ i ].z ] -> SetMaterial( materials[ SelectFigureMaterial ] );
 }
 
 void Game :: SetShift( Axises axis, ShiftDirection direction )
@@ -667,4 +679,20 @@ void Game :: ChangePause()
 bool Game :: IsPause()
 {
     return !is_game;
+}
+
+void Game :: GetSelectFigures( bool* select_figures )
+{
+    for ( int i = 0; i < FiguresMaxCnt; i++ )
+        select_figures[ i ] = false;
+    for ( std :: vector < Figures > :: iterator it = present_figures.begin(); it != present_figures.end(); ++it )
+        select_figures[ ( *it ) ] = true;
+}
+
+void Game :: SetSelectFigures( bool* select_figures )
+{
+     present_figures.clear();
+     for ( int i = 0; i < FiguresMaxCnt; i++ )
+        if ( select_figures[ i ] )
+            present_figures.push_back( game_figures[ i ] );
 }

@@ -18,7 +18,7 @@ Material :: Material( float a_r, float a_g, float a_b, float a_a,
     material_for_specular[ 0 ] = s_r;
     material_for_specular[ 1 ] = s_g;
     material_for_specular[ 2 ] = s_b;
-    material_for_specular[ 4 ] = s_a;
+    material_for_specular[ 3 ] = s_a;
 }
 
 const float* Material :: GetMaterialForAmbient()

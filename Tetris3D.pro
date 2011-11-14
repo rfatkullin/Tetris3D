@@ -22,7 +22,8 @@ SOURCES += \
     Geometry.cpp \
     GeomEntity.cpp \
     PhisEntity.cpp \
-    MainWindow.cpp
+    MainWindow.cpp \
+    SelectFiguresDialog.cpp
 
 HEADERS += \
     Material.h \
@@ -32,7 +33,14 @@ HEADERS += \
     Geometry.h \
     GeomEntity.h \
     PhisEntity.h \
-    MainWindow.h
+    MainWindow.h \
+    SelectFiguresDialog.h
+
+
+
+
+
+
 
 
 

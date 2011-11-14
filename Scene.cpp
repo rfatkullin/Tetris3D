@@ -4,9 +4,9 @@
 #include "Scene.h"
 #include "Game.h"
 
-Scene :: Scene( QWidget* pwgt ) : QGLWidget( pwgt )
+Scene :: Scene( Game* const new_game, QWidget* pwgt ) : QGLWidget( pwgt )
 {
-    game = new Game();
+    game = new_game;
     setMouseTracking( false  );
     for ( int i = 0; i < 4; i++	    )
     {
@@ -102,84 +102,25 @@ void Scene :: paintGL()
     swapBuffers();
 }
 
-void Scene :: keyPressEvent( QKeyEvent* keyboard )
-{
-    switch ( keyboard -> key() )
-    {
-        case Qt :: Key_P :
-            game -> ChangePause();
-            return;
-            break;
-        case Qt :: Key_Escape :
-            exit( 0 );
-            break;
-        default:
-            break;
-    }
+//void Scene :: keyPressEvent( QKeyEvent* keyboard )
+//{
 
-    if ( game -> IsPause() )
-        return;
+//}
 
-    switch ( keyboard -> key() )
-    {
-	case Qt :: Key_Escape :
+//void Scene :: mousePressEvent( QMouseEvent* mouse )
+//{
 
-	case Qt :: Key_Space :
-	    game -> DropDownFigure();
-	    break;
-       case Qt :: Key_Right :            
-            game -> SetShift( Game :: XAxis, Game :: ShiftRight );
-	    break;
-	case Qt :: Key_Left :
-            game -> SetShift( Game :: XAxis, Game :: ShiftLeft );           
-	    break;
-	case Qt :: Key_Up :
-            game -> SetShift( Game :: ZAxis, Game :: ShiftBack );            
-	    break;
-	case Qt :: Key_Down :
-            game -> SetShift( Game :: ZAxis, Game :: ShiftAhead );           
-	    break;
-	case Qt :: Key_D :
-	    game -> Rotate( Game :: PlaneXY, Game :: RotateByClockWise );
-	    break;
-	case Qt :: Key_A :
-	    game -> Rotate( Game :: PlaneXY, Game :: RotateByAntiClockWise );
-	    break;
-	case Qt :: Key_W :
-	    game -> Rotate( Game :: PlaneZY, Game :: RotateByClockWise );
-	    break;
-	case Qt :: Key_S :
-	    game -> Rotate( Game :: PlaneZY, Game :: RotateByAntiClockWise );
-	    break;
-	case Qt :: Key_Q :
-	    game -> Rotate( Game :: PlaneZX, Game :: RotateByClockWise );
-	    break;
-	case Qt :: Key_E :
-	    game -> Rotate( Game :: PlaneZX, Game :: RotateByAntiClockWise );
-	    break;       
-	default:
-	    break;
-    }
-}
+//}
 
-void Scene :: mousePressEvent( QMouseEvent* mouse )
-{
-    if ( mouse -> button() == Qt :: LeftButton )
-	game -> SetLastMousePosition( mouse -> globalX(), mouse -> globalY() );
-}
+//void Scene :: mouseMoveEvent( QMouseEvent* mouse )
+//{
 
-void Scene :: mouseMoveEvent( QMouseEvent* mouse )
-{
-    Point3Df last_mouse_position = game -> GetLastMousePosition();
-    game -> ChangeCameraPosition( mouse -> globalX() - last_mouse_position.x, mouse -> globalY() - last_mouse_position.y );
-    game -> SetLastMousePosition( mouse -> globalX(), mouse -> globalY() );
-}
+//}
 
-void Scene :: timerEvent( QTimerEvent * )
-{
-    game -> NextStep();
-    paintGL();
-}
+//void Scene :: timerEvent( QTimerEvent * )
+//{
+
+//}
 
 void Scene :: SetLigthOption( float ambient[ 4 ], float diffuse[ 4 ], float specular[ 4 ] )
 {
