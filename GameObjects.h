@@ -32,8 +32,8 @@ public:
 
     bool                        PointIn( Point3Df point );
     bool                        PointIn( Point3Di point );
-    bool                        CheckEdgesAveragePoint( Block& block );
-    bool                        IsIntersect( Block& block );
+    bool                        CheckEdgesAveragePoint( Block* block );
+    bool                        IsIntersect( Block* block );
     void                        Draw( Point3Df figure_location  );
 
     virtual float		LowerBoundXf();
@@ -80,8 +80,8 @@ public :
     Point3Di                    GetBackMostBlockPosi();
     Point3Di                    GetAheadMostBlockPosi();
     Material			GetBlockMaterialByIndex( int index ) const;
-    bool                        IsIntersectWithBlock( Block& block );
-    bool                        CheckToCollisonWithBlocks( std :: vector < Block >& blocks );
+    bool                        IsIntersectWithBlock( Block* block );
+    bool                        CheckToCollisonWithBlocks( std :: vector < Block* >& blocks );
     void                        SetBlocksAbsCoor();
     void                        SetBlocksRelCoor();
 

@@ -31,8 +31,8 @@ public:
                                  SelectFigureMaterial = 6,
                                  BottomFiguresMaterial = 7 };
 
-       enum		    { Width             = 12,
-                              Length            = 12,
+       enum		    { Width             = 6,
+                              Length            = 6,
                               Height            = 20,
                               FieldBeginX       = 1,
                               FieldBeginY       = 1,
@@ -87,26 +87,27 @@ private:
     static Figures      game_figures[ FiguresMaxCnt ];
 
     std :: vector < Figures > present_figures;
-    Block*			field[ Length ][ Height ][ Width ];
+    //Block*			field[ Length ][ Height ][ Width ];
+    Block*			mpField[ Length ][ Height ][ Width ];
     int                         count_of_blocks_on_field;
 //Camera manipulating
     SphericalCoor		camera_position;
     Point3Df		last_mouse_position;
     float			Sign( float a );
 //Figures
-    Figure*			current_figure;
+    Figure*			mpCurrentFigure;
     Figure*			next_figure;
 //Game state
     unsigned int		score;
-    bool			is_game;
+    bool			mIsGame;//is_game;
 //Moving
     void			MoveDownFigure();
-    GameSpeed		game_speed;
+    GameSpeed                  mGameSpeed;//game_speed;
     float			rotating_angle;
     bool			rotating;
     bool			is_pos_change;
     int			figure_start_pos_y;
-    int			figure_down_steps;
+    int			mFigureDownSteps;
     int			rotating_step;
 //Rotating
     RotatePlane		rotating_plane;
@@ -116,9 +117,9 @@ private:
     bool			CheckToCollisionByXY();
 
 //Collapse
-    bool			collapse;
+    bool			mIsCollapse;
     void			CheckToCollapse();
-    int			collapse_steps_count;
+    int                     mCollapseStepsCnt;//collapse_steps_count;
 //Selecting block to show where will fall the figure
     static const int        MaxSelectBlockCount = 4;
     Point3Di                select_blocks_pos[ MaxSelectBlockCount ];

@@ -401,29 +401,29 @@ bool Block :: PointIn( Point3Di point )
     return PointIn( Point3Df( point ) );
 }
 
-bool Block :: CheckEdgesAveragePoint( Block& block )
+bool Block :: CheckEdgesAveragePoint( Block* block )
 {
-    return block.PointIn( 0.5f * ( vertices_f[ 1 ] - vertices_f[ 0 ] ) + vertices_f[ 0 ] ) ||
-           block.PointIn( 0.5f * ( vertices_f[ 2 ] - vertices_f[ 1 ] ) + vertices_f[ 1 ] ) ||
-           block.PointIn( 0.5f * ( vertices_f[ 3 ] - vertices_f[ 2 ] ) + vertices_f[ 2 ] ) ||
-           block.PointIn( 0.5f * ( vertices_f[ 0 ] - vertices_f[ 3 ] ) + vertices_f[ 3 ] ) ||
-           block.PointIn( 0.5f * ( vertices_f[ 6 ] - vertices_f[ 7 ] ) + vertices_f[ 7 ] ) ||
-           block.PointIn( 0.5f * ( vertices_f[ 5 ] - vertices_f[ 6 ] ) + vertices_f[ 6 ] ) ||
-           block.PointIn( 0.5f * ( vertices_f[ 4 ] - vertices_f[ 5 ] ) + vertices_f[ 5 ] ) ||
-           block.PointIn( 0.5f * ( vertices_f[ 7 ] - vertices_f[ 4 ] ) + vertices_f[ 4 ] ) ||
-           block.PointIn( 0.5f * ( vertices_f[ 7 ] - vertices_f[ 0 ] ) + vertices_f[ 0 ] ) ||
-           block.PointIn( 0.5f * ( vertices_f[ 6 ] - vertices_f[ 1 ] ) + vertices_f[ 1 ] ) ||
-           block.PointIn( 0.5f * ( vertices_f[ 5 ] - vertices_f[ 2 ] ) + vertices_f[ 2 ] ) ||
-           block.PointIn( 0.5f * ( vertices_f[ 4 ] - vertices_f[ 3 ] ) + vertices_f[ 3 ] );
+    return block -> PointIn( 0.5f * ( vertices_f[ 1 ] - vertices_f[ 0 ] ) + vertices_f[ 0 ] ) ||
+           block -> PointIn( 0.5f * ( vertices_f[ 2 ] - vertices_f[ 1 ] ) + vertices_f[ 1 ] ) ||
+           block -> PointIn( 0.5f * ( vertices_f[ 3 ] - vertices_f[ 2 ] ) + vertices_f[ 2 ] ) ||
+           block -> PointIn( 0.5f * ( vertices_f[ 0 ] - vertices_f[ 3 ] ) + vertices_f[ 3 ] ) ||
+           block -> PointIn( 0.5f * ( vertices_f[ 6 ] - vertices_f[ 7 ] ) + vertices_f[ 7 ] ) ||
+           block -> PointIn( 0.5f * ( vertices_f[ 5 ] - vertices_f[ 6 ] ) + vertices_f[ 6 ] ) ||
+           block -> PointIn( 0.5f * ( vertices_f[ 4 ] - vertices_f[ 5 ] ) + vertices_f[ 5 ] ) ||
+           block -> PointIn( 0.5f * ( vertices_f[ 7 ] - vertices_f[ 4 ] ) + vertices_f[ 4 ] ) ||
+           block -> PointIn( 0.5f * ( vertices_f[ 7 ] - vertices_f[ 0 ] ) + vertices_f[ 0 ] ) ||
+           block -> PointIn( 0.5f * ( vertices_f[ 6 ] - vertices_f[ 1 ] ) + vertices_f[ 1 ] ) ||
+           block -> PointIn( 0.5f * ( vertices_f[ 5 ] - vertices_f[ 2 ] ) + vertices_f[ 2 ] ) ||
+           block -> PointIn( 0.5f * ( vertices_f[ 4 ] - vertices_f[ 3 ] ) + vertices_f[ 3 ] );
 }
 
-bool Block :: IsIntersect( Block& block )
+bool Block :: IsIntersect( Block* block )
 {
     for ( unsigned int i = 0; i < BlocksVertexCount; i++ )
-        if ( block.PointIn( vertices_f[ i ] ) || PointIn( block.vertices_f[ i ] ) )
+        if ( block -> PointIn( vertices_f[ i ] ) || PointIn( block -> vertices_f[ i ] ) )
             return true;
 
-    return this -> CheckEdgesAveragePoint( block ) || block.CheckEdgesAveragePoint( *this );
+    return this -> CheckEdgesAveragePoint( block ) || block -> CheckEdgesAveragePoint( this );
 }
 
 //Figure
@@ -757,12 +757,12 @@ Material Figure :: GetBlockMaterialByIndex( int index ) const
     return blocks[ index ] -> GetMaterial();
 }
 
-bool Figure :: IsIntersectWithBlock( Block& block )
+bool Figure :: IsIntersectWithBlock( Block* block )
 {
     float distance = 0.0f;
     for ( unsigned int i = 0; i < BlocksCount; i++ )
     {
-        distance = ( block.GetPosf() - blocks[ i ] -> GetPosf() ).Length();
+        distance = ( block -> GetPosf() - blocks[ i ] -> GetPosf() ).Length();
         if ( distance - eps > Block :: SafetyDistanceBetweenBlocks )
             continue;
         if ( distance < Block :: NonSafetyDistanceBetweenBlocks - eps )
@@ -815,7 +815,7 @@ void Figure :: SetVerRelCoor()
     }
 }
 
-bool Figure :: CheckToCollisonWithBlocks( std :: vector < Block >& collision_blocks )
+bool Figure :: CheckToCollisonWithBlocks( std :: vector < Block* >& collision_blocks )
 {
     bool collision          = false;
     int  count_of_blocks    = collision_blocks.size();
@@ -824,13 +824,13 @@ bool Figure :: CheckToCollisonWithBlocks( std :: vector < Block >& collision_blo
 
     for ( int i = 0; i < count_of_blocks; ++i )
     {
-        collision_blocks[ i ].SetVerAbsCoor();
+        collision_blocks[ i ] -> SetVerAbsCoor();
         if ( IsIntersectWithBlock( collision_blocks[ i ] ) )
         {
             collision = true;
             break;
         }
-        collision_blocks[ i ].SetVerRelCoor();
+        collision_blocks[ i ] -> SetVerRelCoor();
     }
 
     SetVerRelCoor();
