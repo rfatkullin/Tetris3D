@@ -127,22 +127,22 @@ void MainWindow :: keyPressEvent( QKeyEvent* key )
             mpGame-> SetShift( Game :: ZAxis, Game :: ShiftDirectly );
             break;
         case Qt :: Key_D :
-	    mpGame-> Rotate( Game :: PlaneXY, Game :: RotateByClockWise );
+            mpGame-> Rotate( Game :: PLANE_XY, Game :: ROTATE_BY_CLOCK_WISE );
             break;
         case Qt :: Key_A :
-	    mpGame-> Rotate( Game :: PlaneXY, Game :: RotateByAntiClockWise );
+            mpGame-> Rotate( Game :: PLANE_XY, Game :: ROTATE_BY_ANTI_CLOCKWISE );
             break;
         case Qt :: Key_W :
-	    mpGame-> Rotate( Game :: PlaneZY, Game :: RotateByClockWise );
+            mpGame-> Rotate( Game :: PLANE_ZY, Game :: ROTATE_BY_CLOCK_WISE );
             break;
         case Qt :: Key_S :
-	    mpGame-> Rotate( Game :: PlaneZY, Game :: RotateByAntiClockWise );
+            mpGame-> Rotate( Game :: PLANE_ZY, Game :: ROTATE_BY_ANTI_CLOCKWISE );
             break;
         case Qt :: Key_Q :
-	    mpGame-> Rotate( Game :: PlaneZX, Game :: RotateByClockWise );
+            mpGame-> Rotate( Game :: PLANE_ZX, Game :: ROTATE_BY_CLOCK_WISE );
             break;
         case Qt :: Key_E :
-	    mpGame-> Rotate( Game :: PlaneZX, Game :: RotateByAntiClockWise );
+            mpGame-> Rotate( Game :: PLANE_ZX, Game :: ROTATE_BY_ANTI_CLOCKWISE );
             break;
         default:
             break;

@@ -10,28 +10,28 @@ class Game : public QObject
 public slots :
     void        Start();
 public:
-    enum	RotatePlane	{ PlaneXY, PlaneZY, PlaneZX };
-    enum	RotateSide	{ RotateByClockWise = -1,
-                                  RotateByAntiClockWise = 1 };
+    enum	RotatePlane	{ PLANE_XY, PLANE_ZY, PLANE_ZX };
+    enum	RotateSide	{ ROTATE_BY_CLOCK_WISE = -1,
+                                  ROTATE_BY_ANTI_CLOCKWISE = 1 };
     enum        Axises          { XAxis, YAxis, ZAxis };
 
     enum	ShiftDirection	{ ShiftDirectly = 1,
                                   ShiftBack     = -1 };
 
-    enum        GameSpeed       { ZeroSpeed    = 0,
-                                  FirstSpeed   = 1,
-                                  SecondSpeed  = 2,
-                                  ThirdSpeed   = 4,
-                                  FourthSpeed  = 8,
-                                  FifthSpeed   = 10,
-                                  SixthSpeed   = 12,
-                                  SeventhSpeed = 14 };
+    enum        GameSpeed       { ZERO_SPEED    = 0,
+                                  FIRST_SPEED   = 1,
+                                  SECOND_SPEED  = 2,
+                                  THIRD_SPEED   = 4,
+                                  FOURTH_SPEED  = 8,
+                                  FIFTH_SPEED   = 10,
+                                  SIXTH_SPEED   = 12,
+                                  SEVENTH_SPEED = 14 };
 
     enum         MaterialTypes { FiguresMaterials = 6,
                                  SelectFigureMaterial = 6,
                                  BottomFiguresMaterial = 7 };
 
-       enum		    { Width             = 12,
+       enum   GameConstants { Width             = 12,
                               Length            = 12,
                               Height            = 20,
                               FieldBeginX       = 1,
@@ -48,7 +48,8 @@ public:
                               FieldUpperBoundZ  = FieldEndZ   * Block :: BlockSize,
                               RotateStepsCount  = 20,
                               BSize             = Block :: BlockSize,
-                              FiguresMaxCnt = 7
+                              FiguresMaxCnt     = 7,
+                              FIGURE_START_Y_POS = FieldEndY - 2
                             };
 
                              Game();
@@ -106,7 +107,6 @@ private:
     float			rotating_angle;
     bool			rotating;
     bool			is_pos_change;
-    int			figure_start_pos_y;
     int			mFigureDownSteps;
     int			rotating_step;
 //Rotating

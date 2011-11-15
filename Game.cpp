@@ -46,13 +46,12 @@ void Game :: Start()
     last_mouse_position         =   Point3Df( 0.0f, 0.0f, 0.0f );
     camera_position             =   SphericalCoor( pi / 4, pi / 4 );
     mpCurrentFigure             =   GetNewFigure();
-    figure_start_pos_y          =   mpCurrentFigure -> GetPosByYi();
     mFigureDownSteps            =   0;
     count_of_blocks_on_field	=   0;
     next_figure                 =   GetNewFigure();
     is_pos_change               =   false;
     rotating_step               =   0;
-    mGameSpeed                  =   FirstSpeed;
+    mGameSpeed                  =   FIRST_SPEED;
     rotating                    =   false;
     score                       =   0;
     mIsGame                     =   true;
@@ -165,10 +164,10 @@ Figure* Game :: GetNewFigure()
 	lower_bound_y,
 	upper_bound_y,
 	lower_bound_z,
-	upper_bound_z,
-	y_position  = ( Height - 3 )  * BSize;
+        upper_bound_z,
+        y_position  = FIGURE_START_Y_POS  * BSize;
 
-    next_figure = new Figure( 0.0f, 0.0f, 0.0f, present_figures[ 3/*rand() % present_figures.size()*/ ], materials[ rand() % FiguresMaterials ] );
+    next_figure = new Figure( 0.0f, 0.0f, 0.0f, present_figures[ rand() % present_figures.size() ], materials[ rand() % FiguresMaterials ] );
     lower_bound_x = next_figure -> LowerBoundXi();
     upper_bound_x = next_figure -> UpperBoundXi();
     lower_bound_y = next_figure -> LowerBoundYi();
@@ -234,10 +233,10 @@ bool Game :: CheckToRotate( RotatePlane aRotatingPlane, float aRotatingAngle )
 
         switch ( rotating_plane )
         {
-        case PlaneXY :
+        case PLANE_XY :
             sim_collis_figure -> RotateOnXY( sim_final_angle, false );
             break;
-        case PlaneZY :
+        case PLANE_ZY :
             sim_collis_figure -> RotateOnZY( sim_final_angle, false );
             break;
         default :
@@ -251,11 +250,11 @@ bool Game :: CheckToRotate( RotatePlane aRotatingPlane, float aRotatingAngle )
 
             if ( sim_collapse_steps_cnt > 0 )
                 for ( int i = 0; i < sim_field_blocks_cnt; i++ )
-                    sim_field_blocks[ i ] -> SetPosi( sim_field_blocks[ i ] -> GetPosi() - Point3Di( 0, SeventhSpeed, 0 ) );
+                    sim_field_blocks[ i ] -> SetPosi( sim_field_blocks[ i ] -> GetPosi() - Point3Di( 0, SEVENTH_SPEED, 0 ) );
             else
                 for ( int i = 0; i < sim_field_blocks_cnt; i++ )
                     sim_field_blocks[ i ] -> SetPosi( sim_field_blocks[ i ] -> GetPosi() -
-                        Point3Di( 0, ( sim_field_blocks[ i ] -> GetPosByYi() - SeventhSpeed + BSize / 2 ) / ( BSize / 2 ) * ( BSize / 2 ), 0 ) );
+                        Point3Di( 0, ( sim_field_blocks[ i ] -> GetPosByYi() - SEVENTH_SPEED + BSize / 2 ) / ( BSize / 2 ) * ( BSize / 2 ), 0 ) );
         }
 
         sim_is_collision = sim_collis_figure -> CheckToCollisonWithBlocks( sim_field_blocks ) ||
@@ -307,7 +306,7 @@ void Game :: CheckToCollapse()
                         mpField[ i ][ k ][ j ] = NULL;
 		    }
 	}
-        mCollapseStepsCnt = ( full_levels * BSize ) / FirstSpeed + 1;
+        mCollapseStepsCnt = ( full_levels * BSize ) / FIRST_SPEED + 1;
         mIsCollapse = true;
         count_of_blocks_on_field -= FieldEndX * FieldEndZ * full_levels;
     }
@@ -338,12 +337,12 @@ void Game :: NextStep()
                     if ( mpField[ i ][ k ][ j ] != NULL )
                     {
                         if ( mIsCollapse )
-                            mpField[ i ][ k ][ j ] -> SetPosi( mpField[ i ][ k ][ j ] -> GetPosi() - Point3Di( 0, FirstSpeed, 0 ) );
+                            mpField[ i ][ k ][ j ] -> SetPosi( mpField[ i ][ k ][ j ] -> GetPosi() - Point3Di( 0, mGameSpeed, 0 ) );
                         else
                         {
                             block_pos =  mpField[ i ][ k ][ j ] -> GetPosi();
                             mpField[ i ][ k ][ j ] -> SetPosi( block_pos.x,
-                                                             ( block_pos.y - FirstSpeed + BSize / 2 ) / ( BSize / 2 ) * ( BSize / 2 ),
+                                                             ( block_pos.y - mGameSpeed + BSize / 2 ) / ( BSize / 2 ) * ( BSize / 2 ),
                                                              block_pos.z );
                         }
 
@@ -418,10 +417,10 @@ void Game :: NextStep()
             ChangeSelectBlocks();
 	    next_figure	      = GetNewFigure();
             mFigureDownSteps  = 0;
-            mGameSpeed	      = FirstSpeed;
+            mGameSpeed	      = FIRST_SPEED;
             mIsGame	      = true;
             count_of_blocks_on_field += Figure :: BlocksCount;
-            if ( ( !mIsCollapse ) && ( field_index_by_height == FieldEndY - 2 ) )
+            if ( ( !mIsCollapse ) && ( field_index_by_height >= FieldEndY - 3 ) )
 		exit( 0 );
 	}    
 
@@ -440,10 +439,10 @@ void Game :: NextStep()
 	    }
 	    switch ( rotating_plane )
 	    {
-	    case PlaneXY :
+            case PLANE_XY :
                 mpCurrentFigure -> RotateOnXY( final_angle, state );
 		break;
-	    case PlaneZY :
+            case PLANE_ZY :
                 mpCurrentFigure -> RotateOnZY( final_angle, state );
 		break;
 	    default :
@@ -606,12 +605,12 @@ void Game :: Rotate( RotatePlane plane, RotateSide side )
 	figure_pos_correct_vec = Point3Di( 0, 0, 0 );
 	switch ( rotating_plane )
 	{
-	case PlaneXY :
+        case PLANE_XY :
                 if ( ( ( upper_bound_x - lower_bound_x ) / 2 % BSize != 0 ) ^
                  ( ( upper_bound_y - lower_bound_y ) / 2 % BSize != 0 ) )
 		figure_pos_correct_vec = Point3Di( 1, 1, 0 );
 	    break;
-	case PlaneZY :
+        case PLANE_ZY :
                 if ( ( ( upper_bound_y - lower_bound_y ) / 2 % BSize != 0 ) ^
                  ( ( upper_bound_z - lower_bound_z ) / 2 % BSize != 0 ) )
 		figure_pos_correct_vec = Point3Di( 0, 1, 1 );
@@ -631,7 +630,7 @@ void Game :: Rotate( RotatePlane plane, RotateSide side )
 
 void Game :: DropDownFigure()
 {
-    mGameSpeed = SeventhSpeed;
+    mGameSpeed = SEVENTH_SPEED;
 }
 
 
@@ -677,6 +676,7 @@ void Game :: ChangeSelectBlocks()
     Point3Di block_pos;
     int      block_length_pos;
     int      block_width_pos;
+    int      block_height_pos;
 
     for ( unsigned int i = 0; i < Figure :: BlocksCount; i++ )
          if ( mpField[ select_blocks_pos[ i ].x ][ select_blocks_pos[ i ].y ] [ select_blocks_pos[ i ].z ] != NULL )
@@ -686,10 +686,11 @@ void Game :: ChangeSelectBlocks()
     for ( unsigned int i = 0; i < Figure :: BlocksCount; i++ )
     {
         block_pos = mpCurrentFigure -> GetBlockPosByIndexi( i ) + fig_pos;
-        block_length_pos = block_pos.x / Game :: BSize;
-        block_width_pos  = block_pos.z / Game :: BSize;
+        block_length_pos  = block_pos.x / Game :: BSize;
+        block_width_pos   = block_pos.z / Game :: BSize;
+        block_height_pos  = block_pos.y / Game :: BSize;
 
-        for ( int j = FieldEndY - 1; j >= 0; j-- )
+        for ( int j = block_height_pos - 1; j >= FieldBeginY - 1; j-- )
             if ( mpField[ block_length_pos ][ j ][ block_width_pos ] != NULL )
             {
                 select_blocks_pos[ i ] = Point3Di( block_length_pos, j, block_width_pos );
