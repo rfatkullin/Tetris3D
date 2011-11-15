@@ -828,6 +828,7 @@ bool Figure :: CheckToCollisonWithBlocks( std :: vector < Block* >& collision_bl
         if ( IsIntersectWithBlock( collision_blocks[ i ] ) )
         {
             collision = true;
+            collision_blocks[ i ] -> SetVerRelCoor();
             break;
         }
         collision_blocks[ i ] -> SetVerRelCoor();

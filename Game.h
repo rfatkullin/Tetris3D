@@ -31,8 +31,8 @@ public:
                                  SelectFigureMaterial = 6,
                                  BottomFiguresMaterial = 7 };
 
-       enum		    { Width             = 6,
-                              Length            = 6,
+       enum		    { Width             = 12,
+                              Length            = 12,
                               Height            = 20,
                               FieldBeginX       = 1,
                               FieldBeginY       = 1,
@@ -86,8 +86,8 @@ private:
     static float	light_position[ 4 ];
     static Figures      game_figures[ FiguresMaxCnt ];
 
-    std :: vector < Figures > present_figures;
-    //Block*			field[ Length ][ Height ][ Width ];
+    std :: vector < Figures >   present_figures;
+    std :: vector < Block* >	mBoardBlocks;//board_blocks;//[ Length ][ Height ][ Width ];
     Block*			mpField[ Length ][ Height ][ Width ];
     int                         count_of_blocks_on_field;
 //Camera manipulating
