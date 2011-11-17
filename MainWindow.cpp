@@ -4,15 +4,45 @@
 #include <stdio.h>
 #include "MainWindow.h"
 
+FigureShift MainWindow :: msFigureControl[ MainWindow :: ViewCnt ][ MainWindow :: ButtonsCnt ];
+
+void MainWindow :: SetFigurShiftConstants()
+{
+    //Buttons indexes :
+    //                 S - 0, W - 1, A - 2, D - 3
+
+    msFigureControl[ 0 ][ 0 ] = FigureShift( Game :: Z_AXIS, Game :: SHIFT_DIRECTLY );
+    msFigureControl[ 0 ][ 1 ] = FigureShift( Game :: Z_AXIS, Game :: SHIFT_BACK );
+    msFigureControl[ 0 ][ 2 ] = FigureShift( Game :: X_AXIS, Game :: SHIFT_BACK );
+    msFigureControl[ 0 ][ 3 ] = FigureShift( Game :: X_AXIS, Game :: SHIFT_DIRECTLY );
+
+    msFigureControl[ 1 ][ 0 ] = FigureShift( Game :: X_AXIS, Game :: SHIFT_DIRECTLY );
+    msFigureControl[ 1 ][ 1 ] = FigureShift( Game :: X_AXIS, Game :: SHIFT_BACK );
+    msFigureControl[ 1 ][ 2 ] = FigureShift( Game :: Z_AXIS, Game :: SHIFT_DIRECTLY );
+    msFigureControl[ 1 ][ 3 ] = FigureShift( Game :: Z_AXIS, Game :: SHIFT_BACK );
+
+    msFigureControl[ 2 ][ 0 ] = FigureShift( Game :: Z_AXIS, Game :: SHIFT_BACK );
+    msFigureControl[ 2 ][ 1 ] = FigureShift( Game :: Z_AXIS, Game :: SHIFT_DIRECTLY );
+    msFigureControl[ 2 ][ 2 ] = FigureShift( Game :: X_AXIS, Game :: SHIFT_DIRECTLY );
+    msFigureControl[ 2 ][ 3 ] = FigureShift( Game :: X_AXIS, Game :: SHIFT_BACK );
+
+    msFigureControl[ 3 ][ 0 ] = FigureShift( Game :: X_AXIS, Game :: SHIFT_BACK );
+    msFigureControl[ 3 ][ 1 ] = FigureShift( Game :: X_AXIS, Game :: SHIFT_DIRECTLY );
+    msFigureControl[ 3 ][ 2 ] = FigureShift( Game :: Z_AXIS, Game :: SHIFT_BACK );
+    msFigureControl[ 3 ][ 3 ] = FigureShift( Game :: Z_AXIS, Game :: SHIFT_DIRECTLY );
+}
+
 MainWindow :: MainWindow() : QMainWindow()
 {
-    mpGame = new Game();
-    mpSelectFiguresDialog = new SelectFiguresDialog();
-
+    mpGame		    = new Game();
+    mpSelectFiguresDialog   = new SelectFiguresDialog();
+    mIsRightButtonPressed   = false;
     CreateScene();
     CreateActions();
     CreateMenus();
     CreateStatusBar();
+
+    SetFigurShiftConstants();
 
     setMinimumSize( MIN_WIDTH, MIN_HEIGHT );
     setCentralWidget( mpScene );
@@ -65,7 +95,7 @@ void MainWindow :: CreateScene()
     float speculaer_light[ 4 ] = { 0.2f, 0.2f, 0.2f, 1.0f };
 
     mpScene = new Scene( mpGame);
-    mpScene -> resize( WindowWidth, WindowHeight );
+    mpScene -> Resize( WindowWidth, WindowHeight );
     mpScene -> SetLigthOption( ambient_light, diffuse_light, speculaer_light );
 }
 
@@ -91,6 +121,8 @@ void MainWindow :: closeEvent( QCloseEvent* )
 
 void MainWindow :: keyPressEvent( QKeyEvent* key )
 {
+   int side = mpScene -> GetViewSide();
+
    switch ( key -> key() )
     {
         case Qt :: Key_P :
@@ -114,57 +146,71 @@ void MainWindow :: keyPressEvent( QKeyEvent* key )
         case Qt :: Key_Space :
 	    mpGame-> DropDownFigure();
             break;
-       case Qt :: Key_Right :
-            mpGame-> SetShift( Game :: XAxis, Game :: ShiftDirectly );
-            break;
-        case Qt :: Key_Left :
-            mpGame-> SetShift( Game :: XAxis, Game :: ShiftBack );
-            break;
-        case Qt :: Key_Up :
-	    mpGame-> SetShift( Game :: ZAxis, Game :: ShiftBack );
-            break;
-        case Qt :: Key_Down :
-            mpGame-> SetShift( Game :: ZAxis, Game :: ShiftDirectly );
-            break;
-        case Qt :: Key_D :
-            mpGame-> Rotate( Game :: PLANE_XY, Game :: ROTATE_BY_CLOCK_WISE );
-            break;
-        case Qt :: Key_A :
-            mpGame-> Rotate( Game :: PLANE_XY, Game :: ROTATE_BY_ANTI_CLOCKWISE );
+        case Qt :: Key_S :
+            mpGame -> SetShift( msFigureControl[ side ][ S_BUTTON ].mAxis,
+                                msFigureControl[ side ][ S_BUTTON ].mDirection );
             break;
         case Qt :: Key_W :
-            mpGame-> Rotate( Game :: PLANE_ZY, Game :: ROTATE_BY_CLOCK_WISE );
+            mpGame -> SetShift( msFigureControl[ side ][ W_BUTTON ].mAxis,
+                                msFigureControl[ side ][ W_BUTTON ].mDirection );
             break;
-        case Qt :: Key_S :
-            mpGame-> Rotate( Game :: PLANE_ZY, Game :: ROTATE_BY_ANTI_CLOCKWISE );
+        case Qt :: Key_A :
+            mpGame -> SetShift( msFigureControl[ side ][ A_BUTTON ].mAxis,
+                                msFigureControl[ side ][ A_BUTTON ].mDirection );
             break;
-        case Qt :: Key_Q :
-            mpGame-> Rotate( Game :: PLANE_ZX, Game :: ROTATE_BY_CLOCK_WISE );
+        case Qt :: Key_D :
+            mpGame -> SetShift( msFigureControl[ side ][ D_BUTTON ].mAxis,
+                                msFigureControl[ side ][ D_BUTTON ].mDirection );
             break;
-        case Qt :: Key_E :
-            mpGame-> Rotate( Game :: PLANE_ZX, Game :: ROTATE_BY_ANTI_CLOCKWISE );
-            break;
-        default:
+	default:
             break;
     }
 }
 
+void MainWindow :: keyReleaseEvent( QKeyEvent* aKey )
+{
+
+}
+
 void MainWindow :: mousePressEvent( QMouseEvent* mouse )
 {
-    if ( mouse -> button() == Qt :: LeftButton )
-	mpGame-> SetLastMousePosition( mouse -> globalX(), mouse -> globalY() );
+    Qt :: MouseButton button = mouse -> button();
+
+    if ( ( button == Qt :: LeftButton ) || ( button == Qt :: RightButton )  )
+	mLastMousePos = mouse -> globalPos();
+
+    if ( button == Qt :: RightButton )
+	mIsRightButtonPressed = true;
+
+    mLastMouseButton = button;
+}
+void MainWindow :: mouseReleaseEvent( QMouseEvent* mouse )
+{
+    if (  mLastMouseButton == Qt :: RightButton )
+        SelectRotate( mouse -> globalX(), mouse -> globalY() );
+}
+
+void MainWindow :: wheelEvent ( QWheelEvent * aEvent )
+{
+    if ( aEvent -> delta() > 0 )
+        mpGame-> Rotate( Game :: PLANE_ZX, Game :: ROTATE_BY_CLOCK_WISE );
+    else
+        mpGame-> Rotate( Game :: PLANE_ZX, Game :: ROTATE_BY_ANTI_CLOCKWISE );
 }
 
 void MainWindow :: mouseMoveEvent( QMouseEvent* mouse )
 {
-    Point3Df last_mouse_position = mpGame-> GetLastMousePosition();
-    mpGame-> ChangeCameraPosition( mouse -> globalX() - last_mouse_position.x, mouse -> globalY() - last_mouse_position.y );
-    mpGame-> SetLastMousePosition( mouse -> globalX(), mouse -> globalY() );
+    if ( mLastMouseButton != Qt :: LeftButton )
+	return;
+
+    mpScene -> ChangeCameraPosition( mouse -> globalX() - mLastMousePos.x(),
+                          mouse -> globalY() - mLastMousePos.y() );
+    mLastMousePos = mouse -> globalPos();
 }
 
 void MainWindow :: resizeEvent( int new_width, int new_height )
 {
-     mpScene -> resize( new_width, new_height );
+     mpScene -> Resize( new_width, new_height );
 }
 
 void MainWindow :: timerEvent( QTimerEvent * )
@@ -175,7 +221,7 @@ void MainWindow :: timerEvent( QTimerEvent * )
 
 void MainWindow :: SelectFigures()
 {
-    bool* select_figures = new bool[ Game :: FiguresMaxCnt ];
+    bool* select_figures = new bool[ Game :: FIGURES_MAX_CNT ];
 
     mpGame -> GetSelectFigures( select_figures );
     mpSelectFiguresDialog -> SetSelectFigures( select_figures );
@@ -190,3 +236,44 @@ void MainWindow :: SelectFigures()
 
     delete [] select_figures;
 }
+
+void MainWindow :: SelectRotate( int aX, int aY )
+{
+    Game :: RotatePlane rot_plane;
+    int                 inverse     = 1;
+    int                 side        = mpScene -> GetViewSide();
+    int                 move_by_x   = aX - mLastMousePos.x();
+    int                 move_by_y   = aY - mLastMousePos.y();
+
+    if ( abs( move_by_x ) > abs( move_by_y ) )
+    {
+        if ( side % 2 == 0 )
+            rot_plane = Game :: PLANE_XY;
+        else
+            rot_plane = Game :: PLANE_ZY;
+
+        if ( ( side == 2 ) || ( side == 3 ) )
+            inverse = -1;
+
+        if ( move_by_x * inverse > 0 )
+            mpGame-> Rotate( rot_plane, Game :: ROTATE_BY_CLOCK_WISE );
+        else
+            mpGame-> Rotate( rot_plane, Game :: ROTATE_BY_ANTI_CLOCKWISE );
+    }
+    else
+    {
+        if ( side % 2 == 0 )
+            rot_plane = Game :: PLANE_ZY;
+        else
+            rot_plane = Game :: PLANE_XY;
+
+        if ( ( side == 0 ) || ( side == 3 ) )
+            inverse = -1;
+
+        if ( move_by_y * inverse > 0)
+            mpGame-> Rotate( rot_plane, Game :: ROTATE_BY_CLOCK_WISE );
+	else
+            mpGame-> Rotate( rot_plane, Game :: ROTATE_BY_ANTI_CLOCKWISE );
+    }
+}
+

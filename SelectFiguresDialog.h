@@ -10,9 +10,9 @@ class SelectFiguresDialog : public QDialog
 {
     Q_OBJECT
 public :
-    SelectFiguresDialog( QWidget* parent = 0 );
-    void SetSelectFigures( bool* selected_figures );
-    void GetSelectFigures( bool* selected_figures );
+                        SelectFiguresDialog( QWidget* parent = 0 );
+    void                SetSelectFigures( bool* selected_figures );
+    void                GetSelectFigures( bool* selected_figures );
 private :
     static const int    mcFiguresCnt = 7;
 

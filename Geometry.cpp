@@ -3,85 +3,85 @@
 
 Point3Df& Point3Df :: operator = ( const Point3Df& right_obj )
 {
-    x = right_obj.x;
-    y = right_obj.y;
-    z = right_obj.z;
+    mX = right_obj.mX;
+    mY = right_obj.mY;
+    mZ = right_obj.mZ;
 
     return *this;
 }
 
 Point3Df& Point3Df :: operator = ( const Point3Di& right_obj )
 {
-    x = right_obj.x;
-    y = right_obj.y;
-    z = right_obj.z;
+    mX = right_obj.mX;
+    mY = right_obj.mY;
+    mZ = right_obj.mZ;
 
     return *this;
 }
 
 Point3Df Point3Df :: operator - ( const Point3Df& right_obj )
 {
-   return Point3Df( x - right_obj.x, y - right_obj.y, z - right_obj.z );
+   return Point3Df( mX - right_obj.mX, mY - right_obj.mY, mZ - right_obj.mZ );
 }
 
 Point3Df Point3Df :: operator + ( const Point3Df& right_obj )
 {
-    return Point3Df( x + right_obj.x, y + right_obj.y, z + right_obj.z );
+    return Point3Df( mX + right_obj.mX, mY + right_obj.mY, mZ + right_obj.mZ );
 }
 
 Point3Di :: Point3Di( int new_x, int new_y, int new_z )
 {
-    x = new_x;
-    y = new_y;
-    z = new_z;
+    mX = new_x;
+    mY = new_y;
+    mZ = new_z;
 }
 
 Point3Di& Point3Di :: operator = ( const Point3Di& right_obj )
 {
-    x = right_obj.x;
-    y = right_obj.y;
-    z = right_obj.z;
+    mX = right_obj.mX;
+    mY = right_obj.mY;
+    mZ = right_obj.mZ;
 
     return *this;
 }
 
 Point3Di& Point3Di :: operator = ( const Point3Df& right_obj )
 {
-    x = ( int )right_obj.x;
-    y = ( int )right_obj.y;
-    z = ( int )right_obj.z;
+    mX = ( int )right_obj.mX;
+    mY = ( int )right_obj.mY;
+    mZ = ( int )right_obj.mZ;
 
     return *this;
 }
 
 Point3Di  Point3Di :: operator - ( const Point3Di& right_obj )
 {
-   return Point3Di( x - right_obj.x, y - right_obj.y, z - right_obj.z );
+   return Point3Di( mX - right_obj.mX, mY - right_obj.mY, mZ - right_obj.mZ );
 }
 
 Point3Di  Point3Di :: operator + ( const Point3Di& right_obj )
 {
-   return Point3Di( x + right_obj.x, y + right_obj.y, z + right_obj.z );
+   return Point3Di( mX + right_obj.mX, mY + right_obj.mY, mZ + right_obj.mZ );
 }
 
 Point3Df operator * ( float a, const Point3Df& obj )
 {
-    return Point3Df( a * obj.x, a * obj.y, a * obj.z );
+    return Point3Df( a * obj.mX, a * obj.mY, a * obj.mZ );
 }
 
 Point3Df GetNormalVector( Point3Df p1, Point3Df p2, Point3Df p3 )
 {
-	Point3Df a( p3.x - p1.x, p3.y - p1.y, p3.z - p1.z );
-	Point3Df b( p2.x - p1.x, p2.y - p1.y, p2.z - p1.z );
-	Point3Df n = Point3Df( a.y * b.z - b.y * a.z, a.z * b.x - a.x * b.z , a.x * b.y - b.x * a.y  );
-	float vector_length = sqrt( n.x * n.x + n.y * n.y + n.z * n.z );
-	return Point3Df( n.x / vector_length, n.y / vector_length, n.z / vector_length  );
+	Point3Df a( p3.mX - p1.mX, p3.mY - p1.mY, p3.mZ - p1.mZ );
+	Point3Df b( p2.mX - p1.mX, p2.mY - p1.mY, p2.mZ - p1.mZ );
+	Point3Df n = Point3Df( a.mY * b.mZ - b.mY * a.mZ, a.mZ * b.mX - a.mX * b.mZ , a.mX * b.mY - b.mX * a.mY  );
+	float vector_length = sqrt( n.mX * n.mX + n.mY * n.mY + n.mZ * n.mZ );
+	return Point3Df( n.mX / vector_length, n.mY / vector_length, n.mZ / vector_length  );
 }
 
 Point2Df& Point2Df :: operator = ( const Point2Df& right_obj )
 {
-    x = right_obj.x;
-    y = right_obj.y;
+    mX = right_obj.mX;
+    mY = right_obj.mY;
 
     return *this;
 
@@ -89,12 +89,12 @@ Point2Df& Point2Df :: operator = ( const Point2Df& right_obj )
 
 Point2Df Point2Df :: operator - ( const Point2Df& right_obj )
 {
-    return Point2Df( x - right_obj.x, y - right_obj.y );
+    return Point2Df( mX - right_obj.mX, mY - right_obj.mY );
 }
 
 Point2Df Point2Df :: operator + ( const Point2Df& right_obj )
 {
-    return Point2Df( x + right_obj.x, y + right_obj.y );
+    return Point2Df( mX + right_obj.mX, mY + right_obj.mY );
 }
 
 int Geometry :: Sign( float a )
@@ -125,7 +125,7 @@ float Geometry :: Min( float a, float b )
 
 float Geometry :: ScalarMul( const Point3Df& a, const Point3Df& b )
 {
-    return a.x * b.x + a.y * b.y + a.z * b.z;
+    return a.mX * b.mX + a.mY * b.mY + a.mZ * b.mZ;
 }
 
 float Geometry :: ScalarMul( const Point3Di& a, const Point3Di& b )
@@ -135,12 +135,12 @@ float Geometry :: ScalarMul( const Point3Di& a, const Point3Di& b )
 
 Point3Df Geometry :: VectorMul( const Point3Df& a, const Point3Df& b )
 {
-    return Point3Df( a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x );
+    return Point3Df( a.mY * b.mZ - a.mZ * b.mY, a.mZ * b.mX - a.mX * b.mZ, a.mX * b.mY - a.mY * b.mX );
 }
 
 Point3Di Geometry :: VectorMul( const Point3Di& a, const Point3Di& b )
 {
-    return Point3Di( a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x );
+    return Point3Di( a.mY * b.mZ - a.mZ * b.mY, a.mZ * b.mX - a.mX * b.mZ, a.mX * b.mY - a.mY * b.mX );
 }
 
 
@@ -156,10 +156,20 @@ float Geometry :: MixedMul( const Point3Di& a, const Point3Di& b, const Point3Di
 
 float Point3Df :: Length()
 {
-    return x * x + y * y + z * z;
+    return mX * mX + mY * mY + mZ * mZ;
 }
 
 int Point3Di :: Length()
 {
-    return x * x + y * y + z * z;
+    return mX * mX + mY * mY + mZ * mZ;
+}
+
+float Geometry :: Square( float aValue )
+{
+    return aValue * aValue;
+}
+
+float Geometry :: ParalSquare( Point2Df& aA, Point2Df& aB )
+{
+    return aA.mX * aB.mY - aA.mY * aB.mX;
 }

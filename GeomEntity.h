@@ -6,8 +6,8 @@
 class GeomEntity
 {
 protected:
-    Point3Di	    pos_i;
-    Point3Df	    pos_f;
+    Point3Di	    mPosI;
+    Point3Df	    mPosF;
 public:
                     GeomEntity( int new_x, int new_y, int new_z );
                     GeomEntity( float new_x, float new_y, float new_z );

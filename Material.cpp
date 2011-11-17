@@ -5,39 +5,39 @@ Material :: Material( float a_r, float a_g, float a_b, float a_a,
 		      float s_r, float s_g, float s_b, float s_a
 		    )
 {
-    material_for_ambient[ 0 ] = a_r;
-    material_for_ambient[ 1 ] = a_g;
-    material_for_ambient[ 2 ] = a_b;
-    material_for_ambient[ 3 ] = a_a;
+    mAmbient[ 0 ] = a_r;
+    mAmbient[ 1 ] = a_g;
+    mAmbient[ 2 ] = a_b;
+    mAmbient[ 3 ] = a_a;
 
-    material_for_diffuse[ 0 ] = d_r;
-    material_for_diffuse[ 1 ] = d_g;
-    material_for_diffuse[ 2 ] = d_b;
-    material_for_diffuse[ 3 ] = d_a;
+    mDiffuse[ 0 ] = d_r;
+    mDiffuse[ 1 ] = d_g;
+    mDiffuse[ 2 ] = d_b;
+    mDiffuse[ 3 ] = d_a;
 
-    material_for_specular[ 0 ] = s_r;
-    material_for_specular[ 1 ] = s_g;
-    material_for_specular[ 2 ] = s_b;
-    material_for_specular[ 3 ] = s_a;
+    mSpecular[ 0 ] = s_r;
+    mSpecular[ 1 ] = s_g;
+    mSpecular[ 2 ] = s_b;
+    mSpecular[ 3 ] = s_a;
 }
 
 const float* Material :: GetMaterialForAmbient()
 {
-    return material_for_ambient;
+    return mAmbient;
 }
 
 const float* Material :: GetMaterialForDiffuse()
 {
-    return material_for_diffuse;
+    return mDiffuse;
 }
 
 const float* Material :: GetMaterialForSpecular()
 {
-    return material_for_specular;
+    return mSpecular;
 }
 
 Material :: Material()
 {
     for ( int i = 0; i < 4; i++ )
-        material_for_ambient[ i ] = material_for_diffuse[ i ] = material_for_specular[ i ] = 0.0f;
+        mAmbient[ i ] = mDiffuse[ i ] = mSpecular[ i ] = 0.0f;
 }

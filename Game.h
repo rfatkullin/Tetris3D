@@ -8,60 +8,63 @@ class Game : public QObject
 {
     Q_OBJECT
 public slots :
-    void        Start();
+    void                        Start();
 public:
-    enum	RotatePlane	{ PLANE_XY, PLANE_ZY, PLANE_ZX };
-    enum	RotateSide	{ ROTATE_BY_CLOCK_WISE = -1,
-                                  ROTATE_BY_ANTI_CLOCKWISE = 1 };
-    enum        Axises          { XAxis, YAxis, ZAxis };
+    enum                        RotatePlane { PLANE_XY,
+                                              PLANE_ZY,
+                                              PLANE_ZX };
 
-    enum	ShiftDirection	{ ShiftDirectly = 1,
-                                  ShiftBack     = -1 };
+    enum                        RotateSide { ROTATE_BY_CLOCK_WISE     = 1,
+                                             ROTATE_BY_ANTI_CLOCKWISE = -1 };
 
-    enum        GameSpeed       { ZERO_SPEED    = 0,
-                                  FIRST_SPEED   = 1,
-                                  SECOND_SPEED  = 2,
-                                  THIRD_SPEED   = 4,
-                                  FOURTH_SPEED  = 8,
-                                  FIFTH_SPEED   = 10,
-                                  SIXTH_SPEED   = 12,
-                                  SEVENTH_SPEED = 14 };
+    enum                        Axises { X_AXIS,
+                                         Y_AXIS,
+                                         Z_AXIS };
 
-    enum         MaterialTypes { FiguresMaterials = 6,
-                                 SelectFigureMaterial = 6,
-                                 BottomFiguresMaterial = 7 };
+    enum                        ShiftDirection { SHIFT_DIRECTLY = 1,
+                                                 SHIFT_BACK     = -1 };
 
-       enum   GameConstants { Width             = 12,
-                              Length            = 12,
-                              Height            = 20,
-                              FieldBeginX       = 1,
-                              FieldBeginY       = 1,
-                              FieldBeginZ       = 1,
-                              FieldEndX         = Length - 1,
-                              FieldEndY         = Height - 1,
-                              FieldEndZ         = Width - 1,
-                              FieldLowerBoundX  = FieldBeginX * Block :: BlockSize,
-                              FieldUpperBoundX  = FieldEndX   * Block :: BlockSize,
-                              FieldLowerBoundY  = FieldBeginY * Block :: BlockSize,
-                              FieldUpperBoundY  = FieldEndY   * Block :: BlockSize,
-                              FieldLowerBoundZ  = FieldBeginZ * Block :: BlockSize,
-                              FieldUpperBoundZ  = FieldEndZ   * Block :: BlockSize,
-                              RotateStepsCount  = 20,
-                              BSize             = Block :: BlockSize,
-                              FiguresMaxCnt     = 7,
-                              FIGURE_START_Y_POS = FieldEndY - 2
-                            };
+    enum                        GameSpeed { ZERO_SPEED    = 0,
+                                            FIRST_SPEED   = 1,
+                                            SECOND_SPEED  = 2,
+                                            THIRD_SPEED   = 4,
+                                            FOURTH_SPEED  = 8,
+                                            FIFTH_SPEED   = 10,
+                                            SIXTH_SPEED   = 12,
+                                            SEVENTH_SPEED = 14 };
 
-                             Game();
+    enum                        MaterialType { FIGURES_MATERIALS        = 6,
+                                               SELECT_FIGURES_MATERIALS = 6,
+                                               BOTTOM_FIGURES_MATERIALS = 7 };
 
-    static void		InitializeStaticData();
-    Point3Df		GetCameraPosition() const;
-    Point3Df		GetLastMousePosition();
-    Point2Df		GetFigurePositionOnXZ( int width_x, int width_z );
+    enum                        GameConstants { WIDTH                = 8,
+                                                LENGTH               = 8,
+                                                HEIGHT               = 20,
+                                                FIELD_BEGIN_X        = 1,
+                                                FIELD_BEGIN_Y         = 1,
+                                                FIELD_BEGIN_Z        = 1,
+                                                FIELD_END_X          = LENGTH - 1,
+                                                FIELD_END_Y          = HEIGHT - 1,
+                                                FIELD_END_Z          = WIDTH - 1,
+                                                FIELD_LOWER_BOUND_X  = FIELD_BEGIN_X * Block :: BLOCK_SIZE,
+                                                FIELD_UPPER_BOUND_X  = FIELD_END_X   * Block :: BLOCK_SIZE,
+                                                FIELD_LOWER_BOUND_Y  = FIELD_BEGIN_Y  * Block :: BLOCK_SIZE,
+                                                FIELD_UPPER_BOUND_Y  = FIELD_END_Y   * Block :: BLOCK_SIZE,
+                                                FIELD_LOWER_BOUND_Z  = FIELD_BEGIN_Z * Block :: BLOCK_SIZE,
+                                                FIELD_UPPER_BOUND_Z  = FIELD_END_Z   * Block :: BLOCK_SIZE,
+                                                ROTATE_STEPS_COUNT   = 20,
+                                                BSIZE                = Block :: BLOCK_SIZE,
+                                                HALF_BSIZE           = Block :: BLOCK_SIZE / 2,
+                                                FIGURES_MAX_CNT      = 7,
+                                                FIGURE_START_Y_POS   = FIELD_END_Y - 2
+                                };   
+
+                                Game();
+
+    static void                 InitializeStaticData();
+    Point2Df                    GetFigurePositionOnXZ( int width_x, int width_z );
     Figure*			GetNewFigure();
     float*			GetLightPosition() const;
-    void			SetLastMousePosition( float x, float y );
-    void			ChangeCameraPosition( float x, float y );
     void			DrawWorld() const;
     void			DrawField() const;
     void			DrawInterface() const ;
@@ -72,63 +75,56 @@ public:
     void			ShiftFigureByZAxis( ShiftDirection shift );
     void			Rotate( RotatePlane plane, RotateSide side );
     void			DropDownFigure();
-    void                    ChangePause();
-    bool                    IsPause();
-    void                    SetShift( Axises axis, ShiftDirection direction );
-    void                    GetSelectFigures( bool* select_figures );
-    void                    SetSelectFigures( bool* select_figures );
-
-
+    void                        ChangePause();
+    bool                        IsPause();
+    void                        SetShift( Axises axis, ShiftDirection direction );
+    void                        GetSelectFigures( bool* select_figures );
+    void                        SetSelectFigures( bool* select_figures );
 private:
-    enum LightPosition  { LightPosByX = 400 , LightPosByY = 800, LightPosByZ = 300 };
-    static const int    SafetyDistance;
-    static const float	CameraRadius;
-    static const float	CameraPosChangeKoeff;
-    static float	light_position[ 4 ];
-    static Figures      game_figures[ FiguresMaxCnt ];
+    enum                        LightPosition  { LightPosByX = 400 , LightPosByY = 800, LightPosByZ = 300 };
+    static const int            SAFETY_DISTANCE;
 
-    std :: vector < Figures >   present_figures;
-    std :: vector < Block* >	mBoardBlocks;//board_blocks;//[ Length ][ Height ][ Width ];
-    Block*			mpField[ Length ][ Height ][ Width ];
-    int                         count_of_blocks_on_field;
-//Camera manipulating
-    SphericalCoor		camera_position;
-    Point3Df		last_mouse_position;
-    float			Sign( float a );
-//Figures
+
+    static float                msLightPosition[ 4 ];
+    static Figures              msGameFigures[ FIGURES_MAX_CNT ];
+
+    std :: vector < Figures >   mPresentFigures;
+    std :: vector < Block* >	mBoardBlocks;
+    Block*			mpField[ LENGTH ][ HEIGHT ][ WIDTH ];
+    int                         mFieldBlockCnt;
+
     Figure*			mpCurrentFigure;
-    Figure*			next_figure;
-//Game state
-    unsigned int		score;
-    bool			mIsGame;//is_game;
-//Moving
+    Figure*			mpNextFigure;
+
+    unsigned int		mScore;
+    bool			mIsGame;
+
+    GameSpeed                   mGameSpeed;
+    float			mRotatingAngle;
+    bool			mIsRotate;
     void			MoveDownFigure();
-    GameSpeed                  mGameSpeed;//game_speed;
-    float			rotating_angle;
-    bool			rotating;
-    bool			is_pos_change;
-    int			mFigureDownSteps;
-    int			rotating_step;
-//Rotating
-    RotatePlane		rotating_plane;
-    Point3Di		figure_pos_correct_vec;
-    int			figure_pos_correct_step;
-    bool                    CheckToRotate( RotatePlane rotating_plane, float rotating_angle );
+
+    int                         mFigureDownSteps;
+    int                         mRotatingStep;
+
+    RotatePlane                 mRotatingPlane;
+    Point3Di                    mFigurePosCorrectVec;
+    int                         mFigurePosCirrectStep;
+    bool                        CheckToRotate(/* RotatePlane aRotatingPlane, float aRotatingAngle */);
     bool			CheckToCollisionByXY();
 
-//Collapse
-    bool			mIsCollapse;
-    void			CheckToCollapse();
-    int                     mCollapseStepsCnt;//collapse_steps_count;
-//Selecting block to show where will fall the figure
-    static const int        MaxSelectBlockCount = 4;
-    Point3Di                select_blocks_pos[ MaxSelectBlockCount ];
-    Material                select_blocks_materials[ MaxSelectBlockCount ];
-    void                    ChangeSelectBlocks();
-//Shift
-    int                     count_of_shift_checks;
-    Axises                  shift_axis;
-    ShiftDirection          shift_direction;
+    bool                        mIsCollapse;
+    int                         mCollapseStepsCnt;
+    void                        CheckToCollapse();
+
+    static const int            MaxSelectBlockCount = 4;
+    Point3Di                    mSelectBLocksPos[ MaxSelectBlockCount ];
+    Material                    mSelectBlocksMaterials[ MaxSelectBlockCount ];
+    void                        ChangeSelectBlocks();
+
+    int                         mShiftChecksCnt;
+    Axises                      mShiftAxis;
+    ShiftDirection              mShiftDirection;
 };
 
 #endif

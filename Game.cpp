@@ -4,35 +4,34 @@
 #include <time.h>
 #include "Game.h"
 
-const int       Game :: SafetyDistance = 16.0 * BSize * BSize;
-const float	Game :: CameraPosChangeKoeff =	0.01f;
-const float	Game :: CameraRadius = 1000.0f;
-float		Game :: light_position[ 4 ];
-Figures         Game :: game_figures[ Game :: FiguresMaxCnt ];
+const int       Game :: SAFETY_DISTANCE = 16.0 * BSIZE * BSIZE;
+
+float		Game :: msLightPosition[ 4 ];
+Figures         Game :: msGameFigures[ Game :: FIGURES_MAX_CNT ];
 
 void Game :: InitializeStaticData()
 {
-    light_position[ 0 ] = LightPosByX;
-    light_position[ 1 ] = LightPosByY;
-    light_position[ 2 ] = LightPosByZ;
-    light_position[ 3 ] = 1.0f;
+    msLightPosition[ 0 ] = LightPosByX;
+    msLightPosition[ 1 ] = LightPosByY;
+    msLightPosition[ 2 ] = LightPosByZ;
+    msLightPosition[ 3 ] = 1.0f;
 
-    game_figures[ 0 ] = IFigure;
-    game_figures[ 1 ] = JFigure;
-    game_figures[ 2 ] = LFigure;
-    game_figures[ 3 ] = OFigure;
-    game_figures[ 4 ] = SFigure;
-    game_figures[ 5 ] = TFigure;
-    game_figures[ 6 ] = ZFigure;
+    msGameFigures[ 0 ] = IFigure;
+    msGameFigures[ 1 ] = JFigure;
+    msGameFigures[ 2 ] = LFigure;
+    msGameFigures[ 3 ] = OFigure;
+    msGameFigures[ 4 ] = SFigure;
+    msGameFigures[ 5 ] = TFigure;
+    msGameFigures[ 6 ] = ZFigure;
 }
 
 Game :: Game() : QObject()
 {
     InitializeStaticData();
 
-    present_figures.clear();
-    for ( int i = 0; i < FiguresMaxCnt; i++ )
-        present_figures.push_back( game_figures[ i ] );
+    mPresentFigures.clear();
+    for ( int i = 0; i < FIGURES_MAX_CNT; i++ )
+        mPresentFigures.push_back( msGameFigures[ i ] );
     Start();
 }
 
@@ -42,84 +41,82 @@ void Game :: Start()
     Point3Di block_pos;
     int      block_length_pos;
     int      block_width_pos;
-    figure_pos_correct_step     =   0;
-    last_mouse_position         =   Point3Df( 0.0f, 0.0f, 0.0f );
-    camera_position             =   SphericalCoor( pi / 4, pi / 4 );
-    mpCurrentFigure             =   GetNewFigure();
-    mFigureDownSteps            =   0;
-    count_of_blocks_on_field	=   0;
-    next_figure                 =   GetNewFigure();
-    is_pos_change               =   false;
-    rotating_step               =   0;
-    mGameSpeed                  =   FIRST_SPEED;
-    rotating                    =   false;
-    score                       =   0;
-    mIsGame                     =   true;
-    mIsCollapse                 =   false;
-    count_of_shift_checks       =   0;
+
+    mFigurePosCirrectStep      =   0;
+    mpCurrentFigure            =   GetNewFigure();
+    mFigureDownSteps           =   0;
+    mFieldBlockCnt             =   0;
+    mpNextFigure               =   GetNewFigure();
+    mRotatingStep              =   0;
+    mGameSpeed                 =   FIRST_SPEED;
+    mIsRotate                  =   false;
+    mScore                     =   0;
+    mIsGame                    =   true;
+    mIsCollapse                =   false;
+    mShiftChecksCnt            =   0;
 
     srand( time( 0 ) );
 
-    for ( int i = 0; i < Length; ++i )
-        for ( int j = 0; j < Width; ++j )
-            for ( int k = 0; k < Height; ++k )
+    for ( int i = 0; i < LENGTH; ++i )
+        for ( int j = 0; j < WIDTH; ++j )
+            for ( int k = 0; k < HEIGHT; ++k )
                 mpField[ i ][ k ][ j ] = NULL;
 
-     for ( int i = 1; i < Height - 1; ++i )
+     for ( int i = 1; i < HEIGHT - 1; ++i )
     {
-        for ( int j = 0; j < Length; ++j )
+        for ( int j = 0; j < LENGTH; ++j )
         {
-            mpField[ j ][ i ][ 0 ]         = new Block( BSize / 2 + j * BSize,
-                                                        BSize / 2 + i * BSize,
-                                                        BSize / 2 ,
-                                                        materials[ BottomFiguresMaterial ] );
+            mpField[ j ][ i ][ 0 ]         = new Block( HALF_BSIZE + j * BSIZE,
+                                                        HALF_BSIZE + i * BSIZE,
+                                                        HALF_BSIZE ,
+                                                        materials[ BOTTOM_FIGURES_MATERIALS ] );
 
-            mpField[ j ][ i ][ Width - 1 ] = new Block( BSize / 2 + j * BSize,
-                                                        BSize / 2 + i * BSize,
-                                                        BSize / 2 + ( Width - 1 ) * BSize,
-                                                        materials[ BottomFiguresMaterial ] );
+            mpField[ j ][ i ][ WIDTH - 1 ] = new Block( HALF_BSIZE + j * BSIZE,
+                                                        HALF_BSIZE + i * BSIZE,
+                                                        HALF_BSIZE + ( WIDTH - 1 ) * BSIZE,
+                                                        materials[ BOTTOM_FIGURES_MATERIALS ] );
 
             mBoardBlocks.push_back( mpField[ j ][ i ][ 0 ] );
-            mBoardBlocks.push_back( mpField[ j ][ i ][ Width - 1 ] );
+            mBoardBlocks.push_back( mpField[ j ][ i ][ WIDTH - 1 ] );
         }
 
-        for ( int j = 0; j < Width; ++j )
+        for ( int j = 0; j < WIDTH; ++j )
         {
-            mpField[ 0 ][ i ][ j ]          = new Block( BSize / 2,
-                                                         BSize / 2 + i * BSize,
-                                                         BSize / 2 + j * BSize,
-                                                         materials[ BottomFiguresMaterial ] );
+            mpField[ 0 ][ i ][ j ]          = new Block( BSIZE / 2,
+                                                         HALF_BSIZE + i * BSIZE,
+                                                         HALF_BSIZE + j * BSIZE,
+                                                         materials[ BOTTOM_FIGURES_MATERIALS ] );
 
-            mpField[ Length - 1 ][ i ][ j ] = new Block( BSize / 2 + ( Length - 1 ) * BSize,
-                                                         BSize / 2 + i * BSize,
-                                                         BSize / 2 + j * BSize,
-                                                         materials[ BottomFiguresMaterial ] );
+            mpField[ LENGTH - 1 ][ i ][ j ] = new Block( HALF_BSIZE + ( LENGTH - 1 ) * BSIZE,
+                                                         HALF_BSIZE + i * BSIZE,
+                                                         HALF_BSIZE + j * BSIZE,
+                                                         materials[ BOTTOM_FIGURES_MATERIALS ] );
 
             mBoardBlocks.push_back( mpField[ 0 ][ i ][ j ] );
-            mBoardBlocks.push_back( mpField[ Length - 1 ][ i ][ j ] );
+            mBoardBlocks.push_back( mpField[ LENGTH - 1 ][ i ][ j ] );
         }
     }
 
-     for ( int i = 0; i < Length; ++i )
-        for ( int j = 0; j < Width; ++j )
+     for ( int i = 0; i < LENGTH; ++i )
+        for ( int j = 0; j < WIDTH; ++j )
         {
-            mpField[ i ][ 0 ][ j ] = new Block( BSize / 2 + i * BSize,
-                                                BSize / 2,
-                                                BSize / 2 + j * BSize,
-                                                materials[ BottomFiguresMaterial ] );
+            mpField[ i ][ 0 ][ j ] = new Block( HALF_BSIZE + i * BSIZE,
+                                                BSIZE / 2,
+                                                HALF_BSIZE + j * BSIZE,
+                                                materials[ BOTTOM_FIGURES_MATERIALS ] );
 
             mBoardBlocks.push_back( mpField[ i ][ 0 ][ j ] );
         }
 
-     for ( int i = 0; i < Length; ++i )
-        for ( int j = 0; j < Width; ++j )
+     for ( int i = 0; i < LENGTH; ++i )
+        for ( int j = 0; j < WIDTH; ++j )
         {
-            mpField[ i ][ Height - 1 ][ j ] = new Block( BSize / 2 + i * BSize,
-                                                         BSize / 2 + ( Height - 1 ) * BSize,
-                                                         BSize / 2 + j * BSize,
-                                                         materials[ BottomFiguresMaterial ] );
+            mpField[ i ][ HEIGHT - 1 ][ j ] = new Block( HALF_BSIZE + i * BSIZE,
+                                                         HALF_BSIZE + ( HEIGHT - 1 ) * BSIZE,
+                                                         HALF_BSIZE + j * BSIZE,
+                                                         materials[ BOTTOM_FIGURES_MATERIALS ] );
 
-            mBoardBlocks.push_back( mpField[ i ][ Height - 1 ][ j ] );
+            mBoardBlocks.push_back( mpField[ i ][ HEIGHT - 1 ][ j ] );
         }
 
     //Select blocks
@@ -127,65 +124,69 @@ void Game :: Start()
     for ( unsigned int i = 0; i < Figure :: BlocksCount; i++ )
     {
         block_pos = mpCurrentFigure -> GetBlockPosByIndexi( i ) + fig_pos;
-        block_length_pos = block_pos.x / Game :: BSize;
-        block_width_pos  = block_pos.z / Game :: BSize;
+        block_length_pos = block_pos.mX / Game :: BSIZE;
+        block_width_pos  = block_pos.mZ / Game :: BSIZE;
 
-        select_blocks_pos[ i ] = Point3Di( block_length_pos, 0, block_width_pos );
-        select_blocks_materials[ i ] = mpField[ block_length_pos ][ 0 ][ block_width_pos ] -> GetMaterial();
+        mSelectBLocksPos[ i ] = Point3Di( block_length_pos, 0, block_width_pos );
+        mSelectBlocksMaterials[ i ] = mpField[ block_length_pos ][ 0 ][ block_width_pos ] -> GetMaterial();
     }
 
     for ( unsigned int i = 0; i < Figure :: BlocksCount; i++ )
-        mpField[ select_blocks_pos[ i ].x ][ select_blocks_pos[ i ].y ][ select_blocks_pos[ i ].z ] -> SetMaterial( materials[ SelectFigureMaterial ] );
+        mpField[ mSelectBLocksPos[ i ].mX ][ mSelectBLocksPos[ i ].mY ][ mSelectBLocksPos[ i ].mZ ]
+            -> SetMaterial( materials[ SELECT_FIGURES_MATERIALS ] );
  }
 
 Point2Df Game :: GetFigurePositionOnXZ( int width_x, int width_z )
 {
-    if ( ( width_x / 2 ) % BSize == 0 )
+    if ( ( width_x / 2 ) % BSIZE == 0 )
     {
-        if ( ( width_z / 2 ) % BSize == 0 )
+        if ( ( width_z / 2 ) % BSIZE == 0 )
 	    return Point2Df( 0.0f, 0.0f );
 	else
-            return Point2Df( 0.0f, BSize / 2 );
+            return Point2Df( 0.0f, HALF_BSIZE );
     }
     else
     {
-        if ( ( width_z / 2 ) % BSize == 0 )
-            return Point2Df( BSize / 2, 0.0f );
+        if ( ( width_z / 2 ) % BSIZE == 0 )
+            return Point2Df( BSIZE / 2, 0.0f );
 	else
-            return Point2Df( BSize / 2, BSize / 2 );
+            return Point2Df( BSIZE / 2, HALF_BSIZE );
     }
 }
 
 Figure* Game :: GetNewFigure()
 {
-    Point2Df figure_pos;
-    int lower_bound_x,
-	upper_bound_x,
-	lower_bound_y,
-	upper_bound_y,
-	lower_bound_z,
-        upper_bound_z,
-        y_position  = FIGURE_START_Y_POS  * BSize;
+    Point2Df    figure_pos;
+    int         lower_bound_x;
+    int     	upper_bound_x;
+    int         lower_bound_y;
+    int         upper_bound_y;
+    int         lower_bound_z;
+    int         upper_bound_z;
+    int         y_position  = FIGURE_START_Y_POS  * BSIZE;
 
-    next_figure = new Figure( 0.0f, 0.0f, 0.0f, present_figures[ rand() % present_figures.size() ], materials[ rand() % FiguresMaterials ] );
-    lower_bound_x = next_figure -> LowerBoundXi();
-    upper_bound_x = next_figure -> UpperBoundXi();
-    lower_bound_y = next_figure -> LowerBoundYi();
-    upper_bound_y = next_figure -> UpperBoundYi();
-    lower_bound_z = next_figure -> LowerBoundZi();
-    upper_bound_z = next_figure -> UpperBoundZi();
+    mpNextFigure = new Figure( 0.0f, 0.0f, 0.0f,
+                               mPresentFigures[ rand() % mPresentFigures.size() ],
+                               materials[ rand() % FIGURES_MATERIALS ] );
+
+    lower_bound_x = mpNextFigure -> LowerBoundXi();
+    upper_bound_x = mpNextFigure -> UpperBoundXi();
+    lower_bound_y = mpNextFigure -> LowerBoundYi();
+    upper_bound_y = mpNextFigure -> UpperBoundYi();
+    lower_bound_z = mpNextFigure -> LowerBoundZi();
+    upper_bound_z = mpNextFigure -> UpperBoundZi();
 
     figure_pos = GetFigurePositionOnXZ( upper_bound_x - lower_bound_x, upper_bound_z - lower_bound_z );
 
     if ( ( upper_bound_y - lower_bound_y ) % 2 != 0 )
-        y_position += BSize / 2;
+        y_position += BSIZE / 2;
 
-    next_figure -> SetPosi( Point3Di( BSize * Game :: Length / 2 + figure_pos.x, y_position, BSize * Game :: Width / 2 + figure_pos.y ) );
+    mpNextFigure -> SetPosi( BSIZE * LENGTH / 2 + figure_pos.mX, y_position, BSIZE * WIDTH / 2 + figure_pos.mY );
 
-    return next_figure;
+    return mpNextFigure;
 }
 
-bool Game :: CheckToRotate( RotatePlane aRotatingPlane, float aRotatingAngle )
+bool Game :: CheckToRotate( )
 {
     std :: vector < Point3Di >  sim_field_blocks_pos;
     std :: vector < Block* >    sim_field_blocks;
@@ -198,17 +199,18 @@ bool Game :: CheckToRotate( RotatePlane aRotatingPlane, float aRotatingAngle )
     float                       sim_distance                = 0.0f;
     int                         sim_collapse_steps_cnt      = mCollapseStepsCnt;
     int                         sim_figure_down_steps       = mFigureDownSteps;
+    int                         block_y_pos_i;
 
     //Collection blocks in SafetyDistance radius
-    for ( int k = FieldBeginY; k < FieldEndY; ++k )
-        for ( int i = FieldBeginX; i < FieldEndX; ++i )
-            for ( int j = FieldBeginZ; j < FieldEndZ; ++j )
+    for ( int k = FIELD_BEGIN_Y; k < FIELD_END_Y; ++k )
+        for ( int i = FIELD_BEGIN_X; i < FIELD_END_X; ++i )
+            for ( int j = FIELD_BEGIN_Z; j < FIELD_END_Z; ++j )
                 if ( mpField[ i ][ k ][ j ] != NULL )
                 {
                     sim_block_pos = mpField[ i ][ k ][ j ] -> GetPosi();
-                    sim_distance = ( sim_figure_pos.x - sim_block_pos.x ) * ( sim_figure_pos.x - sim_block_pos.x ) +
-                        ( sim_figure_pos.z - sim_block_pos.z ) * ( sim_figure_pos.z - sim_block_pos.z );
-                    if ( sim_distance < SafetyDistance )
+                    sim_distance = Geometry :: Square( sim_figure_pos.mX - sim_block_pos.mX ) +
+                                   Geometry :: Square( sim_figure_pos.mZ - sim_block_pos.mZ );
+                    if ( sim_distance < SAFETY_DISTANCE )
                     {
                         sim_field_blocks.push_back( mpField[ i ][ k ][ j ] );
                         sim_field_blocks_pos.push_back( sim_block_pos );
@@ -217,7 +219,7 @@ bool Game :: CheckToRotate( RotatePlane aRotatingPlane, float aRotatingAngle )
 
     sim_field_blocks_cnt = sim_field_blocks.size();
 
-    for ( unsigned int i = 0; ( i < RotateStepsCount ) && ( !sim_is_collision ); ++i )
+    for ( unsigned int i = 0; ( i < ROTATE_STEPS_COUNT ) && ( !sim_is_collision ); ++i )
     {
         sim_figure_down_steps++;
         if ( sim_figure_down_steps == 2 )
@@ -226,12 +228,12 @@ bool Game :: CheckToRotate( RotatePlane aRotatingPlane, float aRotatingAngle )
             sim_figure_down_steps = 0;
         }
 
-        if ( i <= BSize / 2 )
-            sim_collis_figure -> SetPosi( sim_collis_figure -> GetPosi() + figure_pos_correct_vec );
+        if ( i <= HALF_BSIZE )
+            sim_collis_figure -> SetPosi( sim_collis_figure -> GetPosi() + mFigurePosCorrectVec );
 
-        sim_final_angle = i * aRotatingAngle;
+        sim_final_angle = i * mRotatingAngle;
 
-        switch ( rotating_plane )
+        switch ( mRotatingPlane )
         {
         case PLANE_XY :
             sim_collis_figure -> RotateOnXY( sim_final_angle, false );
@@ -248,13 +250,17 @@ bool Game :: CheckToRotate( RotatePlane aRotatingPlane, float aRotatingAngle )
         {
             sim_collapse_steps_cnt--;
 
+            block_y_pos_i = sim_field_blocks[ i ] -> GetPosByYi();
+
             if ( sim_collapse_steps_cnt > 0 )
                 for ( int i = 0; i < sim_field_blocks_cnt; i++ )
-                    sim_field_blocks[ i ] -> SetPosi( sim_field_blocks[ i ] -> GetPosi() - Point3Di( 0, SEVENTH_SPEED, 0 ) );
+                    sim_field_blocks[ i ] -> SetPosByYi( block_y_pos_i - SEVENTH_SPEED );
             else
                 for ( int i = 0; i < sim_field_blocks_cnt; i++ )
-                    sim_field_blocks[ i ] -> SetPosi( sim_field_blocks[ i ] -> GetPosi() -
-                        Point3Di( 0, ( sim_field_blocks[ i ] -> GetPosByYi() - SEVENTH_SPEED + BSize / 2 ) / ( BSize / 2 ) * ( BSize / 2 ), 0 ) );
+                {
+                    sim_field_blocks[ i ] -> SetPosByYi(
+                        block_y_pos_i - ( block_y_pos_i - SEVENTH_SPEED + HALF_BSIZE ) / HALF_BSIZE * HALF_BSIZE );
+                }
         }
 
         sim_is_collision = sim_collis_figure -> CheckToCollisonWithBlocks( sim_field_blocks ) ||
@@ -273,11 +279,11 @@ void Game :: CheckToCollapse()
     bool    full	= false;
     int	    full_levels = 0;
 
-    for ( int k = FieldBeginY; k < FieldEndY; ++k )
+    for ( int k = FIELD_BEGIN_Y; k < FIELD_END_Y; ++k )
     {
 	full = true;
-        for ( int i = FieldBeginX; ( i < FieldEndX ) && ( full ); ++i )
-            for ( int j = FieldBeginZ; j < FieldEndZ; ++j )
+        for ( int i = FIELD_BEGIN_X; ( i < FIELD_END_X ) && ( full ); ++i )
+            for ( int j = FIELD_BEGIN_Z; j < FIELD_END_Z; ++j )
                 if ( mpField[ i ][ k ][ j ] == NULL )
 		{
 		    full = false;
@@ -289,26 +295,26 @@ void Game :: CheckToCollapse()
 
     if ( full_levels > 0 )
     {
-        for ( int k = FieldBeginY; k < FieldEndY; k++ )
+        for ( int k = FIELD_BEGIN_Y; k < FIELD_END_Y; k++ )
 	{
-            if ( k < full_levels + FieldBeginY )
-                for ( int i = FieldBeginX; i < FieldEndX; ++i )
-                    for ( int j = FieldBeginZ; j < FieldEndZ; ++j )
+            if ( k < full_levels + FIELD_BEGIN_Y )
+                for ( int i = FIELD_BEGIN_X; i < FIELD_END_X; ++i )
+                    for ( int j = FIELD_BEGIN_Z; j < FIELD_END_Z; ++j )
 		    {
                         delete mpField[ i ][ k ][ j ];
                         mpField[ i ][ k ][ j ] = NULL;
 		    }
 	    else
-                for ( int i = FieldBeginX; i < FieldEndX; ++i )
-                    for ( int j = FieldBeginZ; j < FieldEndZ; ++j )
+                for ( int i = FIELD_BEGIN_X; i < FIELD_END_X; ++i )
+                    for ( int j = FIELD_BEGIN_Z; j < FIELD_END_Z; ++j )
 		    {
                         mpField[ i ][ k - full_levels ][ j ] = mpField[ i ][ k ][ j ];
                         mpField[ i ][ k ][ j ] = NULL;
 		    }
 	}
-        mCollapseStepsCnt = ( full_levels * BSize ) / FIRST_SPEED + 1;
+        mCollapseStepsCnt = ( full_levels * BSIZE ) / FIRST_SPEED + 1;
         mIsCollapse = true;
-        count_of_blocks_on_field -= FieldEndX * FieldEndZ * full_levels;
+        mFieldBlockCnt -= FIELD_END_X * FIELD_END_Z * full_levels;
     }
 }
 
@@ -331,9 +337,9 @@ void Game :: NextStep()
         if ( mCollapseStepsCnt < 0 )
             mIsCollapse = false;
 
-        for ( int k = FieldBeginY; k < FieldEndY; k++ )
-            for ( int i = FieldBeginX; i < FieldEndX; ++i )
-                for ( int j = FieldBeginZ; j < FieldEndZ; ++j )
+        for ( int k = FIELD_BEGIN_Y; k < FIELD_END_Y; k++ )
+            for ( int i = FIELD_BEGIN_X; i < FIELD_END_X; ++i )
+                for ( int j = FIELD_BEGIN_Z; j < FIELD_END_Z; ++j )
                     if ( mpField[ i ][ k ][ j ] != NULL )
                     {
                         if ( mIsCollapse )
@@ -341,9 +347,9 @@ void Game :: NextStep()
                         else
                         {
                             block_pos =  mpField[ i ][ k ][ j ] -> GetPosi();
-                            mpField[ i ][ k ][ j ] -> SetPosi( block_pos.x,
-                                                             ( block_pos.y - mGameSpeed + BSize / 2 ) / ( BSize / 2 ) * ( BSize / 2 ),
-                                                             block_pos.z );
+                            mpField[ i ][ k ][ j ] -> SetPosi( block_pos.mX,
+                                                             ( block_pos.mY - mGameSpeed + HALF_BSIZE ) / ( HALF_BSIZE ) * ( HALF_BSIZE ),
+                                                             block_pos.mZ );
                         }
 
                     }
@@ -358,16 +364,16 @@ void Game :: NextStep()
             mFigureDownSteps = 0;
         }
 
-        if ( ( !rotating ) && ( count_of_shift_checks > 0 ) )
+        if ( ( !mIsRotate ) && ( mShiftChecksCnt > 0 ) )
         {
-            count_of_shift_checks--;
-            switch ( shift_axis )
+            mShiftChecksCnt--;
+            switch ( mShiftAxis )
                 {
-                    case XAxis :
-                        ShiftFigureByXAxis( shift_direction );
+                    case X_AXIS :
+                        ShiftFigureByXAxis( mShiftDirection );
                         break;
-                    case ZAxis :
-                        ShiftFigureByZAxis( shift_direction );
+                    case Z_AXIS :
+                        ShiftFigureByZAxis( mShiftDirection );
                         break;
                     default :
                         break;
@@ -379,14 +385,14 @@ void Game :: NextStep()
         for ( unsigned int  i = 0; ( i < Figure :: BlocksCount ) && ( mIsGame ); i++ )
 	{
             block_pos = figure_pos + mpCurrentFigure -> GetBlockPosByIndexi( i );
-            field_index_by_length = block_pos.x / BSize;
-            field_index_by_height = block_pos.y / BSize;
-            field_index_by_width  = block_pos.z / BSize;
+            field_index_by_length = block_pos.mX / BSIZE;
+            field_index_by_height = block_pos.mY / BSIZE;
+            field_index_by_width  = block_pos.mZ / BSIZE;
 
-            for ( int j = field_index_by_height - 1; j >= FieldBeginY - 1; --j )
+            for ( int j = field_index_by_height - 1; j >= FIELD_BEGIN_Y - 1; --j )
                 if ( mpField[ field_index_by_length ][ j ][ field_index_by_width ] != NULL )
                 {
-                    if ( block_pos.y - BSize / 2 <= Game :: FieldLowerBoundY + j * BSize )
+                    if ( block_pos.mY - HALF_BSIZE <= Game :: FIELD_LOWER_BOUND_Y + j * BSIZE )
                     {
                         mIsGame = false;
                         break;
@@ -396,48 +402,48 @@ void Game :: NextStep()
 
         if ( !mIsGame )
 	{
-            mpCurrentFigure -> SetPosByYi( ( mpCurrentFigure -> GetPosByYi() + mGameSpeed ) / ( BSize / 2 ) * ( BSize / 2  ) );
+            mpCurrentFigure -> SetPosByYi( ( mpCurrentFigure -> GetPosByYi() + mGameSpeed ) / ( HALF_BSIZE ) * ( HALF_BSIZE  ) );
             figure_pos = mpCurrentFigure -> GetPosi();
             for ( unsigned int  i = 0; i < Figure :: BlocksCount; i++ )
 	    {
                 block_pos        = figure_pos + mpCurrentFigure -> GetBlockPosByIndexi( i );
-                field_index_by_length = block_pos.x / BSize;
-                field_index_by_width  = block_pos.z / BSize;
-                field_index_by_height = block_pos.y / BSize;
+                field_index_by_length = block_pos.mX / BSIZE;
+                field_index_by_width  = block_pos.mZ / BSIZE;
+                field_index_by_height = block_pos.mY / BSIZE;
                 mpField[ field_index_by_length ][ field_index_by_height ][ field_index_by_width ]
-		    = new Block( block_pos.x,
-				 block_pos.y,
-				 block_pos.z,
+                    = new Block( block_pos.mX,
+                                 block_pos.mY,
+                                 block_pos.mZ,
                                  mpCurrentFigure -> GetBlockMaterialByIndex( i )
 				);
 	    }
 	    CheckToCollapse();
             delete mpCurrentFigure;
-            mpCurrentFigure    = next_figure;
+            mpCurrentFigure    = mpNextFigure;
             ChangeSelectBlocks();
-	    next_figure	      = GetNewFigure();
+            mpNextFigure	      = GetNewFigure();
             mFigureDownSteps  = 0;
             mGameSpeed	      = FIRST_SPEED;
             mIsGame	      = true;
-            count_of_blocks_on_field += Figure :: BlocksCount;
-            if ( ( !mIsCollapse ) && ( field_index_by_height >= FieldEndY - 3 ) )
+            mFieldBlockCnt += Figure :: BlocksCount;
+            if ( ( !mIsCollapse ) && ( field_index_by_height >= FIELD_END_Y - 3 ) )
 		exit( 0 );
 	}    
 
         //Rotate the figure
-	if ( rotating )
+        if ( mIsRotate )
 	{
-            rotating_step++;
-            if ( rotating_step <= BSize / 2 )
-                mpCurrentFigure -> SetPosi( mpCurrentFigure -> GetPosi() + figure_pos_correct_vec );
-	    final_angle = rotating_step * rotating_angle;
-	    if ( rotating_step == RotateStepsCount )
+            mRotatingStep++;
+            if ( mRotatingStep <= HALF_BSIZE )
+                mpCurrentFigure -> SetPosi( mpCurrentFigure -> GetPosi() + mFigurePosCorrectVec );
+            final_angle = mRotatingStep * mRotatingAngle;
+            if ( mRotatingStep == ROTATE_STEPS_COUNT )
 	    {
-		rotating_step = 0;
-		rotating = false;
+                mRotatingStep = 0;
+                mIsRotate = false;
 		state = true;
 	    }
-	    switch ( rotating_plane )
+            switch ( mRotatingPlane )
 	    {
             case PLANE_XY :
                 mpCurrentFigure -> RotateOnXY( final_angle, state );
@@ -449,7 +455,7 @@ void Game :: NextStep()
                 mpCurrentFigure -> RotateOnZX( final_angle, state );
 	    }
 
-            if ( !rotating )
+            if ( !mIsRotate )
                 ChangeSelectBlocks();
 	}
     }
@@ -464,41 +470,41 @@ void Game :: DrawField() const
     glBegin( GL_LINES );
 	glColor3f( 0.5f, 0.5f, 0.5f );
     //FarGridZ
-        for ( int i = FieldBeginX - 1; i < FieldEndX; i++ )
+        for ( int i = FIELD_BEGIN_X - 1; i < FIELD_END_X; i++ )
         {
-                glVertex3f( FieldLowerBoundX + i * BSize, FieldLowerBoundY, FieldLowerBoundZ );
-                glVertex3f( FieldLowerBoundX + i * BSize, FieldUpperBoundY, FieldLowerBoundZ );
+                glVertex3f( FIELD_LOWER_BOUND_X + i * BSIZE, FIELD_LOWER_BOUND_Y, FIELD_LOWER_BOUND_Z );
+                glVertex3f( FIELD_LOWER_BOUND_X + i * BSIZE, FIELD_UPPER_BOUND_Y, FIELD_LOWER_BOUND_Z );
         }
 
-        for ( int i = FieldBeginY - 1; i < FieldEndY; i++ )
+        for ( int i = FIELD_BEGIN_Y - 1; i < FIELD_END_Y; i++ )
         {
-                glVertex3f( FieldLowerBoundX, FieldLowerBoundY + i * BSize, FieldLowerBoundZ );
-                glVertex3f( FieldUpperBoundX, FieldLowerBoundY + i * BSize, FieldLowerBoundZ );
+                glVertex3f( FIELD_LOWER_BOUND_X, FIELD_LOWER_BOUND_Y + i * BSIZE, FIELD_LOWER_BOUND_Z );
+                glVertex3f( FIELD_UPPER_BOUND_X, FIELD_LOWER_BOUND_Y + i * BSIZE, FIELD_LOWER_BOUND_Z );
         }
     //LowerGrid
 	glColor3f( 1.0f, 1.0f, 1.0f );
-        for ( int i = FieldBeginZ - 1; i < FieldEndZ; i++ )
+        for ( int i = FIELD_BEGIN_Z - 1; i < FIELD_END_Z; i++ )
 	{
-                glVertex3f( FieldLowerBoundX, FieldLowerBoundY, FieldLowerBoundZ + i * BSize );
-                glVertex3f( FieldUpperBoundX, FieldLowerBoundY, FieldLowerBoundZ + i * BSize );
+                glVertex3f( FIELD_LOWER_BOUND_X, FIELD_LOWER_BOUND_Y, FIELD_LOWER_BOUND_Z + i * BSIZE );
+                glVertex3f( FIELD_UPPER_BOUND_X, FIELD_LOWER_BOUND_Y, FIELD_LOWER_BOUND_Z + i * BSIZE );
 	}
 
-        for ( int i = FieldBeginX - 1; i < FieldEndX; i++ )
+        for ( int i = FIELD_BEGIN_X - 1; i < FIELD_END_X; i++ )
 	{
-                glVertex3f(  FieldLowerBoundX + i * BSize, FieldLowerBoundY, FieldLowerBoundZ );
-                glVertex3f(  FieldLowerBoundX + i * BSize, FieldLowerBoundY, FieldUpperBoundZ );
+                glVertex3f(  FIELD_LOWER_BOUND_X + i * BSIZE, FIELD_LOWER_BOUND_Y, FIELD_LOWER_BOUND_Z );
+                glVertex3f(  FIELD_LOWER_BOUND_X + i * BSIZE, FIELD_LOWER_BOUND_Y, FIELD_UPPER_BOUND_Z );
 	}
     //LeftGrid
         glColor3f( 0.5f, 0.0f, 0.0f );
-        for ( int i = FieldBeginZ - 1; i < FieldEndZ; i++ )
+        for ( int i = FIELD_BEGIN_Z - 1; i < FIELD_END_Z; i++ )
         {
-                glVertex3f(  FieldLowerBoundX, FieldLowerBoundY, FieldLowerBoundZ + i * BSize );
-                glVertex3f(  FieldLowerBoundX, FieldUpperBoundY, FieldLowerBoundZ + i * BSize );
+                glVertex3f(  FIELD_LOWER_BOUND_X, FIELD_LOWER_BOUND_Y, FIELD_LOWER_BOUND_Z + i * BSIZE );
+                glVertex3f(  FIELD_LOWER_BOUND_X, FIELD_UPPER_BOUND_Y, FIELD_LOWER_BOUND_Z + i * BSIZE );
         }
-        for ( int i = FieldBeginY - 1; i < FieldEndY; i++ )
+        for ( int i = FIELD_BEGIN_Y - 1; i < FIELD_END_Y; i++ )
         {
-                glVertex3f( FieldLowerBoundX, FieldLowerBoundY + i * BSize, FieldLowerBoundZ );
-                glVertex3f( FieldLowerBoundX, FieldLowerBoundY + i * BSize, FieldUpperBoundZ );
+                glVertex3f( FIELD_LOWER_BOUND_X, FIELD_LOWER_BOUND_Y + i * BSIZE, FIELD_LOWER_BOUND_Z );
+                glVertex3f( FIELD_LOWER_BOUND_X, FIELD_LOWER_BOUND_Y + i * BSIZE, FIELD_UPPER_BOUND_Z );
         }
     glEnd();
 
@@ -509,9 +515,9 @@ void Game :: DrawBlocksOnTheField() const
 {
     Point3Df rel_position( 0.0f, 0.0f, 0.0f );
 
-    for ( int i = FieldBeginX; i < FieldEndX; ++i )
-	for ( int j = FieldBeginZ; j < FieldEndZ; ++j )
-            for ( int k = FieldBeginY - 1; k < FieldEndY; ++k )
+    for ( int i = FIELD_BEGIN_X; i < FIELD_END_X; ++i )
+        for ( int j = FIELD_BEGIN_Z; j < FIELD_END_Z; ++j )
+            for ( int k = FIELD_BEGIN_Y - 1; k < FIELD_END_Y; ++k )
                 if ( mpField[ i ][ k ][ j ] != NULL )
                     mpField[ i ][ k ][ j ] -> Draw( rel_position );
 }
@@ -532,7 +538,7 @@ void Game :: DrawWorld() const
 
 float* Game :: GetLightPosition() const
 {
-    return light_position;    
+    return msLightPosition;
 }
 
 
@@ -542,21 +548,21 @@ void Game :: ShiftFigureByXAxis( ShiftDirection shift )
     int                         x_coor_collision_blocks;
 
     if ( shift < 0 )
-        x_coor_collision_blocks = mpCurrentFigure -> GetLeftMostBlockPosi().x / BSize;
+        x_coor_collision_blocks = mpCurrentFigure -> GetLeftMostBlockPosi().mX / BSIZE;
     else
-        x_coor_collision_blocks = mpCurrentFigure -> GetRightMostBlockPosi().x / BSize;
+        x_coor_collision_blocks = mpCurrentFigure -> GetRightMostBlockPosi().mX / BSIZE;
 
-    for ( int i = FieldBeginY; i < FieldEndY; ++i )
-        for ( int j = FieldBeginZ; j < FieldEndZ; ++j )
-            if ( ( x_coor_collision_blocks + shift >= 0 ) && ( x_coor_collision_blocks + shift < Length ) && ( mpField[ x_coor_collision_blocks + shift ][ i ][ j ] != NULL ) )
+    for ( int i = FIELD_BEGIN_Y; i < FIELD_END_Y; ++i )
+        for ( int j = FIELD_BEGIN_Z; j < FIELD_END_Z; ++j )
+            if ( ( x_coor_collision_blocks + shift >= 0 ) && ( x_coor_collision_blocks + shift < LENGTH ) && ( mpField[ x_coor_collision_blocks + shift ][ i ][ j ] != NULL ) )
                 collision_block.push_back( mpField[ x_coor_collision_blocks + shift ][ i ][ j ] );
 
-    mpCurrentFigure -> SetPosi( mpCurrentFigure -> GetPosi() + Point3Di( shift * BSize, 0, 0 ) );
+    mpCurrentFigure -> SetPosi( mpCurrentFigure -> GetPosi() + Point3Di( shift * BSIZE, 0, 0 ) );
     if ( mpCurrentFigure -> CheckToCollisonWithBlocks( collision_block ) ) //Cancel shift
-        mpCurrentFigure -> SetPosi( mpCurrentFigure -> GetPosi() - Point3Di( shift * BSize, 0, 0 ) );
+        mpCurrentFigure -> SetPosi( mpCurrentFigure -> GetPosi() - Point3Di( shift * BSIZE, 0, 0 ) );
     else
     {
-        count_of_shift_checks = 0;
+        mShiftChecksCnt = 0;
         ChangeSelectBlocks();
     }
 }
@@ -567,34 +573,33 @@ void Game :: ShiftFigureByZAxis( ShiftDirection shift )
     int                         z_coor_collision_blocks;
 
     if ( shift < 0 )
-        z_coor_collision_blocks = mpCurrentFigure -> GetBackMostBlockPosi().z/ BSize;
+        z_coor_collision_blocks = mpCurrentFigure -> GetBackMostBlockPosi().mZ/ BSIZE;
     else
-        z_coor_collision_blocks = mpCurrentFigure -> GetAheadMostBlockPosi().z/ BSize;
+        z_coor_collision_blocks = mpCurrentFigure -> GetAheadMostBlockPosi().mZ/ BSIZE;
 
-    for ( int i = FieldBeginY; i < FieldEndY; ++i )
-        for ( int j = FieldBeginX; j < FieldEndX; ++j )
-            if ( ( z_coor_collision_blocks + shift >= 0  ) && ( z_coor_collision_blocks + shift < Width ) && ( mpField[ j ][ i ][ z_coor_collision_blocks + shift ] != NULL ) )
+    for ( int i = FIELD_BEGIN_Y; i < FIELD_END_Y; ++i )
+        for ( int j = FIELD_BEGIN_X; j < FIELD_END_X; ++j )
+            if ( ( z_coor_collision_blocks + shift >= 0  ) && ( z_coor_collision_blocks + shift < WIDTH ) && ( mpField[ j ][ i ][ z_coor_collision_blocks + shift ] != NULL ) )
               collision_block.push_back( mpField[ j ][ i ][ z_coor_collision_blocks + shift ] );
 
-    mpCurrentFigure -> SetPosi( mpCurrentFigure -> GetPosi() + Point3Di( 0, 0, shift * BSize ) );
+    mpCurrentFigure -> SetPosi( mpCurrentFigure -> GetPosi() + Point3Di( 0, 0, shift * BSIZE ) );
     if ( mpCurrentFigure -> CheckToCollisonWithBlocks( collision_block ) ) //Cancel shift
-        mpCurrentFigure -> SetPosi( mpCurrentFigure -> GetPosi() - Point3Di( 0, 0, shift * BSize ) );
+        mpCurrentFigure -> SetPosi( mpCurrentFigure -> GetPosi() - Point3Di( 0, 0, shift * BSIZE ) );
     else
     {
-        count_of_shift_checks = 0;
+        mShiftChecksCnt = 0;
         ChangeSelectBlocks();
     }
 }
 
 void Game :: Rotate( RotatePlane plane, RotateSide side )
 {
-    if ( !rotating )
+    if ( !mIsRotate )
     {
-	rotating_angle = pi / 2 / RotateStepsCount * side;
-	rotating_plane = plane;
-	rotating = true;
+        mRotatingAngle = pi / 2 / ROTATE_STEPS_COUNT * side;
+        mRotatingPlane = plane;
+        mIsRotate = true;
 
-        //Point3Df figure_pos = mpCurrentFigure -> GetPosition();
         int lower_bound_x = mpCurrentFigure -> LowerBoundXi();
         int upper_bound_x = mpCurrentFigure -> UpperBoundXi();
         int lower_bound_y = mpCurrentFigure -> LowerBoundYi();
@@ -602,29 +607,29 @@ void Game :: Rotate( RotatePlane plane, RotateSide side )
         int lower_bound_z = mpCurrentFigure -> LowerBoundZi();
         int upper_bound_z = mpCurrentFigure -> UpperBoundZi();
 
-	figure_pos_correct_vec = Point3Di( 0, 0, 0 );
-	switch ( rotating_plane )
+        mFigurePosCorrectVec = Point3Di( 0, 0, 0 );
+        switch ( mRotatingPlane )
 	{
         case PLANE_XY :
-                if ( ( ( upper_bound_x - lower_bound_x ) / 2 % BSize != 0 ) ^
-                 ( ( upper_bound_y - lower_bound_y ) / 2 % BSize != 0 ) )
-		figure_pos_correct_vec = Point3Di( 1, 1, 0 );
+                if ( ( ( upper_bound_x - lower_bound_x ) / 2 % BSIZE != 0 ) ^
+                 ( ( upper_bound_y - lower_bound_y ) / 2 % BSIZE != 0 ) )
+                mFigurePosCorrectVec = Point3Di( side, -1, 0 );
 	    break;
         case PLANE_ZY :
-                if ( ( ( upper_bound_y - lower_bound_y ) / 2 % BSize != 0 ) ^
-                 ( ( upper_bound_z - lower_bound_z ) / 2 % BSize != 0 ) )
-		figure_pos_correct_vec = Point3Di( 0, 1, 1 );
+                if ( ( ( upper_bound_y - lower_bound_y ) / 2 % BSIZE != 0 ) ^
+                 ( ( upper_bound_z - lower_bound_z ) / 2 % BSIZE != 0 ) )
+                mFigurePosCorrectVec = Point3Di( 0, -1, -side );
 	     break;
 	default :
-                if ( ( ( upper_bound_x - lower_bound_x ) / 2 % BSize != 0 ) ^
-                 ( ( upper_bound_z - lower_bound_z ) / 2 % BSize != 0 ) )
-		figure_pos_correct_vec = Point3Di( 1, 0, 1 );
+                if ( ( ( upper_bound_x - lower_bound_x ) / 2 % BSIZE != 0 ) ^
+                 ( ( upper_bound_z - lower_bound_z ) / 2 % BSIZE != 0 ) )
+                mFigurePosCorrectVec = Point3Di( side, 0, side );
 	}
-	figure_pos_correct_vec = side * figure_pos_correct_vec;
-	figure_pos_correct_step = 0;
 
-        if ( CheckToRotate( plane, rotating_angle ) )
-            rotating = false;        
+        mFigurePosCirrectStep = 0;
+
+        if ( CheckToRotate() )
+            mIsRotate = false;
     }
 }
 
@@ -634,36 +639,7 @@ void Game :: DropDownFigure()
 }
 
 
-void Game :: ChangeCameraPosition( float x, float y )
-{
-    float next_teta       = camera_position.teta  + CameraPosChangeKoeff * y;
-    float next_alpha      = camera_position.alpha - CameraPosChangeKoeff * x;
-    int   next_alpha_sign = Geometry :: Sign( next_alpha );
 
-    if ( Geometry :: InRange( next_teta, -pi / 2, pi / 2 ) )
-        camera_position.teta  = next_teta;
-
-    if ( !Geometry :: InRange( next_alpha_sign * next_alpha, 0.0, 2 * pi ) )
-        next_alpha -= next_alpha_sign * 2 * pi;
-    camera_position.alpha = next_alpha;   
-}
-
-Point3Df Game :: GetCameraPosition() const
-{
-    float cos_teta = cos( camera_position.teta );
-    return Point3Df(   ( Game :: Length / 2  ) * BSize + cos_teta * sin( camera_position.alpha ) * CameraRadius, sin( camera_position.teta ) * CameraRadius,  ( Game :: Width / 2  ) * BSize + cos_teta * cos( camera_position.alpha ) * CameraRadius );
-}
-
-void Game :: SetLastMousePosition( float x, float y )
-{
-    last_mouse_position.x = x;
-    last_mouse_position.y = y;
-}
-
-Point3Df Game :: GetLastMousePosition( )
-{
-    return last_mouse_position;
-}
 
  void Game :: SetGameSpeed( GameSpeed new_game_speed )
  {
@@ -679,35 +655,38 @@ void Game :: ChangeSelectBlocks()
     int      block_height_pos;
 
     for ( unsigned int i = 0; i < Figure :: BlocksCount; i++ )
-         if ( mpField[ select_blocks_pos[ i ].x ][ select_blocks_pos[ i ].y ] [ select_blocks_pos[ i ].z ] != NULL )
-                    mpField[ select_blocks_pos[ i ].x ][ select_blocks_pos[ i ].y ] [ select_blocks_pos[ i ].z ] -> SetMaterial( select_blocks_materials[ i ] );
+        if ( mpField[ mSelectBLocksPos[ i ].mX ][ mSelectBLocksPos[ i ].mY ] [ mSelectBLocksPos[ i ].mZ ] != NULL )
+            mpField[ mSelectBLocksPos[ i ].mX ][ mSelectBLocksPos[ i ].mY ] [ mSelectBLocksPos[ i ].mZ ]
+                -> SetMaterial( mSelectBlocksMaterials[ i ] );
 
     fig_pos = mpCurrentFigure -> GetPosi();
     for ( unsigned int i = 0; i < Figure :: BlocksCount; i++ )
     {
         block_pos = mpCurrentFigure -> GetBlockPosByIndexi( i ) + fig_pos;
-        block_length_pos  = block_pos.x / Game :: BSize;
-        block_width_pos   = block_pos.z / Game :: BSize;
-        block_height_pos  = block_pos.y / Game :: BSize;
+        block_length_pos  = block_pos.mX / Game :: BSIZE;
+        block_width_pos   = block_pos.mZ / Game :: BSIZE;
+        block_height_pos  = block_pos.mY / Game :: BSIZE;
 
-        for ( int j = block_height_pos - 1; j >= FieldBeginY - 1; j-- )
+        for ( int j = block_height_pos - 1; j >= FIELD_BEGIN_Y - 1; j-- )
             if ( mpField[ block_length_pos ][ j ][ block_width_pos ] != NULL )
             {
-                select_blocks_pos[ i ] = Point3Di( block_length_pos, j, block_width_pos );
-                select_blocks_materials[ i ] = mpField[ block_length_pos ][ j ][ block_width_pos ] -> GetMaterial();
+                mSelectBLocksPos[ i ] = Point3Di( block_length_pos, j, block_width_pos );
+                mSelectBlocksMaterials[ i ] = mpField[ block_length_pos ][ j ][ block_width_pos ]
+                    -> GetMaterial();
                 break;
             }
     }
 
      for ( unsigned int i = 0; i < Figure :: BlocksCount; i++ )
-        mpField[ select_blocks_pos[ i ].x ][ select_blocks_pos[ i ].y ] [ select_blocks_pos[ i ].z ] -> SetMaterial( materials[ SelectFigureMaterial ] );
+        mpField[ mSelectBLocksPos[ i ].mX ][ mSelectBLocksPos[ i ].mY ] [ mSelectBLocksPos[ i ].mZ ]
+            -> SetMaterial( materials[ SELECT_FIGURES_MATERIALS ] );
 }
 
-void Game :: SetShift( Axises axis, ShiftDirection direction )
+void Game :: SetShift( Axises aAxis, ShiftDirection aDirection )
 {
-   shift_axis = axis;
-   shift_direction = direction;
-   count_of_shift_checks = 5;
+   mShiftAxis = aAxis;
+   mShiftDirection = aDirection;
+   mShiftChecksCnt = 5;
 }
 
 void Game :: ChangePause()
@@ -720,18 +699,18 @@ bool Game :: IsPause()
     return !mIsGame;
 }
 
-void Game :: GetSelectFigures( bool* select_figures )
+void Game :: GetSelectFigures( bool* aSelectFigures )
 {
-    for ( int i = 0; i < FiguresMaxCnt; i++ )
-        select_figures[ i ] = false;
-    for ( std :: vector < Figures > :: iterator it = present_figures.begin(); it != present_figures.end(); ++it )
-        select_figures[ ( *it ) ] = true;
+    for ( int i = 0; i < FIGURES_MAX_CNT; i++ )
+        aSelectFigures[ i ] = false;
+    for ( std :: vector < Figures > :: iterator it = mPresentFigures.begin(); it != mPresentFigures.end(); ++it )
+        aSelectFigures[ ( *it ) ] = true;
 }
 
-void Game :: SetSelectFigures( bool* select_figures )
+void Game :: SetSelectFigures( bool* aSelectFigures )
 {
-     present_figures.clear();
-     for ( int i = 0; i < FiguresMaxCnt; i++ )
-        if ( select_figures[ i ] )
-            present_figures.push_back( game_figures[ i ] );
+     mPresentFigures.clear();
+     for ( int i = 0; i < FIGURES_MAX_CNT; i++ )
+        if ( aSelectFigures[ i ] )
+            mPresentFigures.push_back( msGameFigures[ i ] );
 }

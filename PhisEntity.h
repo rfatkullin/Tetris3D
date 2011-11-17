@@ -6,7 +6,7 @@
 class PhisEntity
 {
 protected:
-    Material	    material;
+    Material	    mMaterial;
 public:
                     PhisEntity( Material new_material );
     Material        GetMaterial()  const;

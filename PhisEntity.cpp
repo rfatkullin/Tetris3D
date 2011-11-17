@@ -2,15 +2,15 @@
 
 PhisEntity :: PhisEntity( Material new_material )
 {
-    material = new_material;
+    mMaterial = new_material;
 }
 
 Material PhisEntity :: GetMaterial() const
 {
-    return material;
+    return mMaterial;
 }
 
 void PhisEntity :: SetMaterial( Material new_material )
 {
-    material = new_material;
+    mMaterial = new_material;
 }

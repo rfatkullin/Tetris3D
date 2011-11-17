@@ -5,9 +5,9 @@
 class Material
 {
 private :
-	float material_for_ambient[ 4 ];
-	float material_for_diffuse[ 4 ];
-	float material_for_specular[ 4 ];
+        float mAmbient[ 4 ];
+        float mDiffuse[ 4 ];
+        float mSpecular[ 4 ];
 public :
         Material();
         Material( float a_r, float a_g, float a_b, float a_a,
@@ -19,9 +19,9 @@ public :
 	const float* GetMaterialForSpecular();
 };
 
-const int	MaterialsCount = 8;
+const int	MATERIALS_CNT = 8;
 
-const Material	materials[ MaterialsCount ] = {
+const Material	materials[ MATERIALS_CNT ] = {
     Material(  0.0f, 1.0f, 0.0f, 1.0f,
                0.0f, 1.0f, 0.0f, 1.0f,
                0.0f, 0.0f, 0.0f, 1.0f

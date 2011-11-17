@@ -8,28 +8,54 @@
 #include "Scene.h"
 #include "SelectFiguresDialog.h"
 
+struct FigureShift
+{
+public :
+                            FigureShift(){}
+                            FigureShift( Game :: Axises aAxis, Game :: ShiftDirection aDirection ) :
+                                                    mAxis( aAxis ), mDirection( aDirection ) {}
+    Game :: Axises          mAxis;
+    Game :: ShiftDirection  mDirection;
+
+};
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
 public :
-    MainWindow();
+			    MainWindow();
 protected :
-    void closeEvent( QCloseEvent *event );
+    void		    closeEvent( QCloseEvent *event );
 private slots :
-    void NewGame();
-    void Exit();
+    void		    NewGame();
+    void		    Exit();
 private:
-    enum WindowMinSize{ MIN_WIDTH = 800, MIN_HEIGHT = 600 };
-    void CreateScene();
-    void CreateActions();
-    void CreateMenus();
-    void CreateStatusBar();
+    static const int        ViewCnt = 4;
+    static const int        ButtonsCnt = 4;
+    static FigureShift      msFigureControl[ ViewCnt ][ ButtonsCnt ];
+    enum		    WindowMinSize{ MIN_WIDTH = 800,
+                                           MIN_HEIGHT = 600 };
 
-    void keyPressEvent( QKeyEvent* key );
-    void mousePressEvent( QMouseEvent* mouse );
-    void mouseMoveEvent( QMouseEvent* mouse );
-    void timerEvent( QTimerEvent * );
-    void resizeEvent( int new_width, int new_height );
+    enum                    ControlButtons{ S_BUTTON = 0,
+                                            W_BUTTON = 1,
+                                            A_BUTTON = 2,
+                                            D_BUTTON = 3 };
+
+    static void             SetFigurShiftConstants();
+    void		    CreateScene();
+    void		    CreateActions();
+    void		    CreateMenus();
+    void		    CreateStatusBar();
+    void		    SelectRotate( int aX, int aY );
+
+    void		    keyPressEvent( QKeyEvent* key );
+    void		    keyReleaseEvent( QKeyEvent* key );
+    void		    mousePressEvent( QMouseEvent* mouse );
+    void		    mouseReleaseEvent( QMouseEvent* mouse );
+    void		    mouseMoveEvent( QMouseEvent* mouse );
+    void                    wheelEvent ( QWheelEvent * aEvent );
+    void		    timerEvent( QTimerEvent * );
+    void		    resizeEvent( int new_width, int new_height );
 
     Scene*                  mpScene;
     Game*                   mpGame;
@@ -47,8 +73,11 @@ private:
     QAction*                mpChangePresentSoundsAction;
 
     SelectFiguresDialog*    mpSelectFiguresDialog;
+    Qt :: MouseButton	    mLastMouseButton;
+    QPoint		    mLastMousePos;
+    bool		    mIsRightButtonPressed;
 public slots :
-    void SelectFigures();
+    void		    SelectFigures();
 };
 
 

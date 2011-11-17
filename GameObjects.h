@@ -11,14 +11,14 @@ enum Figures { IFigure = 0, JFigure, LFigure, OFigure, SFigure, TFigure, ZFigure
 class Block : public GeomEntity, public PhisEntity
 {
 public :
-    static const unsigned int	BlocksVertexCount = 8;
-    static const int		BlockSize = 32;		//Must be even
-    static const double         SafetyDistanceBetweenBlocks;
-    static const double         NonSafetyDistanceBetweenBlocks;
+    static const unsigned int	BLOCKS_VERTEX_CNT = 8;
+    static const int		BLOCK_SIZE = 32;		//Must be even
+    static const double         SAFETY_DISTANCE;
+    static const double         NOT_SAFETY_DISTANCE;
 private :
-    Point3Df			vertices_f[ BlocksVertexCount ];
+    Point3Df			mVerticesF[ BLOCKS_VERTEX_CNT ];
 
-    void			Rotate  ( float &a, float &b, float angle );
+    void			Rotate ( float &a, float &b, float angle );
     void			DrawSide( Point3Df x1, Point3Df x2, Point3Df x3, Point3Df x4 );
 
 public:
@@ -66,7 +66,7 @@ class Figure : public GeomEntity, public PhisEntity
 public :
     static const unsigned int  BlocksCount = 4;
 private :    
-    Block                       *blocks[ BlocksCount ];
+    Block                       *mpBlocks[ BlocksCount ];
 	
 public :
 				Figure( int x, int y, int z, Figures type, Material new_material );
@@ -81,7 +81,7 @@ public :
     Point3Di                    GetAheadMostBlockPosi();
     Material			GetBlockMaterialByIndex( int index ) const;
     bool                        IsIntersectWithBlock( Block* block );
-    bool                        CheckToCollisonWithBlocks( std :: vector < Block* >& blocks );
+    bool                        CheckToCollisonWithBlocks( std :: vector < Block* >& mpBlocks );
     void                        SetBlocksAbsCoor();
     void                        SetBlocksRelCoor();
 
