@@ -34,25 +34,28 @@ void MainWindow :: SetFigurShiftConstants()
 
 MainWindow :: MainWindow() : QMainWindow()
 {
-    mpGame		    = new Game();
-    mpSelectFiguresDialog   = new SelectFiguresDialog();
+    mpGame		    = new Game( this );
+    mpSelectFiguresDialog   = new SelectFiguresDialog( this );
     mIsRightButtonPressed   = false;
+    mIsGame            = false;
+
     CreateScene();
     CreateActions();
-    CreateMenus();
-    CreateStatusBar();
+    CreateMenus();   
 
     SetFigurShiftConstants();
 
     setMinimumSize( MIN_WIDTH, MIN_HEIGHT );
     setCentralWidget( mpScene );
     startTimer( 10 );
+
+
 }
 
 void MainWindow :: CreateActions()
 {
     mpNewGameAction = new QAction( "&New game", this );
-    connect( mpNewGameAction, SIGNAL( triggered() ), mpGame, SLOT( Start() ) );
+    connect( mpNewGameAction, SIGNAL( triggered() ), SLOT( NewGame() ) );
 
     mpExitGameAction = new QAction( "&Exit", this );
     connect( mpExitGameAction, SIGNAL( triggered() ), this, SLOT( close() ) );
@@ -68,10 +71,12 @@ void MainWindow :: CreateActions()
     mpChangePresentMusicAction = new QAction( "Music", this );
     mpChangePresentMusicAction -> setCheckable( true );
     mpChangePresentMusicAction -> setChecked( true );
+    connect( mpChangePresentMusicAction, SIGNAL( toggled( bool ) ), mpGame, SLOT( MusicStateChange( bool ) ) );
 
     mpChangePresentSoundsAction = new QAction( "Sounds", this );
     mpChangePresentSoundsAction -> setCheckable( true );
     mpChangePresentSoundsAction -> setChecked( true );
+    connect( mpChangePresentSoundsAction, SIGNAL( toggled( bool ) ), mpGame, SLOT( SoundsStateChange( bool ) ) );
 
 }
 
@@ -94,55 +99,62 @@ void MainWindow :: CreateScene()
     float diffuse_light[ 4 ] = { 0.5f, 0.5f, 0.5f, 1.0f };
     float speculaer_light[ 4 ] = { 0.2f, 0.2f, 0.2f, 1.0f };
 
-    mpScene = new Scene( mpGame);
-    mpScene -> Resize( WindowWidth, WindowHeight );
+    mpScene = new Scene( mpGame );
     mpScene -> SetLigthOption( ambient_light, diffuse_light, speculaer_light );
-}
-
-void MainWindow :: CreateStatusBar()
-{
-
 }
 
 void MainWindow :: NewGame()
 {
+    mIsGame = true;
+
+    mpGame -> End();
+    mpGame -> Start();
 
 }
 
 void MainWindow :: Exit()
 {
-
+    QApplication :: exit( 0 );
 }
 
 void MainWindow :: closeEvent( QCloseEvent* )
 {
-
+    Exit();
 }
 
 void MainWindow :: keyPressEvent( QKeyEvent* key )
 {
-   int side = mpScene -> GetViewSide();
+    int side = mpScene -> GetViewSide();
 
-   switch ( key -> key() )
+    switch ( key -> key() )
     {
-        case Qt :: Key_P :
-	    mpGame-> ChangePause();
+	case Qt :: Key_P :
+            mIsGame = !mIsGame;
             return;
             break;
         case Qt :: Key_Escape :
-            exit( 0 );
+	    Exit();
             break;
         default:
             break;
     }
 
-    if ( mpGame-> IsPause() )
+    if ( !mIsGame )
         return;
 
     switch ( key -> key() )
     {
-        case Qt :: Key_Escape :
 
+//	case Qt :: Key_I :
+//	    mpScene -> mFrustumFocalLength++;
+//	    printf( "%f\n", mpScene -> mFrustumFocalLength );
+//	    mpScene -> mFrustumEyeSep = mpScene -> mFrustumFocalLength / 30.0f;
+//	    break;
+//	case Qt :: Key_K :
+//	    mpScene -> mFrustumFocalLength--;
+//	    printf( "%f\n", mpScene -> mFrustumFocalLength );
+//	    mpScene -> mFrustumEyeSep = mpScene -> mFrustumFocalLength / 30.0f;
+//	    break;
         case Qt :: Key_Space :
 	    mpGame-> DropDownFigure();
             break;
@@ -167,14 +179,15 @@ void MainWindow :: keyPressEvent( QKeyEvent* key )
     }
 }
 
-void MainWindow :: keyReleaseEvent( QKeyEvent* aKey )
-{
-
-}
-
 void MainWindow :: mousePressEvent( QMouseEvent* mouse )
 {
+    if ( !mIsGame )
+        return;
+
     Qt :: MouseButton button = mouse -> button();
+
+    if ( button == Qt :: RightButton )
+	mpScene -> mIsOneSide = !mpScene -> mIsOneSide;
 
     if ( ( button == Qt :: LeftButton ) || ( button == Qt :: RightButton )  )
 	mLastMousePos = mouse -> globalPos();
@@ -186,12 +199,18 @@ void MainWindow :: mousePressEvent( QMouseEvent* mouse )
 }
 void MainWindow :: mouseReleaseEvent( QMouseEvent* mouse )
 {
+    if ( !mIsGame )
+        return;
+
     if (  mLastMouseButton == Qt :: RightButton )
         SelectRotate( mouse -> globalX(), mouse -> globalY() );
 }
 
 void MainWindow :: wheelEvent ( QWheelEvent * aEvent )
 {
+    if ( !mIsGame )
+        return;
+
     if ( aEvent -> delta() > 0 )
         mpGame-> Rotate( Game :: PLANE_ZX, Game :: ROTATE_BY_CLOCK_WISE );
     else
@@ -200,6 +219,9 @@ void MainWindow :: wheelEvent ( QWheelEvent * aEvent )
 
 void MainWindow :: mouseMoveEvent( QMouseEvent* mouse )
 {
+    if ( !mIsGame )
+        return;
+
     if ( mLastMouseButton != Qt :: LeftButton )
 	return;
 
@@ -215,7 +237,14 @@ void MainWindow :: resizeEvent( int new_width, int new_height )
 
 void MainWindow :: timerEvent( QTimerEvent * )
 {
-    mpGame-> NextStep();
+    if ( mpGame -> IsGameOver() )
+    {
+
+    }
+
+   if ( mIsGame )
+        mpGame-> NextStep();
+
     mpScene -> paintGL();
 }
 
@@ -226,13 +255,13 @@ void MainWindow :: SelectFigures()
     mpGame -> GetSelectFigures( select_figures );
     mpSelectFiguresDialog -> SetSelectFigures( select_figures );
 
-    mpGame -> ChangePause();
+    mIsGame = false;
     if ( mpSelectFiguresDialog -> exec() == QDialog :: Accepted )
     {
         mpSelectFiguresDialog -> GetSelectFigures( select_figures );
         mpGame -> SetSelectFigures( select_figures );
     }
-    mpGame -> ChangePause();
+    mIsGame = true;
 
     delete [] select_figures;
 }

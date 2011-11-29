@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core opengl
+QT       += core opengl phonon
 
 TARGET = Tetris3D
 CONFIG   += console opengl gui
@@ -23,7 +23,8 @@ SOURCES += \
     GeomEntity.cpp \
     PhisEntity.cpp \
     MainWindow.cpp \
-    SelectFiguresDialog.cpp
+    SelectFiguresDialog.cpp \
+    GameOverDIalog.cpp
 
 HEADERS += \
     Material.h \
@@ -34,7 +35,10 @@ HEADERS += \
     GeomEntity.h \
     PhisEntity.h \
     MainWindow.h \
-    SelectFiguresDialog.h
+    SelectFiguresDialog.h \
+    GameOverDialog.h
+
+
 
 
 

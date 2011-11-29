@@ -11,5 +11,5 @@ int main( int argc, char **argv )
 
     p_main_window -> show();
 
-    app.exec();
+    return app.exec();
 }

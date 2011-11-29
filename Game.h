@@ -1,14 +1,26 @@
+#include <phonon/AbstractAudioOutput>
+#include <phonon/MediaObject>
+#include <phonon/AudioOutput>
 #include <QObject>
+#include <QSound>
 #include "GameObjects.h"
 
 #ifndef GAME_H
 #define GAME_H
+
+typedef std :: vector < std :: pair < Block*, std :: pair < int, int > > > BlocksVec;
+typedef std :: vector < BlocksVec > ComponentsVec;
 
 class Game : public QObject
 {
     Q_OBJECT
 public slots :
     void                        Start();
+    void			MusicStateChange( bool aState );
+    void			SoundsStateChange( bool aState );
+private slots :
+    void			PlayFallSound();
+    void			PlayAmbientMusic();
 public:
     enum                        RotatePlane { PLANE_XY,
                                               PLANE_ZY,
@@ -24,43 +36,44 @@ public:
     enum                        ShiftDirection { SHIFT_DIRECTLY = 1,
                                                  SHIFT_BACK     = -1 };
 
-    enum                        GameSpeed { ZERO_SPEED    = 0,
-                                            FIRST_SPEED   = 1,
-                                            SECOND_SPEED  = 2,
-                                            THIRD_SPEED   = 4,
-                                            FOURTH_SPEED  = 8,
-                                            FIFTH_SPEED   = 10,
-                                            SIXTH_SPEED   = 12,
-                                            SEVENTH_SPEED = 14 };
+   const unsigned int static	ZERO_SPEED    = 0;
+   const unsigned int static	FIRST_SPEED   = 1;
+   const unsigned int static	SECOND_SPEED  = 2;
+   const unsigned int static	THIRD_SPEED   = 4;
+   const unsigned int static	FOURTH_SPEED  = 8;
+   const unsigned int static	FIFTH_SPEED   = 10;
+   const unsigned int static	SIXTH_SPEED   = 12;
+   const unsigned int static	SEVENTH_SPEED = 14;
 
     enum                        MaterialType { FIGURES_MATERIALS        = 6,
                                                SELECT_FIGURES_MATERIALS = 6,
                                                BOTTOM_FIGURES_MATERIALS = 7 };
 
-    enum                        GameConstants { WIDTH                = 8,
-                                                LENGTH               = 8,
-                                                HEIGHT               = 20,
-                                                FIELD_BEGIN_X        = 1,
-                                                FIELD_BEGIN_Y         = 1,
-                                                FIELD_BEGIN_Z        = 1,
-                                                FIELD_END_X          = LENGTH - 1,
-                                                FIELD_END_Y          = HEIGHT - 1,
-                                                FIELD_END_Z          = WIDTH - 1,
-                                                FIELD_LOWER_BOUND_X  = FIELD_BEGIN_X * Block :: BLOCK_SIZE,
-                                                FIELD_UPPER_BOUND_X  = FIELD_END_X   * Block :: BLOCK_SIZE,
-                                                FIELD_LOWER_BOUND_Y  = FIELD_BEGIN_Y  * Block :: BLOCK_SIZE,
-                                                FIELD_UPPER_BOUND_Y  = FIELD_END_Y   * Block :: BLOCK_SIZE,
-                                                FIELD_LOWER_BOUND_Z  = FIELD_BEGIN_Z * Block :: BLOCK_SIZE,
-                                                FIELD_UPPER_BOUND_Z  = FIELD_END_Z   * Block :: BLOCK_SIZE,
-                                                ROTATE_STEPS_COUNT   = 20,
-                                                BSIZE                = Block :: BLOCK_SIZE,
-                                                HALF_BSIZE           = Block :: BLOCK_SIZE / 2,
-                                                FIGURES_MAX_CNT      = 7,
-                                                FIGURE_START_Y_POS   = FIELD_END_Y - 2
-                                };   
+    const unsigned int static	WIDTH                = 6;
+    const unsigned int static	LENGTH               = 6;
+    const unsigned int static   HEIGHT               = 20;
+    const unsigned int static   FIGURES_MAX_CNT      = 7;
+    const int static            FIELD_BEGIN_X        = 1;
+    const int static            FIELD_BEGIN_Y        = 1;
+    const int static            FIELD_BEGIN_Z        = 1;
+    const int static            FIELD_END_X          = ( int )LENGTH - 1;
+    const int static            FIELD_END_Y          = ( int )HEIGHT - 1;
+    const int static            FIELD_END_Z          = ( int )WIDTH - 1;
+    const int static            FIELD_LOWER_BOUND_X  = FIELD_BEGIN_X * Block :: BLOCK_SIZE;
+    const int static            FIELD_UPPER_BOUND_X  = FIELD_END_X   * Block :: BLOCK_SIZE;
+    const int static            FIELD_LOWER_BOUND_Y  = FIELD_BEGIN_Y * Block :: BLOCK_SIZE;
+    const int static            FIELD_UPPER_BOUND_Y  = FIELD_END_Y   * Block :: BLOCK_SIZE;
+    const int static            FIELD_LOWER_BOUND_Z  = FIELD_BEGIN_Z * Block :: BLOCK_SIZE;
+    const int static            FIELD_UPPER_BOUND_Z  = FIELD_END_Z   * Block :: BLOCK_SIZE;
+    const int static            ROTATE_STEPS_COUNT   = 20;
+    const int static            BSIZE                = ( int )Block :: BLOCK_SIZE;
+    const int static            HALF_BSIZE           = ( int )Block :: BLOCK_SIZE / 2;
+    const int static           FIGURE_START_Y_POS   = FIELD_END_Y - 2;
 
-                                Game();
+				Game( QObject* parent = 0 );
+				~Game();
 
+    unsigned int		GetLevel() const;
     static void                 InitializeStaticData();
     Point2Df                    GetFigurePositionOnXZ( int width_x, int width_z );
     Figure*			GetNewFigure();
@@ -69,17 +82,20 @@ public:
     void			DrawField() const;
     void			DrawInterface() const ;
     void			DrawBlocksOnTheField() const;
-    void			SetGameSpeed( GameSpeed new_game_speed );
+    //void			SetGameSpeed( unsigned int new_game_speed );
     void			NextStep();
     void			ShiftFigureByXAxis( ShiftDirection shift );
     void			ShiftFigureByZAxis( ShiftDirection shift );
     void			Rotate( RotatePlane plane, RotateSide side );
     void			DropDownFigure();
-    void                        ChangePause();
-    bool                        IsPause();
+    //void                        ChangePause();
     void                        SetShift( Axises axis, ShiftDirection direction );
     void                        GetSelectFigures( bool* select_figures );
     void                        SetSelectFigures( bool* select_figures );
+    void			SearchAndSetSteps( int i, int k, int j, int color );
+    void			GameOver();
+    void			End();
+    bool                        IsGameOver() const;
 private:
     enum                        LightPosition  { LightPosByX = 400 , LightPosByY = 800, LightPosByZ = 300 };
     static const int            SAFETY_DISTANCE;
@@ -91,15 +107,18 @@ private:
     std :: vector < Figures >   mPresentFigures;
     std :: vector < Block* >	mBoardBlocks;
     Block*			mpField[ LENGTH ][ HEIGHT ][ WIDTH ];
+    //int                         mpCollapseBlockStepsCount[ LENGTH ][ HEIGHT ][ WIDTH ];
+    int                         mpCollapseComponent[ LENGTH ][ HEIGHT ][ WIDTH ];
     int                         mFieldBlockCnt;
+    void			CreateBorderBlocks();
 
     Figure*			mpCurrentFigure;
-    Figure*			mpNextFigure;
 
     unsigned int		mScore;
-    bool			mIsGame;
+    unsigned int		mGameLevel;
+    unsigned int                mGameSpeed;
+    bool                        mIsGameOver;
 
-    GameSpeed                   mGameSpeed;
     float			mRotatingAngle;
     bool			mIsRotate;
     void			MoveDownFigure();
@@ -109,13 +128,17 @@ private:
 
     RotatePlane                 mRotatingPlane;
     Point3Di                    mFigurePosCorrectVec;
-    int                         mFigurePosCirrectStep;
-    bool                        CheckToRotate(/* RotatePlane aRotatingPlane, float aRotatingAngle */);
+    int                         mFigurePosCorrectStep;
+    bool                        CheckToRotate();
     bool			CheckToCollisionByXY();
 
+    ComponentsVec               component_block;
     bool                        mIsCollapse;
-    int                         mCollapseStepsCnt;
     void                        CheckToCollapse();
+    void			PickUpComponent( int a_i, int a_k, int a_j/*, int a_color*/ );
+    void			PrepairToCollapse();
+    void                        CollapseStep();
+    int                         mFallingComponents;
 
     static const int            MaxSelectBlockCount = 4;
     Point3Di                    mSelectBLocksPos[ MaxSelectBlockCount ];
@@ -125,6 +148,12 @@ private:
     int                         mShiftChecksCnt;
     Axises                      mShiftAxis;
     ShiftDirection              mShiftDirection;
+
+    Phonon :: MediaObject*	mpAmbientMusicObject;
+    Phonon :: MediaObject*	mpBlockFallSoundObject;
+    Phonon :: AudioOutput*	mpAudioAmbient;
+    Phonon :: AudioOutput*	mpAudioSound;
+    bool			mIsSound;
 };
 
 #endif

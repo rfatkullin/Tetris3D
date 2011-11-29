@@ -32,8 +32,9 @@ private slots :
 private:
     static const int        ViewCnt = 4;
     static const int        ButtonsCnt = 4;
+    static const int	    NativeKeyEsc = 27;
     static FigureShift      msFigureControl[ ViewCnt ][ ButtonsCnt ];
-    enum		    WindowMinSize{ MIN_WIDTH = 800,
+    enum		    WindowMinSize{ MIN_WIDTH  = 800,
                                            MIN_HEIGHT = 600 };
 
     enum                    ControlButtons{ S_BUTTON = 0,
@@ -44,12 +45,10 @@ private:
     static void             SetFigurShiftConstants();
     void		    CreateScene();
     void		    CreateActions();
-    void		    CreateMenus();
-    void		    CreateStatusBar();
+    void		    CreateMenus();    
     void		    SelectRotate( int aX, int aY );
 
     void		    keyPressEvent( QKeyEvent* key );
-    void		    keyReleaseEvent( QKeyEvent* key );
     void		    mousePressEvent( QMouseEvent* mouse );
     void		    mouseReleaseEvent( QMouseEvent* mouse );
     void		    mouseMoveEvent( QMouseEvent* mouse );
@@ -59,6 +58,7 @@ private:
 
     Scene*                  mpScene;
     Game*                   mpGame;
+    bool                    mIsGame;
 
     QMenu*                  mpMainMenu;
     QMenu*                  mpSettingsMenu;

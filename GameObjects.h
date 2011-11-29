@@ -12,7 +12,7 @@ class Block : public GeomEntity, public PhisEntity
 {
 public :
     static const unsigned int	BLOCKS_VERTEX_CNT = 8;
-    static const int		BLOCK_SIZE = 32;		//Must be even
+    static const unsigned int	BLOCK_SIZE = 32;		//Must be even
     static const double         SAFETY_DISTANCE;
     static const double         NOT_SAFETY_DISTANCE;
 private :

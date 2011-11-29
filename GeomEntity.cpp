@@ -69,16 +69,19 @@ int GeomEntity :: GetPosByZi() const
 void GeomEntity :: SetPosByXi( int new_x )
 {
     mPosI.mX = new_x;
+    mPosF.mX = static_cast< float > ( new_x );
 }
 
 void GeomEntity :: SetPosByYi( int new_y )
 {
     mPosI.mY = new_y;
+    mPosF.mY = static_cast< float > ( new_y );
 }
 
 void GeomEntity :: SetPosByZi( int new_z )
 {
     mPosI.mZ = new_z;
+    mPosF.mZ = static_cast< float > ( new_z );
 }
 
  void GeomEntity :: SetPosByXf( float new_x )

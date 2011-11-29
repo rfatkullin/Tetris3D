@@ -16,7 +16,7 @@ public :
 private :
     static const int    mcFiguresCnt = 7;
 
-    QLabel*             mpSelectLabel;
+  //  QLabel*             mpSelectLabel;
     QCheckBox*          mpFigures[ mcFiguresCnt ];
     QPushButton*        mpOkButton;
     QPushButton*        mpCancelButton;

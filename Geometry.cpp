@@ -1,6 +1,10 @@
 #include <math.h>
 #include "Geometry.h"
 
+
+const float Geometry :: pi = 3.141592653f;
+const float Geometry :: eps = 1e-5f;
+
 Point3Df& Point3Df :: operator = ( const Point3Df& right_obj )
 {
     mX = right_obj.mX;
@@ -12,9 +16,9 @@ Point3Df& Point3Df :: operator = ( const Point3Df& right_obj )
 
 Point3Df& Point3Df :: operator = ( const Point3Di& right_obj )
 {
-    mX = right_obj.mX;
-    mY = right_obj.mY;
-    mZ = right_obj.mZ;
+    mX = ( float )right_obj.mX;
+    mY = ( float )right_obj.mY;
+    mZ = ( float )right_obj.mZ;
 
     return *this;
 }
@@ -154,12 +158,12 @@ float Geometry :: MixedMul( const Point3Di& a, const Point3Di& b, const Point3Di
     return ScalarMul( a, VectorMul( b, c ) );
 }
 
-float Point3Df :: Length()
+float Point3Df :: Length() const
 {
     return mX * mX + mY * mY + mZ * mZ;
 }
 
-int Point3Di :: Length()
+int Point3Di :: Length() const
 {
     return mX * mX + mY * mY + mZ * mZ;
 }
@@ -172,4 +176,10 @@ float Geometry :: Square( float aValue )
 float Geometry :: ParalSquare( Point2Df& aA, Point2Df& aB )
 {
     return aA.mX * aB.mY - aA.mY * aB.mX;
+}
+
+Point3Df Geometry :: Normalize( const Point3Df& vec )
+{
+    float length = sqrt( vec.Length() );
+    return Point3Df( vec.mX / length, vec.mY / length, vec.mZ / length );
 }

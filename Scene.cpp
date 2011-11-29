@@ -2,6 +2,7 @@
 #include <QKeyEvent>
 #include <QDebug>
 #include <math.h>
+#include <stdlib.h>
 #include "Scene.h"
 #include "Game.h"
 
@@ -9,7 +10,7 @@ const Point3Di Scene :: mCameraShift            = Point3Di ( ( Game :: LENGTH / 
                                                              ( Game :: HEIGHT / 2 ) * Block :: BLOCK_SIZE,
                                                              ( Game :: WIDTH / 2  ) * Block :: BLOCK_SIZE );
 const float Scene :: CAMERA_POS_CHANGE_KOEFF    = 0.01f;
-const float Scene :: CAMERA_RADIUS              = 1000.0f;
+const float Scene :: CAMERA_RADIUS              = 450.0f;
 Point2Df    Scene :: mSectorVecs[ Scene :: SectorVecCnt ];
 
 Scene :: Scene( Game* const new_game, QWidget* pwgt ) : QGLWidget( pwgt )
@@ -22,12 +23,29 @@ Scene :: Scene( Game* const new_game, QWidget* pwgt ) : QGLWidget( pwgt )
         mDiffuseLight[ i ] = 0.0f;
 	mSpecularLight[ i ] = 0.0f;
     }
-    mSceneWIdth  = WindowWidth;
-    mSceneHeight = WindowHeight;
+    mSceneWidth  = SCENE_WIDTH;
+    mSceneHeight = SCENE_HEIGHT;
 
-    mCameraPosition = SphericalCoor( pi / 4, pi / 8 );
+
+    mCameraPosition = SphericalCoor( Geometry :: pi / 4, Geometry :: pi / 8 );
     GetCameraPosition();
     SetViewVectors();
+    Resize( SCENE_WIDTH, SCENE_HEIGHT );
+
+    mRatio = mSceneWidth / ( float )mSceneHeight;
+    mFrustumAperture    =  45.0f / 180.0f * Geometry :: pi;
+    mFrustumNearPlane	=  60;
+    mFrustumFarPlane	=  800;
+    mFrustumHalfWidth   =  mFrustumNearPlane * tan( mFrustumAperture );
+    mFrustumFocalLength =  mFrustumNearPlane / 2;
+    mFrustumEyeSep      =  mFrustumFocalLength / 30.0f;
+    mIsOneSide		=  false;
+
+//    QGLFormat fmt;
+//    fmt.setStereo( true );
+//    setFormat( fmt );
+    mIsStereo	 = false;
+
 }
 
 Scene :: ~Scene()
@@ -37,6 +55,9 @@ Scene :: ~Scene()
 
 void Scene :: initializeGL()
 {
+    glEnable( GL_STEREO );
+    glEnable( GL_DOUBLE );
+    glEnable( GL_SMOOTH );
     glEnable( GL_DEPTH_TEST );
     glShadeModel( GL_FLAT );
     glEnable( GL_LIGHTING );
@@ -49,94 +70,157 @@ void Scene :: initializeGL()
     glClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    glOrtho( -WindowWidth / 2, WindowWidth / 2, -WindowHeight / 2, WindowHeight / 2, 0, 3000);
+    glOrtho( -SCENE_WIDTH / 2, SCENE_WIDTH / 2, -SCENE_HEIGHT / 2, SCENE_HEIGHT / 2, 0, 3000);
+
 }
 
 void Scene :: resizeGL( int new_width, int new_height )
 {
-    Resize( new_width, new_height );
+    //Resize( new_width, new_height );
 }
 
 void Scene :: Resize( int new_width, int new_height )
 {
-    mSceneWIdth = new_width;
-    mSceneHeight = new_height;
+    //mSceneWIdth = new_width;
+    //mSceneHeight = new_height;
 }
+
+//void Scene :: paintGL()
+//{
+//    glViewport( 0, 0, mSceneWIdth, mSceneHeight );
+
+//    glMatrixMode( GL_MODELVIEW );
+//    glDrawBuffer( GL_BACK_RIGHT );
+//    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+//    glLoadIdentity();
+//    gluLookAt( 0.0f, 0.0f, 10.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f );
+//    glColor3f( 1.0f, 0.0f, 0.0f );
+//    glBegin( GL_QUADS );
+//	glVertex3f( -100.0f, -100.0f, 0.0f );
+//	glVertex3f( 100.0f, -100.0f, 0.0f );
+//	glVertex3f( 100.0f, 100.0f, 0.0f );
+//	glVertex3f( -100.0f, 100.0f, 0.0f );
+//    glEnd();
+
+//    glMatrixMode( GL_MODELVIEW );
+//    glDrawBuffer( GL_BACK_LEFT );
+//    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+//    glLoadIdentity();
+//    gluLookAt( 0.0f, 0.0f, 10.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f );
+//    glColor3f( 0.0f, 0.0f, 1.0f );
+//    glBegin( GL_QUADS );
+//	glVertex3f( -100.0f, -100.0f, 0.0f );
+//	glVertex3f( 100.0f, -100.0f, 0.0f );
+//	glVertex3f( 100.0f, 100.0f, 0.0f );
+//	glVertex3f( -100.0f, 100.0f, 0.0f );
+//    glEnd();
+
+//    swapBuffers();
+//}
 
 void Scene :: paintGL()
 {
-     Point3Df camera_positon;
-    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-    glMatrixMode( GL_MODELVIEW );
+    Point3Df camera_positon;
+    Point3Df camera_directon;
+    Point3Df right_vec_to_dir;
 
+    camera_positon     = GetCameraPosition();
+    camera_directon    = Geometry :: Normalize( -1.0f * camera_positon );
+    camera_positon     = camera_positon + mCameraShift;
+    right_vec_to_dir   = Geometry :: VectorMul( camera_directon, Point3Df( 0.0f, 1.0f, 0.0f ) );
 
+    glViewport( 0, 0, mSceneWidth, mSceneHeight );
 
+    if ( mIsStereo )
+    {
+	right_vec_to_dir    = ( mFrustumEyeSep / 2.0f ) * right_vec_to_dir;
 
-//    glViewport( 0, WindowHeight / 2, WindowWidth / 2, WindowHeight / 2 );
-//    glLoadIdentity();
-//    glScaled( 0.5f, 0.5f, 0.5f );
-//    gluLookAt( 300.0f, 0.0f, 0.0f, 0, 0, 0, 0, 1, 0 );
-//    glColor3f( 1.0f, 1.0f, 1.0f );
-//    renderText( 100, WindowHeight / 2 - 200, "ZY Plane" );
-//    game -> DrawWorld();
+	if ( !mIsOneSide )
+	{
+	    glMatrixMode( GL_PROJECTION );
+	    glLoadIdentity();
 
+	    mFrustumLeft  = -mRatio * mFrustumHalfWidth - 0.5 * mFrustumEyeSep * mFrustumNearPlane / mFrustumFocalLength;
+	    mFrustumRight =  mRatio * mFrustumHalfWidth - 0.5 * mFrustumEyeSep * mFrustumNearPlane / mFrustumFocalLength;
 
-//    glViewport( WindowWidth / 2, WindowHeight / 2, WindowWidth / 2, WindowHeight / 2 );
-//    glLoadIdentity();
-//    glScaled( 0.5f, 0.5f, 0.5f );
-//    gluLookAt( 0.0f, 300.0f, 0.0f, 0, 0, 0, 1, 0, 0 );
-//    glColor3f( 1.0f, 1.0f, 1.0f );
-//    renderText( WindowWidth / 2 + 100, WindowHeight / 2 - 200, "ZX Plane" );
-//    game -> DrawWorld();
+	    glFrustum( mFrustumLeft, mFrustumRight, -mFrustumHalfWidth, mFrustumHalfWidth, mFrustumNearPlane, mFrustumFarPlane );
 
-//    glViewport( 0, 0, WindowWidth / 2, WindowHeight / 2 );
-//    glLoadIdentity();
-//    //glScaled( 0.5f, 0.5f, 0.5f );
-//    gluLookAt( 0.0f, 0.0f, 300.0f, 0, 0, 0, 0, 1, 0 );
-//    glColor3f( 1.0f, 1.0f, 1.0f );
-//    renderText( 100, WindowHeight - 200, "XY Plane" );
-//    game -> DrawWorld();
+	    glMatrixMode( GL_MODELVIEW );
+	    glDrawBuffer( GL_BACK_RIGHT );
+	    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+	    glLoadIdentity();
+	    gluLookAt( camera_positon.mX + right_vec_to_dir.mX,
+		       camera_positon.mY + right_vec_to_dir.mY,
+		       camera_positon.mZ + right_vec_to_dir.mZ,
+		       camera_positon.mX + right_vec_to_dir.mX + camera_directon.mX,
+		       camera_positon.mY + right_vec_to_dir.mY + camera_directon.mY,
+		       camera_positon.mZ + right_vec_to_dir.mZ + camera_directon.mZ,
+		       0, 1, 0 );
+	    mpGame -> DrawWorld();
+	    glLightfv( GL_LIGHT0, GL_POSITION, mpGame -> GetLightPosition() );
+	}
 
-    camera_positon = GetCameraPosition();
-    camera_positon = camera_positon + mCameraShift;
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
 
+	mFrustumLeft  = -mRatio * mFrustumHalfWidth + 0.5 * mFrustumEyeSep * mFrustumNearPlane / mFrustumFocalLength;
+	mFrustumRight =  mRatio * mFrustumHalfWidth + 0.5 * mFrustumEyeSep * mFrustumNearPlane / mFrustumFocalLength;
 
-    glViewport( 0, 0, mSceneWIdth, mSceneHeight );
-    glLoadIdentity();
-    glScaled( 0.5f, 0.5f, 0.5f );
-    gluLookAt( camera_positon.mX, camera_positon.mY, camera_positon.mZ,
-               mCameraShift.mX,   mCameraShift.mY,   mCameraShift.mZ,
-               0, 1, 0 );
-    glColor3f( 1.0f, 1.0f, 1.0f );
-    renderText( 10, 20, "3D Model" );
-    renderText( 10, mSceneHeight - 10, "PAUSE - P" );
-    mpGame -> DrawWorld();
+	glFrustum( mFrustumLeft, mFrustumRight, -mFrustumHalfWidth, mFrustumHalfWidth, mFrustumNearPlane, mFrustumFarPlane );
 
-    glLightfv( GL_LIGHT0, GL_POSITION, mpGame -> GetLightPosition() );
+	glMatrixMode( GL_MODELVIEW );
+	glDrawBuffer( GL_BACK_LEFT );
+	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+	glLoadIdentity();
+	gluLookAt( camera_positon.mX - right_vec_to_dir.mX,
+		   camera_positon.mY - right_vec_to_dir.mY,
+		   camera_positon.mZ - right_vec_to_dir.mZ,
+		   camera_positon.mX - right_vec_to_dir.mX + camera_directon.mX,
+		   camera_positon.mY - right_vec_to_dir.mY + camera_directon.mY,
+		   camera_positon.mZ - right_vec_to_dir.mZ + camera_directon.mZ,
+		   0, 1, 0 );
+	mpGame -> DrawWorld();
+	glLightfv( GL_LIGHT0, GL_POSITION, mpGame -> GetLightPosition() );
+    }
+    else
+    {
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glOrtho( -SCENE_WIDTH / 2, SCENE_WIDTH / 2, -SCENE_HEIGHT / 2, SCENE_HEIGHT / 2, 0, 1000 );
+	glMatrixMode( GL_MODELVIEW );
+	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+	glLoadIdentity();
+        gluLookAt( camera_positon.mX, camera_positon.mY, camera_positon.mZ,
+		   mCameraShift.mX,   mCameraShift.mY,   mCameraShift.mZ,
+		   0, 1, 0 );
+	mpGame -> DrawWorld();
+	glLightfv( GL_LIGHT0, GL_POSITION, mpGame -> GetLightPosition() );
+    }
 
-    glFlush();
+    DrawTextInformation();
+
     swapBuffers();
 }
 
-//void Scene :: keyPressEvent( QKeyEvent* keyboard )
-//{
+void Scene :: DrawTextInformation()
+{
+    unsigned int    text_buffer_len = 0;
+    unsigned int    game_level	    = mpGame -> GetLevel();
+    char*	    text_buffer	    = new char[ 100 ];
 
-//}
+    strcpy( text_buffer, "Level: " );
+    text_buffer_len = strlen( text_buffer );
+    text_buffer[ text_buffer_len ] = ( char )( game_level + ( unsigned int )'0' );
+    text_buffer[ text_buffer_len + 1 ] = 0;
 
-//void Scene :: mousePressEvent( QMouseEvent* mouse )
-//{
+    glColor3f( 1.0f, 1.0f, 1.0f );
+    //renderText( 10, 20, "3D Model" );
+    //renderText( 10, mSceneHeight - 10, "PAUSE - P" );
 
-//}
+    renderText( SCENE_WIDTH - 200, 10, text_buffer );
 
-//void Scene :: mouseMoveEvent( QMouseEvent* mouse )
-//{
-
-//}
-
-//void Scene :: timerEvent( QTimerEvent * )
-//{
-
-//}
+    delete [] text_buffer;
+}
 
 void Scene :: SetLigthOption( float ambient[ 4 ], float diffuse[ 4 ], float specular[ 4 ] )
 {
@@ -154,7 +238,9 @@ void Scene :: SetLigthOption( float ambient[ 4 ], float diffuse[ 4 ], float spec
 void Scene :: set3D( bool is_3d)
 {
     if ( is_3d )
-        exit( 0 );
+	mIsStereo = true;
+    else
+	mIsStereo = false;
 }
 
 void Scene :: ChangeCameraPosition( float x, float y )
@@ -163,11 +249,11 @@ void Scene :: ChangeCameraPosition( float x, float y )
     float next_alpha      = mCameraPosition.mAlpha - CAMERA_POS_CHANGE_KOEFF * x;
     int   next_alpha_sign = Geometry :: Sign( next_alpha );
 
-    if ( Geometry :: InRange( next_teta, -pi / 2, pi / 2 ) )
+    if ( Geometry :: InRange( next_teta, -Geometry :: pi / 2, Geometry :: pi / 2 ) )
         mCameraPosition.mTeta  = next_teta;
 
-    if ( !Geometry :: InRange( next_alpha_sign * next_alpha, 0.0, 2 * pi ) )
-        next_alpha -= next_alpha_sign * 2 * pi;
+    if ( !Geometry :: InRange( next_alpha_sign * next_alpha, 0.0, 2 * Geometry :: pi ) )
+        next_alpha -= next_alpha_sign * 2 * Geometry :: pi;
     mCameraPosition.mAlpha = next_alpha;
 }
 
