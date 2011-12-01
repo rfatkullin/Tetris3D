@@ -22,6 +22,12 @@ private slots :
     void			PlayFallSound();
     void			PlayAmbientMusic();
 public:
+    enum                        Messages { NEW_LEVEL,
+                                           COLLAPSE,
+                                           COULDNT_ROTATE_COLLISION,
+                                           COULDNT_SHIFT_COLLISION
+                                          };
+
     enum                        RotatePlane { PLANE_XY,
                                               PLANE_ZY,
                                               PLANE_ZX };
@@ -74,28 +80,29 @@ public:
 				~Game();
 
     unsigned int		GetLevel() const;
-    static void                 InitializeStaticData();
-    Point2Df                    GetFigurePositionOnXZ( int width_x, int width_z );
-    Figure*			GetNewFigure();
     float*			GetLightPosition() const;
-    void			DrawWorld() const;
-    void			DrawField() const;
-    void			DrawInterface() const ;
-    void			DrawBlocksOnTheField() const;
-    //void			SetGameSpeed( unsigned int new_game_speed );
+
     void			NextStep();
-    void			ShiftFigureByXAxis( ShiftDirection shift );
-    void			ShiftFigureByZAxis( ShiftDirection shift );
-    void			Rotate( RotatePlane plane, RotateSide side );
     void			DropDownFigure();
-    //void                        ChangePause();
-    void                        SetShift( Axises axis, ShiftDirection direction );
+
     void                        GetSelectFigures( bool* select_figures );
     void                        SetSelectFigures( bool* select_figures );
     void			SearchAndSetSteps( int i, int k, int j, int color );
+
+    //Game state
     void			GameOver();
     void			End();
     bool                        IsGameOver() const;
+
+    //Draw
+    void			DrawWorld() const;
+    void			DrawField() const;
+    void			DrawBlocksOnTheField() const;
+
+    //Figure control
+    void                        SetShift( Axises axis, ShiftDirection direction );
+    bool			Rotate( RotatePlane plane, RotateSide side );
+
 private:
     enum                        LightPosition  { LightPosByX = 400 , LightPosByY = 800, LightPosByZ = 300 };
     static const int            SAFETY_DISTANCE;
@@ -107,7 +114,6 @@ private:
     std :: vector < Figures >   mPresentFigures;
     std :: vector < Block* >	mBoardBlocks;
     Block*			mpField[ LENGTH ][ HEIGHT ][ WIDTH ];
-    //int                         mpCollapseBlockStepsCount[ LENGTH ][ HEIGHT ][ WIDTH ];
     int                         mpCollapseComponent[ LENGTH ][ HEIGHT ][ WIDTH ];
     int                         mFieldBlockCnt;
     void			CreateBorderBlocks();
@@ -135,7 +141,7 @@ private:
     ComponentsVec               component_block;
     bool                        mIsCollapse;
     void                        CheckToCollapse();
-    void			PickUpComponent( int a_i, int a_k, int a_j/*, int a_color*/ );
+    void			PickUpComponent( int a_i, int a_k, int a_j );
     void			PrepairToCollapse();
     void                        CollapseStep();
     int                         mFallingComponents;
@@ -154,6 +160,14 @@ private:
     Phonon :: AudioOutput*	mpAudioAmbient;
     Phonon :: AudioOutput*	mpAudioSound;
     bool			mIsSound;
+
+    bool			ShiftFigureByXAxis( ShiftDirection shift );
+    bool			ShiftFigureByZAxis( ShiftDirection shift );
+
+    static void                 InitializeStaticData();
+    Point2Df                    GetFigurePositionOnXZ( int width_x, int width_z );
+    Figure*			GetNewFigure();
+
 };
 
 #endif

@@ -57,7 +57,6 @@ void Scene :: initializeGL()
 {
     glEnable( GL_STEREO );
     glEnable( GL_DOUBLE );
-    glEnable( GL_SMOOTH );
     glEnable( GL_DEPTH_TEST );
     glShadeModel( GL_FLAT );
     glEnable( GL_LIGHTING );
@@ -293,4 +292,14 @@ int Scene :: GetViewSide()
     }
 
     return 0;
+}
+
+void Scene :: AddMessage( Game :: Messages aNewMessage )
+{
+   mMessagesList.push_back( aNewMessage );
+}
+
+void Scene :: SetMessages( Game :: Messages& aMessages )
+{
+
 }

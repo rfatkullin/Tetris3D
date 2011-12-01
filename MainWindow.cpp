@@ -37,7 +37,7 @@ MainWindow :: MainWindow() : QMainWindow()
     mpGame		    = new Game( this );
     mpSelectFiguresDialog   = new SelectFiguresDialog( this );
     mIsRightButtonPressed   = false;
-    mIsGame            = false;
+    mIsGame                 = false;
 
     CreateScene();
     CreateActions();
@@ -186,8 +186,8 @@ void MainWindow :: mousePressEvent( QMouseEvent* mouse )
 
     Qt :: MouseButton button = mouse -> button();
 
-    if ( button == Qt :: RightButton )
-	mpScene -> mIsOneSide = !mpScene -> mIsOneSide;
+    //if ( button == Qt :: RightButton )
+        //mpScene -> mIsOneSide = !mpScene -> mIsOneSide;
 
     if ( ( button == Qt :: LeftButton ) || ( button == Qt :: RightButton )  )
 	mLastMousePos = mouse -> globalPos();
@@ -285,7 +285,8 @@ void MainWindow :: SelectRotate( int aX, int aY )
             inverse = -1;
 
         if ( move_by_x * inverse > 0 )
-            mpGame-> Rotate( rot_plane, Game :: ROTATE_BY_CLOCK_WISE );
+            if ( !mpGame-> Rotate( rot_plane, Game :: ROTATE_BY_CLOCK_WISE ) )
+                messages.push_back( Game :: COULDNT_ROTATE_COLLISION );
         else
             mpGame-> Rotate( rot_plane, Game :: ROTATE_BY_ANTI_CLOCKWISE );
     }
