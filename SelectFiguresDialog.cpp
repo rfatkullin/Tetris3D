@@ -3,9 +3,9 @@
 
 SelectFiguresDialog :: SelectFiguresDialog( QWidget* parent ) : QDialog( parent )
 {
-    QVBoxLayout* p_figures_layout = new QVBoxLayout();
+    QVBoxLayout* p_figures_layout   = new QVBoxLayout();
     QVBoxLayout* p_ok_cancel_layout = new QVBoxLayout();
-    QHBoxLayout* p_common_layout = new QHBoxLayout();
+    QHBoxLayout* p_common_layout    = new QHBoxLayout();
 
     mpFigures[ 0 ] = new QCheckBox( "I figure" );
     mpFigures[ 1 ] = new QCheckBox( "J figure" );

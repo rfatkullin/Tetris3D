@@ -9,9 +9,9 @@
 const Point3Di Scene :: mCameraShift            = Point3Di ( ( Game :: LENGTH / 2 ) * Block :: BLOCK_SIZE,
                                                              ( Game :: HEIGHT / 2 ) * Block :: BLOCK_SIZE,
                                                              ( Game :: WIDTH / 2  ) * Block :: BLOCK_SIZE );
-const float Scene :: CAMERA_POS_CHANGE_KOEFF    = 0.01f;
-const float Scene :: CAMERA_RADIUS              = 450.0f;
-Point2Df    Scene :: mSectorVecs[ Scene :: SectorVecCnt ];
+const float  Scene :: CAMERA_POS_CHANGE_KOEFF    = 0.01f;
+const float  Scene :: CAMERA_RADIUS              = 450.0f;
+Point2Df     Scene :: mSectorVecs[ Scene :: SectorVecCnt ];
 
 Scene :: Scene( Game* const new_game, QWidget* pwgt ) : QGLWidget( pwgt )
 {
@@ -23,16 +23,15 @@ Scene :: Scene( Game* const new_game, QWidget* pwgt ) : QGLWidget( pwgt )
         mDiffuseLight[ i ] = 0.0f;
 	mSpecularLight[ i ] = 0.0f;
     }
-    mSceneWidth  = SCENE_WIDTH;
-    mSceneHeight = SCENE_HEIGHT;
 
+    mWidth  = STANDART_SCENE_WIDTH;
+    mHeight = STANDART_SCENE_HEIGHT;
 
     mCameraPosition = SphericalCoor( Geometry :: pi / 4, Geometry :: pi / 8 );
     GetCameraPosition();
     SetViewVectors();
-    Resize( SCENE_WIDTH, SCENE_HEIGHT );
 
-    mRatio = mSceneWidth / ( float )mSceneHeight;
+    mRatio = WIDTH_RATIO / ( float )HEIGHT_RATIO;
     mFrustumAperture    =  45.0f / 180.0f * Geometry :: pi;
     mFrustumNearPlane	=  60;
     mFrustumFarPlane	=  800;
@@ -40,12 +39,15 @@ Scene :: Scene( Game* const new_game, QWidget* pwgt ) : QGLWidget( pwgt )
     mFrustumFocalLength =  mFrustumNearPlane / 2;
     mFrustumEyeSep      =  mFrustumFocalLength / 30.0f;
     mIsOneSide		=  false;
+    mShowHelp           =  true;
 
 //    QGLFormat fmt;
 //    fmt.setStereo( true );
 //    setFormat( fmt );
     mIsStereo	 = false;
 
+    for ( int i = 0; i < RENDER_MESSAGES_CNT; i++ )
+        mRenderMessages[ i ] = Game :: EMPTY;
 }
 
 Scene :: ~Scene()
@@ -66,56 +68,27 @@ void Scene :: initializeGL()
     glLightf( GL_LIGHT0, GL_LINEAR_ATTENUATION,    0.0f );
     glLightf( GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 0.0f );
 
-    glClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho( -SCENE_WIDTH / 2, SCENE_WIDTH / 2, -SCENE_HEIGHT / 2, SCENE_HEIGHT / 2, 0, 3000);
-
 }
 
-void Scene :: resizeGL( int new_width, int new_height )
+void Scene :: resizeGL( int aNewWidth, int aNewHeight )
 {
-    //Resize( new_width, new_height );
+    Resize( aNewWidth, aNewHeight );
 }
 
-void Scene :: Resize( int new_width, int new_height )
+void Scene :: Resize( int aNewWidth, int aNewHeight )
 {
-    //mSceneWIdth = new_width;
-    //mSceneHeight = new_height;
+    int factor = 1;
+
+    while ( ( mWidth <= aNewWidth ) && ( mHeight <= aNewHeight ) )
+    {
+        mWidth  = factor * WIDTH_RATIO * RESOL_FIND_STEP;
+        mHeight = factor * HEIGHT_RATIO * RESOL_FIND_STEP;
+        ++factor;
+    }
+
+    mWidth  -= WIDTH_RATIO * RESOL_FIND_STEP;
+    mHeight -= HEIGHT_RATIO * RESOL_FIND_STEP;
 }
-
-//void Scene :: paintGL()
-//{
-//    glViewport( 0, 0, mSceneWIdth, mSceneHeight );
-
-//    glMatrixMode( GL_MODELVIEW );
-//    glDrawBuffer( GL_BACK_RIGHT );
-//    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-//    glLoadIdentity();
-//    gluLookAt( 0.0f, 0.0f, 10.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f );
-//    glColor3f( 1.0f, 0.0f, 0.0f );
-//    glBegin( GL_QUADS );
-//	glVertex3f( -100.0f, -100.0f, 0.0f );
-//	glVertex3f( 100.0f, -100.0f, 0.0f );
-//	glVertex3f( 100.0f, 100.0f, 0.0f );
-//	glVertex3f( -100.0f, 100.0f, 0.0f );
-//    glEnd();
-
-//    glMatrixMode( GL_MODELVIEW );
-//    glDrawBuffer( GL_BACK_LEFT );
-//    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-//    glLoadIdentity();
-//    gluLookAt( 0.0f, 0.0f, 10.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f );
-//    glColor3f( 0.0f, 0.0f, 1.0f );
-//    glBegin( GL_QUADS );
-//	glVertex3f( -100.0f, -100.0f, 0.0f );
-//	glVertex3f( 100.0f, -100.0f, 0.0f );
-//	glVertex3f( 100.0f, 100.0f, 0.0f );
-//	glVertex3f( -100.0f, 100.0f, 0.0f );
-//    glEnd();
-
-//    swapBuffers();
-//}
 
 void Scene :: paintGL()
 {
@@ -128,7 +101,7 @@ void Scene :: paintGL()
     camera_positon     = camera_positon + mCameraShift;
     right_vec_to_dir   = Geometry :: VectorMul( camera_directon, Point3Df( 0.0f, 1.0f, 0.0f ) );
 
-    glViewport( 0, 0, mSceneWidth, mSceneHeight );
+    glViewport( 0, 0, mWidth, mHeight );
 
     if ( mIsStereo )
     {
@@ -185,7 +158,7 @@ void Scene :: paintGL()
     {
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	glOrtho( -SCENE_WIDTH / 2, SCENE_WIDTH / 2, -SCENE_HEIGHT / 2, SCENE_HEIGHT / 2, 0, 1000 );
+        glOrtho( -mWidth / 2, mWidth / 2, -mHeight / 2, mHeight / 2, 0, 1000 );
 	glMatrixMode( GL_MODELVIEW );
 	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 	glLoadIdentity();
@@ -203,22 +176,81 @@ void Scene :: paintGL()
 
 void Scene :: DrawTextInformation()
 {
-    unsigned int    text_buffer_len = 0;
-    unsigned int    game_level	    = mpGame -> GetLevel();
-    char*	    text_buffer	    = new char[ 100 ];
+    const std :: vector < Game :: Messages >    messages            = mpGame -> GetMessages();
+    int                                         messages_cnt        = messages.size();
+    int                                         start_message_index = 0;
+    float                                       alpha_can           = 1.0f / RENDER_MESSAGES_CNT;
+    char*                                       level_text_buffer   = new char[ 50 ];
+    char*                                       score_text_buffer   = new char[ 50 ];
+    QString                                     number_buff;
 
-    strcpy( text_buffer, "Level: " );
-    text_buffer_len = strlen( text_buffer );
-    text_buffer[ text_buffer_len ] = ( char )( game_level + ( unsigned int )'0' );
-    text_buffer[ text_buffer_len + 1 ] = 0;
+    strcpy( level_text_buffer, "Level: " );
+    number_buff.setNum( mpGame -> GetLevel() );
+    strcat( level_text_buffer, number_buff.toStdString().c_str() );
+
+    strcpy( score_text_buffer, "Score: " );
+    number_buff.setNum( mpGame -> GetScore() );
+    strcat( score_text_buffer, number_buff.toStdString().c_str() );
+
+    if ( messages_cnt >= RENDER_MESSAGES_CNT )
+    {
+        start_message_index = messages_cnt - RENDER_MESSAGES_CNT;
+        messages_cnt = RENDER_MESSAGES_CNT;
+    }
+    else
+    {
+        for ( int i = RENDER_MESSAGES_CNT - messages_cnt - 1; i >= 0; --i )
+            mRenderMessages[ i + messages_cnt ] = mRenderMessages[ i  ];
+    }
+
+    for ( int i = 0; i < messages_cnt; i++ )
+        mRenderMessages[ i ] = messages[ start_message_index + i ];
 
     glColor3f( 1.0f, 1.0f, 1.0f );
-    //renderText( 10, 20, "3D Model" );
-    //renderText( 10, mSceneHeight - 10, "PAUSE - P" );
+    renderText( mWidth - INFO_X_OFFSET, INFO_Y_OFFSET, level_text_buffer );
+    renderText( mWidth - INFO_X_OFFSET, INFO_Y_OFFSET + 20, score_text_buffer );
 
-    renderText( SCENE_WIDTH - 200, 10, text_buffer );
+    for ( int i = 0; i < RENDER_MESSAGES_CNT; i++ )
+    {
+        switch ( mRenderMessages[ i ] )
+        {
+            case Game :: EMPTY :
+                continue;
+                break;
+            case Game :: COULDNT_ROTATE_COLLISION :
+                glColor4f( 0.0f, 1.0f, 1.0f, 1.0f - i * alpha_can );
+                break;
+            case Game :: COULDNT_SHIFT_COLLISION :
+                glColor4f( 0.0f, 1.0f, 1.0f, 1.0f - i * alpha_can );
+                break;
+            case Game :: COLLAPSE :
+                glColor4f( 0.0f, 1.0f, 0.0f, 1.0f - i * alpha_can );
+                break;
+            case Game :: NEW_GAME :
+                glColor4f( 1.0f, 1.0f, 0.0f, 1.0f - i * alpha_can );
+                break;
+            case Game :: GAME_OVER :
+                glColor4f( 1.0f, 0.0f, 0.0f, 1.0f - i * alpha_can );
+                break;
+             default :
+                glColor4f( 1.0f, 1.0f, 1.0f, 1.0f - i * alpha_can );
+        }
 
-    delete [] text_buffer;
+        if ( mRenderMessages[ i ] != Game :: EMPTY )
+            renderText( mWidth - INFO_X_OFFSET, INFO_Y_OFFSET + ( i + 2 ) * 20, Game :: MESSAGES[ mRenderMessages[ i ] ] );
+    }
+
+    if ( mShowHelp )
+    {
+        glColor3f( 1.0f, 1.0f, 1.0f );
+        renderText( mWidth - HELP_X_OFFSET, mHeight - HELP_Y_OFFSET,      "Pause                P"  );
+        renderText( mWidth - HELP_X_OFFSET, mHeight - HELP_Y_OFFSET + 20, "This help            F1" );
+        renderText( mWidth - HELP_X_OFFSET, mHeight - HELP_Y_OFFSET + 40, "New game         F2" );
+        renderText( mWidth - HELP_X_OFFSET, mHeight - HELP_Y_OFFSET + 60, "Full screen         F3" );
+        renderText( mWidth - HELP_X_OFFSET, mHeight - HELP_Y_OFFSET + 80, "Ambient music  F4" );
+    }
+
+
 }
 
 void Scene :: SetLigthOption( float ambient[ 4 ], float diffuse[ 4 ], float specular[ 4 ] )
@@ -294,12 +326,9 @@ int Scene :: GetViewSide()
     return 0;
 }
 
-void Scene :: AddMessage( Game :: Messages aNewMessage )
+void Scene :: ChangeShowHelp()
 {
-   mMessagesList.push_back( aNewMessage );
+    mShowHelp = !mShowHelp;
 }
 
-void Scene :: SetMessages( Game :: Messages& aMessages )
-{
 
-}

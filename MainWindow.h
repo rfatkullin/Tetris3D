@@ -7,6 +7,7 @@
 #include <QMenu>
 #include "Scene.h"
 #include "SelectFiguresDialog.h"
+#include "GameOverDialog.h"
 
 struct FigureShift
 {
@@ -35,7 +36,7 @@ private:
     static const int	    NativeKeyEsc = 27;
     static FigureShift      msFigureControl[ ViewCnt ][ ButtonsCnt ];
     enum		    WindowMinSize{ MIN_WIDTH  = 800,
-                                           MIN_HEIGHT = 600 };
+                                           MIN_HEIGHT = 625 };
 
     enum                    ControlButtons{ S_BUTTON = 0,
                                             W_BUTTON = 1,
@@ -73,9 +74,12 @@ private:
     QAction*                mpChangePresentSoundsAction;
 
     SelectFiguresDialog*    mpSelectFiguresDialog;
+    GameOverDialog*         mpGameOverDialog;
     Qt :: MouseButton	    mLastMouseButton;
     QPoint		    mLastMousePos;
     bool		    mIsRightButtonPressed;
+
+    bool                    mIsFullScreen;
 public slots :
     void		    SelectFigures();
 };

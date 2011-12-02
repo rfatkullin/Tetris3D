@@ -36,8 +36,10 @@ MainWindow :: MainWindow() : QMainWindow()
 {
     mpGame		    = new Game( this );
     mpSelectFiguresDialog   = new SelectFiguresDialog( this );
+    mpGameOverDialog        = NULL;
     mIsRightButtonPressed   = false;
     mIsGame                 = false;
+    mIsFullScreen           = false;
 
     CreateScene();
     CreateActions();
@@ -48,16 +50,14 @@ MainWindow :: MainWindow() : QMainWindow()
     setMinimumSize( MIN_WIDTH, MIN_HEIGHT );
     setCentralWidget( mpScene );
     startTimer( 10 );
-
-
 }
 
 void MainWindow :: CreateActions()
 {
-    mpNewGameAction = new QAction( "&New game", this );
+    mpNewGameAction = new QAction( "New game", this );
     connect( mpNewGameAction, SIGNAL( triggered() ), SLOT( NewGame() ) );
 
-    mpExitGameAction = new QAction( "&Exit", this );
+    mpExitGameAction = new QAction( "Exit", this );
     connect( mpExitGameAction, SIGNAL( triggered() ), this, SLOT( close() ) );
 
     mpTrun3dAction = new QAction( "3D effect", this );
@@ -71,7 +71,7 @@ void MainWindow :: CreateActions()
     mpChangePresentMusicAction = new QAction( "Music", this );
     mpChangePresentMusicAction -> setCheckable( true );
     mpChangePresentMusicAction -> setChecked( true );
-    connect( mpChangePresentMusicAction, SIGNAL( toggled( bool ) ), mpGame, SLOT( MusicStateChange( bool ) ) );
+    connect( mpChangePresentMusicAction, SIGNAL( toggled( bool ) ), mpGame, SLOT( AmbientMusicStateChange( bool ) ) );
 
     mpChangePresentSoundsAction = new QAction( "Sounds", this );
     mpChangePresentSoundsAction -> setCheckable( true );
@@ -82,11 +82,11 @@ void MainWindow :: CreateActions()
 
 void MainWindow :: CreateMenus()
 {
-    mpMainMenu = menuBar() -> addMenu( "&Game" );
+    mpMainMenu = menuBar() -> addMenu( "Game" );
     mpMainMenu -> addAction( mpNewGameAction );
     mpMainMenu -> addAction( mpExitGameAction );
 
-    mpSettingsMenu = menuBar() -> addMenu( "&Settings" );
+    mpSettingsMenu = menuBar() -> addMenu( "Settings" );
     mpSettingsMenu -> addAction( mpTrun3dAction );
     mpSettingsMenu -> addAction( mpSelectFiguresAction );
     mpSettingsMenu -> addAction( mpChangePresentMusicAction );
@@ -105,11 +105,9 @@ void MainWindow :: CreateScene()
 
 void MainWindow :: NewGame()
 {
-    mIsGame = true;
-
     mpGame -> End();
     mpGame -> Start();
-
+    mIsGame = true;
 }
 
 void MainWindow :: Exit()
@@ -135,6 +133,16 @@ void MainWindow :: keyPressEvent( QKeyEvent* key )
         case Qt :: Key_Escape :
 	    Exit();
             break;
+        case Qt :: Key_F1 :
+            mpScene -> ChangeShowHelp();
+            break;
+        case Qt :: Key_F2 :
+            NewGame();
+            break;
+//        case Qt :: Key_F5 :
+//            game_over = new GameOverDialog( 100 );
+//            game_over -> exec();
+//            break;
         default:
             break;
     }
@@ -155,6 +163,25 @@ void MainWindow :: keyPressEvent( QKeyEvent* key )
 //	    printf( "%f\n", mpScene -> mFrustumFocalLength );
 //	    mpScene -> mFrustumEyeSep = mpScene -> mFrustumFocalLength / 30.0f;
 //	    break;
+        case Qt :: Key_F4 :
+            mpGame -> AmbientMusicStateChange( !mpGame -> AmbientMusicState() );
+            break;
+        case Qt :: Key_F3 :
+            mIsFullScreen = !mIsFullScreen;
+            this -> menuBar() -> setVisible( !mIsFullScreen );
+
+            if ( mIsFullScreen )
+            {
+                this -> showFullScreen();
+                this -> setCursor( Qt :: BlankCursor );
+            }
+            else
+            {
+                this -> showNormal();
+                this -> setCursor( Qt :: ArrowCursor );
+            }
+
+            break;
         case Qt :: Key_Space :
 	    mpGame-> DropDownFigure();
             break;
@@ -230,22 +257,28 @@ void MainWindow :: mouseMoveEvent( QMouseEvent* mouse )
     mLastMousePos = mouse -> globalPos();
 }
 
-void MainWindow :: resizeEvent( int new_width, int new_height )
+void MainWindow :: resizeEvent( int aNewWidth, int aNewHeight )
 {
-     mpScene -> Resize( new_width, new_height );
+     mpScene -> Resize( aNewWidth, aNewHeight );
 }
 
 void MainWindow :: timerEvent( QTimerEvent * )
 {
     if ( mpGame -> IsGameOver() )
     {
-
+        mpGameOverDialog = new GameOverDialog( width() / 2, height() / 2, mpGame -> GetScore() );
+        mpGameOverDialog -> exec();
+        delete mpGameOverDialog;
+        mIsGame = false;
     }
 
    if ( mIsGame )
         mpGame-> NextStep();
 
     mpScene -> paintGL();
+
+    if ( mIsGame )
+        mpGame -> ClearMessagesList();
 }
 
 void MainWindow :: SelectFigures()
@@ -285,8 +318,7 @@ void MainWindow :: SelectRotate( int aX, int aY )
             inverse = -1;
 
         if ( move_by_x * inverse > 0 )
-            if ( !mpGame-> Rotate( rot_plane, Game :: ROTATE_BY_CLOCK_WISE ) )
-                messages.push_back( Game :: COULDNT_ROTATE_COLLISION );
+            mpGame-> Rotate( rot_plane, Game :: ROTATE_BY_CLOCK_WISE );
         else
             mpGame-> Rotate( rot_plane, Game :: ROTATE_BY_ANTI_CLOCKWISE );
     }

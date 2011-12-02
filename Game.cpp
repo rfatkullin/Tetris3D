@@ -9,6 +9,14 @@ const int       Game :: SAFETY_DISTANCE = 16.0 * BSIZE * BSIZE;
 float		Game :: msLightPosition[ 4 ];
 Figures         Game :: msGameFigures[ Game :: FIGURES_MAX_CNT ];
 
+const char*     Game :: MESSAGES[ Game :: MESSAGES_CNT ] = {  "Empty!",
+                                                              "New level!",
+                                                              "Collapse!",
+                                                              "Could not rotate - collision!",
+                                                              "Could not shift - collision!",
+                                                              "New game!",
+                                                              "Game over!"
+                                                           };
 Game :: ~Game()
 {
     //Delete all blocks
@@ -47,18 +55,20 @@ Game :: Game( QObject* parent ) : QObject( parent )
     mpCurrentFigure         = NULL;
     mGameLevel              = FIRST_SPEED;
     mIsSound		    = true;
+    mIsAmbientMusic         = false;
     mpAmbientMusicObject    = new Phonon :: MediaObject( this );
     mpBlockFallSoundObject  = new Phonon :: MediaObject( this );
-    mpAmbientMusicObject    -> setCurrentSource( Phonon :: MediaSource( "Sounds/Ambient.mp3") );
-    mpBlockFallSoundObject  -> setCurrentSource( Phonon :: MediaSource( "Sounds/FALL.wav") );
     mpAudioAmbient	    = new Phonon :: AudioOutput( Phonon :: MusicCategory, this );
     mpAudioSound	    = new Phonon :: AudioOutput( Phonon :: MusicCategory, this );
 
     Phonon :: createPath( mpAmbientMusicObject, mpAudioAmbient );
     Phonon :: createPath( mpBlockFallSoundObject, mpAudioSound );
 
+    mpAmbientMusicObject    -> setCurrentSource( Phonon :: MediaSource( "Sounds/Ambient.mp3") );
+    mpBlockFallSoundObject  -> setCurrentSource( Phonon :: MediaSource( "Sounds/Fall.wav") );
+
     connect( mpAmbientMusicObject,   SIGNAL( finished() ), SLOT( PlayAmbientMusic() ) );
-    connect( mpBlockFallSoundObject, SIGNAL( finished() ), SLOT( PlayFallSound() ) );
+    connect( mpBlockFallSoundObject, SIGNAL( finished() ), SLOT( PrepairFallSound() ) );
 
     InitializeStaticData();
     CreateBorderBlocks();
@@ -143,8 +153,7 @@ void Game :: Start()
 
     mFigurePosCorrectStep      = 0;
     mpCurrentFigure            = GetNewFigure();
-    mFigureDownSteps           = 0;
-    mFieldBlockCnt             = 0;
+    mFigureDownSteps           = 0;    
     mRotatingStep              = 0;
     mGameSpeed                 = FIRST_SPEED;
     mGameLevel                 = FIRST_SPEED;
@@ -177,7 +186,11 @@ void Game :: Start()
         mpField[ mSelectBLocksPos[ i ].mX ][ mSelectBLocksPos[ i ].mY ][ mSelectBLocksPos[ i ].mZ ]
             -> SetMaterial( materials[ SELECT_FIGURES_MATERIALS ] );
 
-     mpAmbientMusicObject -> play();
+     if ( mIsAmbientMusic )
+        mpAmbientMusicObject -> play();
+
+     mMessagesList.clear();
+     mMessagesList.push_back( NEW_GAME );
  }
 
 void Game :: End()
@@ -190,6 +203,8 @@ void Game :: End()
 		    delete mpField[ i ][ k ][ j ];
 		    mpField[ i ][ k ][ j ] = NULL;
 		}
+
+    GetPrevColors();
 
     if ( mpCurrentFigure != NULL )
         delete mpCurrentFigure;
@@ -403,7 +418,7 @@ void Game :: PrepairToCollapse()
                 mpField[ i ][ k ][ j ] = NULL;
 }
 
-void Game :: CheckToCollapse()
+bool Game :: CheckToCollapse()
 {
     bool    full = false;
 
@@ -427,13 +442,16 @@ void Game :: CheckToCollapse()
                     mpField[ i ][ k ][ j ] = NULL;
                 }
 
-            mFieldBlockCnt -= FIELD_END_X * FIELD_END_Z;
+            //mFieldBlockCnt -= ONE_LEVEL_BLOCKS_CNT;
+            mScore         += ONE_LEVEL_BLOCKS_CNT;
             mIsCollapse = true;
          }
     }
 
     if ( mIsCollapse )
         PrepairToCollapse();
+
+    return mIsCollapse;
 }
 
 void Game :: CollapseStep()
@@ -492,6 +510,7 @@ void Game :: CollapseStep()
     if ( mFallingComponents == 0 )
     {
         mIsCollapse = false;
+        ChangeSelectBlocks();
         CheckToCollapse();
     }
 }
@@ -503,9 +522,12 @@ void Game :: NextStep()
     float	final_angle		= 0.0f;
     bool	is_to_commit		= false;
     bool        figure_stopped          = false;
+    bool        shift_res               = false;
     int		field_index_by_length	= 0;
     int		field_index_by_height	= 0;
     int		field_index_by_width	= 0;
+
+
 
     if ( mIsCollapse )
         CollapseStep();
@@ -523,14 +545,17 @@ void Game :: NextStep()
         switch ( mShiftAxis )
             {
                 case X_AXIS :
-                    ShiftFigureByXAxis( mShiftDirection );
+                    shift_res = ShiftFigureByXAxis( mShiftDirection );
                     break;
                 case Z_AXIS :
-                    ShiftFigureByZAxis( mShiftDirection );
+                    shift_res = ShiftFigureByZAxis( mShiftDirection );
                     break;
                 default :
                     break;
             }
+
+        if ( ( mShiftChecksCnt == 0 ) && ( !shift_res ) )
+            mMessagesList.push_back( COULDNT_SHIFT_COLLISION );
     }
 
     //Detecting when figure must stop
@@ -575,19 +600,25 @@ void Game :: NextStep()
         if ( mIsSound )
             mpBlockFallSoundObject -> play();
 
-        CheckToCollapse();
+        if ( CheckToCollapse() )
+            mMessagesList.push_back( Game :: COLLAPSE );
 
         delete mpCurrentFigure;
         mpCurrentFigure     = GetNewFigure();
         mGameSpeed          = mGameLevel;
         mFigureDownSteps    = 0;
-        mFieldBlockCnt      += Figure :: BlocksCount;
+        mScore              += Figure :: BlocksCount;
 
         ChangeSelectBlocks();
 
         //GameOver!!!
         if ( ( !mIsCollapse ) && ( field_index_by_height >= FIELD_END_Y - 3 ) )
-            mIsGameOver = false;
+        {
+            delete mpCurrentFigure;
+            mpCurrentFigure = NULL;
+            mIsGameOver = true;
+            mMessagesList.push_back( GAME_OVER );
+        }
     }
 
         //Rotate the figure
@@ -685,11 +716,6 @@ void Game :: DrawBlocksOnTheField() const
                     mpField[ i ][ k ][ j ] -> Draw( rel_position );
 }
 
-void Game :: DrawInterface() const
-{
-
-}
-
 void Game :: DrawWorld() const
 {
     DrawField();
@@ -697,11 +723,9 @@ void Game :: DrawWorld() const
     if ( mpCurrentFigure != NULL )
         mpCurrentFigure -> Draw();
 
-    Point3Df rel_position( 0.0f, 0.0f, 0.0f );
-
     for ( ComponentsVec :: const_iterator comp_it = component_block.begin(); comp_it != component_block.end(); ++comp_it )
 	for ( BlocksVec :: const_iterator block_it = comp_it -> begin(); block_it != comp_it -> end(); ++block_it  )
-	    ( block_it -> first ) -> Draw( rel_position );
+            ( block_it -> first ) -> Draw();
 }
 
 float* Game :: GetLightPosition() const
@@ -710,9 +734,10 @@ float* Game :: GetLightPosition() const
 }
 
 
-void Game :: ShiftFigureByXAxis( ShiftDirection shift )
+bool Game :: ShiftFigureByXAxis( ShiftDirection shift )
 {
-    std :: vector < Block* >     collision_block;
+    std :: vector < Block* >    collision_block;
+    bool                        result = false;
     int                         x_coor_collision_blocks;
 
     if ( shift < 0 )
@@ -727,17 +752,24 @@ void Game :: ShiftFigureByXAxis( ShiftDirection shift )
 
     mpCurrentFigure -> SetPosi( mpCurrentFigure -> GetPosi() + Point3Di( shift * BSIZE, 0, 0 ) );
     if ( mpCurrentFigure -> CheckToCollisonWithBlocks( collision_block ) ) //Cancel shift
+    {
         mpCurrentFigure -> SetPosi( mpCurrentFigure -> GetPosi() - Point3Di( shift * BSIZE, 0, 0 ) );
+        result = false;
+    }
     else
     {
         mShiftChecksCnt = 0;
         ChangeSelectBlocks();
+        result = true;
     }
+
+    return result;
 }
 
-void Game :: ShiftFigureByZAxis( ShiftDirection shift )
+bool Game :: ShiftFigureByZAxis( ShiftDirection shift )
 {
-    std :: vector < Block* >     collision_block;
+    std :: vector < Block* >    collision_block;
+    bool                        result = false;
     int                         z_coor_collision_blocks;
 
     if ( shift < 0 )
@@ -752,12 +784,18 @@ void Game :: ShiftFigureByZAxis( ShiftDirection shift )
 
     mpCurrentFigure -> SetPosi( mpCurrentFigure -> GetPosi() + Point3Di( 0, 0, shift * BSIZE ) );
     if ( mpCurrentFigure -> CheckToCollisonWithBlocks( collision_block ) ) //Cancel shift
+    {
         mpCurrentFigure -> SetPosi( mpCurrentFigure -> GetPosi() - Point3Di( 0, 0, shift * BSIZE ) );
+        result = false;
+    }
     else
     {
         mShiftChecksCnt = 0;
         ChangeSelectBlocks();
+        result = true;
     }
+
+    return result;
 }
 
 void Game :: Rotate( RotatePlane plane, RotateSide side )
@@ -813,6 +851,14 @@ void Game :: SetGameSpeed( GameSpeed new_game_speed )
 }
 */
 
+void Game :: GetPrevColors()
+{
+    for ( unsigned int i = 0; i < Figure :: BlocksCount; i++ )
+        if ( mpField[ mSelectBLocksPos[ i ].mX ][ mSelectBLocksPos[ i ].mY ] [ mSelectBLocksPos[ i ].mZ ] != NULL )
+            mpField[ mSelectBLocksPos[ i ].mX ][ mSelectBLocksPos[ i ].mY ] [ mSelectBLocksPos[ i ].mZ ]
+                -> SetMaterial( mSelectBlocksMaterials[ i ] );
+}
+
 void Game :: ChangeSelectBlocks()
 {    
     Point3Di fig_pos;
@@ -821,10 +867,7 @@ void Game :: ChangeSelectBlocks()
     int      block_width_pos;
     int      block_height_pos;
 
-    for ( unsigned int i = 0; i < Figure :: BlocksCount; i++ )
-        if ( mpField[ mSelectBLocksPos[ i ].mX ][ mSelectBLocksPos[ i ].mY ] [ mSelectBLocksPos[ i ].mZ ] != NULL )
-            mpField[ mSelectBLocksPos[ i ].mX ][ mSelectBLocksPos[ i ].mY ] [ mSelectBLocksPos[ i ].mZ ]
-                -> SetMaterial( mSelectBlocksMaterials[ i ] );
+    GetPrevColors();
 
     fig_pos = mpCurrentFigure -> GetPosi();
     for ( unsigned int i = 0; i < Figure :: BlocksCount; i++ )
@@ -883,9 +926,11 @@ void Game :: SetSelectFigures( bool* aSelectFigures )
             mPresentFigures.push_back( msGameFigures[ i ] );
 }
 
-void Game :: MusicStateChange( bool aState )
+void Game :: AmbientMusicStateChange( bool aState )
 {
-    if ( !aState )
+    mIsAmbientMusic = aState;
+
+    if ( !mIsAmbientMusic )
 	mpAmbientMusicObject -> stop();
     else
 	mpAmbientMusicObject -> play();
@@ -896,9 +941,9 @@ void Game :: SoundsStateChange( bool aState )
     mIsSound = aState;
 }
 
-void Game :: PlayFallSound()
+void Game :: PrepairFallSound()
 {
-    mpBlockFallSoundObject -> setCurrentSource( Phonon :: MediaSource( "Sounds/FALL.wav") );
+    mpBlockFallSoundObject -> setCurrentSource( Phonon :: MediaSource( "Sounds/Fall.wav") );
 }
 
 void Game :: PlayAmbientMusic()
@@ -907,12 +952,38 @@ void Game :: PlayAmbientMusic()
     mpAmbientMusicObject -> play();
 }
 
-bool Game :: IsGameOver() const
+bool Game :: IsGameOver()
 {
+    if ( mIsGameOver )
+    {
+        mIsGameOver = false;
+        return true;
+    }
+
     return mIsGameOver;
 }
 
 unsigned int Game :: GetLevel() const
 {
     return mGameLevel;
+}
+
+const std :: vector < Game :: Messages >& Game :: GetMessages() const
+{
+    return mMessagesList;
+}
+
+bool Game :: AmbientMusicState()
+{
+    return mIsAmbientMusic;
+}
+
+int Game :: GetScore() const
+{
+    return mScore;
+}
+
+void Game :: ClearMessagesList()
+{
+    mMessagesList.clear();
 }
