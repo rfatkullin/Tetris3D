@@ -52,17 +52,13 @@ public:
 
     static const char*          MESSAGES[ MESSAGES_CNT ];
 
-    const unsigned int static	ZERO_SPEED    = 0;
-    const unsigned int static	FIRST_SPEED   = 1;
-    const unsigned int static	SECOND_SPEED  = 2;
-    const unsigned int static	THIRD_SPEED   = 4;
-    const unsigned int static	FOURTH_SPEED  = 8;
-    const unsigned int static	FIFTH_SPEED   = 10;
-    const unsigned int static	SIXTH_SPEED   = 12;
-    const unsigned int static	SEVENTH_SPEED = 14;
+    static const int            LEVELS_CNT    = 7;
+    static const unsigned int   LEVELS_SCORE[ LEVELS_CNT ];
+    static const unsigned int   LEVELS_SPEED[ LEVELS_CNT ];
+    static const unsigned int   MAX_GAME_SPEED;
 
-    const unsigned int static	WIDTH                = 6;
-    const unsigned int static	LENGTH               = 6;
+    const unsigned int static	WIDTH                = 8;
+    const unsigned int static	LENGTH               = 8;
     const unsigned int static   HEIGHT               = 20;
     const unsigned int static   FIGURES_MAX_CNT      = 7;
     const int static            FIELD_BEGIN_X        = 1;
@@ -158,10 +154,10 @@ private:
     void			PickUpComponent( int a_i, int a_k, int a_j );
     void			PrepairToCollapse();
     void                        CollapseStep();
-    int                         mFallingComponents;
+    int                         mFallingComponentsCnt;
 
     static const int                    MaxSelectBlockCount = 4;
-    Point3Di                            mSelectBLocksPos[ MaxSelectBlockCount ];
+    Point3Di                            mSelectBlocksPos[ MaxSelectBlockCount ];
     Material                            mSelectBlocksMaterials[ MaxSelectBlockCount ];
     void                                ChangeSelectBlocks();
     void                                GetPrevColors();
@@ -185,10 +181,6 @@ private:
     Figure*                             GetNewFigure();
 
     std :: vector < Messages >          mMessagesList;
-
-
-
-
 };
 
 #endif

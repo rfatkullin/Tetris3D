@@ -12,7 +12,7 @@ const double Block :: NOT_SAFETY_DISTANCE   = Block :: BLOCK_SIZE * Block :: BLO
 
 //Block
 
-const Point3Di vertices_i[ 8 ] = {
+const Point3Di Block :: msVerticesI[ Block :: BLOCKS_VERTEX_CNT ] = {
         Point3Di( -( int )Block :: BLOCK_SIZE / 2,  ( int )Block :: BLOCK_SIZE / 2, -( int )Block :: BLOCK_SIZE / 2 ),
         Point3Di( -( int )Block :: BLOCK_SIZE / 2,  ( int )Block :: BLOCK_SIZE / 2,  ( int )Block :: BLOCK_SIZE / 2 ),
         Point3Di(  ( int )Block :: BLOCK_SIZE / 2,  ( int )Block :: BLOCK_SIZE / 2,  ( int )Block :: BLOCK_SIZE / 2 ),
@@ -26,19 +26,19 @@ const Point3Di vertices_i[ 8 ] = {
 Block :: Block() : GeomEntity( 0, 0, 0 ), PhisEntity( materials[ 3 ] )
 {
      for ( unsigned int i = 0; i < BLOCKS_VERTEX_CNT; i++ )
-        mVerticesF[ i ] = vertices_i[ i ];
+        mVerticesF[ i ] = msVerticesI[ i ];
 }
 
 Block :: Block( int new_x, int new_y, int new_z, Material new_material ) : GeomEntity( new_x, new_y, new_z ), PhisEntity( new_material )
 {
     for ( unsigned int i = 0; i < BLOCKS_VERTEX_CNT; i++ )
-        mVerticesF[ i ] = vertices_i[ i ];
+        mVerticesF[ i ] = msVerticesI[ i ];
 }
 
 Block :: Block( Point3Di new_pos, Material new_material ) : GeomEntity( new_pos ), PhisEntity( new_material )
 {
     for ( unsigned int i = 0; i < BLOCKS_VERTEX_CNT; i++ )
-        mVerticesF[ i ] = vertices_i[ i ];
+        mVerticesF[ i ] = msVerticesI[ i ];
 }
 
 Block :: Block( const Block& block) : GeomEntity( block.mPosI ), PhisEntity( block.mMaterial )
@@ -50,13 +50,13 @@ Block :: Block( const Block& block) : GeomEntity( block.mPosI ), PhisEntity( blo
 Block :: Block( float new_x, float new_y, float new_z, Material new_material )  : GeomEntity( new_x, new_y, new_z ), PhisEntity( new_material )
 {
      for ( unsigned int i = 0; i < BLOCKS_VERTEX_CNT; i++ )
-        mVerticesF[ i ] = vertices_i[ i ];
+        mVerticesF[ i ] = msVerticesI[ i ];
 }
 
 Block :: Block( Point3Df new_Pos, Material new_material ) : GeomEntity( new_Pos ), PhisEntity( new_material )
 {
      for ( unsigned int i = 0; i < BLOCKS_VERTEX_CNT; i++ )
-        mVerticesF[ i ] = vertices_i[ i ];
+        mVerticesF[ i ] = msVerticesI[ i ];
 }
 
 void Block :: Rotate( float &a, float &b, float angle )
@@ -80,7 +80,7 @@ void Block :: RotateOnZY( float angle, bool change_const )
 
 	for ( unsigned int i = 0; i < BLOCKS_VERTEX_CNT; ++i )
 	{
-	    mVerticesF[ i ] = vertices_i[ i ];
+	    mVerticesF[ i ] = msVerticesI[ i ];
             Rotate( mVerticesF[ i ].mY,  mVerticesF[ i ].mZ, angle  );
 	}
     }
@@ -101,7 +101,7 @@ void Block :: RotateOnZY( float angle, bool change_const )
 	mPosF = mPosI;
 
 	for ( unsigned int i = 0; i < BLOCKS_VERTEX_CNT; ++i )
-	    mVerticesF[ i ] = vertices_i[ i ];
+	    mVerticesF[ i ] = msVerticesI[ i ];
     }
 
 }
@@ -117,7 +117,7 @@ void Block :: RotateOnZX( float angle, bool change_const )
 
 	for ( unsigned int i = 0; i < BLOCKS_VERTEX_CNT; ++i )
 	{
-	    mVerticesF[ i ] = vertices_i[ i ];
+	    mVerticesF[ i ] = msVerticesI[ i ];
 	    Rotate( mVerticesF[ i ].mZ, mVerticesF[ i ].mX, angle  );
 	}
     }
@@ -138,7 +138,7 @@ void Block :: RotateOnZX( float angle, bool change_const )
 	mPosF   = mPosI;
 
 	for ( unsigned int i = 0; i < BLOCKS_VERTEX_CNT; ++i )
-	    mVerticesF[ i ] = vertices_i[ i ];
+	    mVerticesF[ i ] = msVerticesI[ i ];
     }
 }
 
@@ -153,7 +153,7 @@ void Block :: RotateOnXY( float angle, bool change_const )
 
 	for ( unsigned int i = 0; i < BLOCKS_VERTEX_CNT; ++i )
 	{
-	    mVerticesF[ i ] = vertices_i[ i ];
+	    mVerticesF[ i ] = msVerticesI[ i ];
 	    Rotate( mVerticesF[ i ].mX, mVerticesF[ i ].mY, angle  );
 	}
     }
@@ -174,7 +174,7 @@ void Block :: RotateOnXY( float angle, bool change_const )
 	mPosF   = mPosI;
 
 	for ( unsigned int i = 0; i < BLOCKS_VERTEX_CNT; ++i )
-	    mVerticesF[ i ] = vertices_i[ i ];
+	    mVerticesF[ i ] = msVerticesI[ i ];
     }
 }
 
@@ -314,60 +314,60 @@ float Block :: UpperBoundZf()
 
 int Block :: LowerBoundXi()
 {
-    int min_x = vertices_i[ 0 ].mX;
+    int min_x = msVerticesI[ 0 ].mX;
 
     for ( unsigned int i = 1; i < BLOCKS_VERTEX_CNT; i++ )
-        min_x = Geometry :: Min( min_x, vertices_i[ i ].mX );
+        min_x = Geometry :: Min( min_x, msVerticesI[ i ].mX );
 
     return min_x + mPosI.mX;
 }
 
 int Block :: UpperBoundXi()
 {
-    int max_y = vertices_i[ 0 ].mY;
+    int max_y = msVerticesI[ 0 ].mY;
 
     for ( unsigned int i = 1; i < BLOCKS_VERTEX_CNT; i++ )
-        max_y = Geometry :: Max( max_y, vertices_i[ i ].mY );
+        max_y = Geometry :: Max( max_y, msVerticesI[ i ].mY );
 
     return max_y + mPosI.mX;
 }
 
 int Block :: LowerBoundYi()
 {
-    int min_y = vertices_i[ 0 ].mY;
+    int min_y = msVerticesI[ 0 ].mY;
 
     for ( unsigned int i = 1; i < BLOCKS_VERTEX_CNT; i++ )
-        min_y = Geometry :: Min( min_y, vertices_i[ i ].mY );
+        min_y = Geometry :: Min( min_y, msVerticesI[ i ].mY );
 
     return min_y + mPosI.mY;
 }
 
 int Block :: UpperBoundYi()
 {
-    int max_y = vertices_i[ 0 ].mY;
+    int max_y = msVerticesI[ 0 ].mY;
 
     for ( unsigned int i = 1; i < BLOCKS_VERTEX_CNT; i++ )
-        max_y = Geometry :: Max( max_y, vertices_i[ i ].mY );
+        max_y = Geometry :: Max( max_y, msVerticesI[ i ].mY );
 
     return max_y + mPosI.mY;
 }
 
 int Block :: LowerBoundZi()
 {
-    int min_z = vertices_i[ 0 ].mZ;
+    int min_z = msVerticesI[ 0 ].mZ;
 
     for ( unsigned int i = 1; i < BLOCKS_VERTEX_CNT; i++ )
-        min_z = Geometry :: Min( min_z, vertices_i[ i ].mZ );
+        min_z = Geometry :: Min( min_z, msVerticesI[ i ].mZ );
 
     return min_z + mPosI.mZ;
 }
 
 int Block :: UpperBoundZi()
 {
-    int max_z = vertices_i[ 0 ].mZ;
+    int max_z = msVerticesI[ 0 ].mZ;
 
     for ( unsigned int i = 1; i < BLOCKS_VERTEX_CNT; i++ )
-        max_z = Geometry :: Max( max_z, vertices_i[ i ].mZ );
+        max_z = Geometry :: Max( max_z, msVerticesI[ i ].mZ );
 
     return max_z + mPosI.mZ;
 }
@@ -538,7 +538,7 @@ Figure :: Figure( int x, int y, int z, Figures type, Material material ) : GeomE
                                     material );
 
         mpBlocks[ 3 ] = new Block( -( int )Block :: BLOCK_SIZE,
-                                   -( int )( Block :: BLOCK_SIZE + Block :: BLOCK_SIZE / 2 ),
+                                   -( int )Block :: BLOCK_SIZE / 2,
                                     0,
                                     material );
 	break;

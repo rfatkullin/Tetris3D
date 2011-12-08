@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QMenuBar>
 #include <QAction>
+#include <QTime>
 #include <QMenu>
 #include "Scene.h"
 #include "SelectFiguresDialog.h"

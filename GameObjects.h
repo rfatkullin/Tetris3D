@@ -16,7 +16,9 @@ public :
     static const double         SAFETY_DISTANCE;
     static const double         NOT_SAFETY_DISTANCE;
 private :
+    static const Point3Di       msVerticesI[ BLOCKS_VERTEX_CNT ];
     Point3Df			mVerticesF[ BLOCKS_VERTEX_CNT ];
+
 
     void			Rotate ( float &a, float &b, float angle );
     void			DrawSide( Point3Df x1, Point3Df x2, Point3Df x3, Point3Df x4 );

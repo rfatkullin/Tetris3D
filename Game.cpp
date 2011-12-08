@@ -17,6 +17,27 @@ const char*     Game :: MESSAGES[ Game :: MESSAGES_CNT ] = {  "Empty!",
                                                               "New game!",
                                                               "Game over!"
                                                            };
+
+const unsigned int   Game :: LEVELS_SPEED[ Game :: LEVELS_CNT ] = { 1,
+                                                                    2,
+                                                                    4,
+                                                                    8,
+                                                                    10,
+                                                                    12,
+                                                                    14
+                                                                  };
+
+const unsigned int   Game :: LEVELS_SCORE[ Game :: LEVELS_CNT ] = {  0,
+                                                                     200,
+                                                                     400,
+                                                                     600,
+                                                                     800,
+                                                                     1000,
+                                                                     1200
+                                                                   };
+
+const unsigned int   Game :: MAX_GAME_SPEED = LEVELS_SPEED[ Game :: LEVELS_CNT - 1 ];
+
 Game :: ~Game()
 {
     //Delete all blocks
@@ -52,9 +73,11 @@ void Game :: InitializeStaticData()
 
 Game :: Game( QObject* parent ) : QObject( parent )
 {
+    mScore                  = 0;
     mpCurrentFigure         = NULL;
-    mGameLevel              = FIRST_SPEED;
+    mGameLevel              = 1;
     mIsSound		    = true;
+    mIsGameOver             = false;
     mIsAmbientMusic         = false;
     mpAmbientMusicObject    = new Phonon :: MediaObject( this );
     mpBlockFallSoundObject  = new Phonon :: MediaObject( this );
@@ -155,8 +178,8 @@ void Game :: Start()
     mpCurrentFigure            = GetNewFigure();
     mFigureDownSteps           = 0;    
     mRotatingStep              = 0;
-    mGameSpeed                 = FIRST_SPEED;
-    mGameLevel                 = FIRST_SPEED;
+    mGameLevel                 = 1;
+    mGameSpeed                 = LEVELS_SPEED[ mGameLevel - 1 ];
     mIsRotate                  = false;
     mScore                     = 0;
     mIsCollapse                = false;
@@ -178,12 +201,12 @@ void Game :: Start()
         block_length_pos = block_pos.mX / Game :: BSIZE;
         block_width_pos  = block_pos.mZ / Game :: BSIZE;
 
-        mSelectBLocksPos[ i ] = Point3Di( block_length_pos, 0, block_width_pos );
+        mSelectBlocksPos[ i ] = Point3Di( block_length_pos, 0, block_width_pos );
         mSelectBlocksMaterials[ i ] = mpField[ block_length_pos ][ 0 ][ block_width_pos ] -> GetMaterial();
     }
 
     for ( unsigned int i = 0; i < Figure :: BlocksCount; i++ )
-        mpField[ mSelectBLocksPos[ i ].mX ][ mSelectBLocksPos[ i ].mY ][ mSelectBLocksPos[ i ].mZ ]
+        mpField[ mSelectBlocksPos[ i ].mX ][ mSelectBlocksPos[ i ].mY ][ mSelectBlocksPos[ i ].mZ ]
             -> SetMaterial( materials[ SELECT_FIGURES_MATERIALS ] );
 
      if ( mIsAmbientMusic )
@@ -243,7 +266,7 @@ Figure* Game :: GetNewFigure()
     int         y_position  = FIGURE_START_Y_POS  * BSIZE;
 
     Figure* new_figure = new Figure( 0.0f, 0.0f, 0.0f,
-                               IFigure/*mPresentFigures[ rand() % mPresentFigures.size() ]*/,
+                               mPresentFigures[ rand() % mPresentFigures.size() ],
                                materials[ rand() % FIGURES_MATERIALS ] );
 
     lower_bound_x = new_figure -> LowerBoundXi();
@@ -318,25 +341,7 @@ bool Game :: CheckToRotate( )
             break;
         default :
             sim_collis_figure -> RotateOnZX( sim_final_angle, false );
-        }
-
-        //Manipulating witn field blocks at the collpase
-//        if ( sim_collapse_steps_cnt > 0 )
-//        {
-//            sim_collapse_steps_cnt--;
-
-//            block_y_pos_i = sim_field_blocks[ i ] -> GetPosByYi();
-
-//            if ( sim_collapse_steps_cnt > 0 )
-//                for ( int i = 0; i < sim_field_blocks_cnt; i++ )
-//                    sim_field_blocks[ i ] -> SetPosByYi( block_y_pos_i - SEVENTH_SPEED );
-//            else
-//                for ( int i = 0; i < sim_field_blocks_cnt; i++ )
-//                {
-//                    sim_field_blocks[ i ] -> SetPosByYi(
-//                        block_y_pos_i - ( block_y_pos_i - SEVENTH_SPEED + HALF_BSIZE ) / HALF_BSIZE * HALF_BSIZE );
-//                }
-//        }
+        }      
 
         sim_is_collision = sim_collis_figure -> CheckToCollisonWithBlocks( sim_field_blocks ) ||
                            sim_collis_figure -> CheckToCollisonWithBlocks( mBoardBlocks );
@@ -402,13 +407,13 @@ void Game :: PrepairToCollapse()
 	    for ( int j = FIELD_BEGIN_Z; j < FIELD_END_Z; ++j )
 		mpCollapseComponent[ i ][ k ][ j ] = 0;
 
-    mFallingComponents = 0;
+    mFallingComponentsCnt = 0;
     for ( int k = FIELD_BEGIN_Y; k < FIELD_END_Y; ++k )
 	for ( int i = FIELD_BEGIN_X; i < FIELD_END_X; ++i )
 	    for ( int j = FIELD_BEGIN_Z; j < FIELD_END_Z; ++j )
 		if ( ( mpField[ i ][ k ][ j ] != NULL ) && ( mpCollapseComponent[ i ][ k ][ j ] == 0 ) )
                 {
-                    mFallingComponents++;
+                    mFallingComponentsCnt++;
                     component_block.push_back( BlocksVec() );
 		    PickUpComponent( i, k, j );
                 }
@@ -468,7 +473,7 @@ void Game :: CollapseStep()
 
         for ( BlocksVec :: iterator block_it = comp_it -> begin(); ( block_it != comp_it -> end() ) && ( !stop ); ++block_it  )
         {
-            world_y_coor = ( block_it -> first ) -> GetPosByYi() - SEVENTH_SPEED;
+            world_y_coor = ( block_it -> first ) -> GetPosByYi() - MAX_GAME_SPEED;
             field_y_coor =   world_y_coor / BSIZE;
             i = ( block_it -> second ).first;
             j = ( block_it -> second ).second;
@@ -497,17 +502,17 @@ void Game :: CollapseStep()
                 mpField[ i ][ field_y_coor ][ j ] = block_it -> first;
             }
             else
-		( block_it -> first ) -> SetPosByYi( ( block_it -> first ) -> GetPosByYi() - SEVENTH_SPEED );
+		( block_it -> first ) -> SetPosByYi( ( block_it -> first ) -> GetPosByYi() - MAX_GAME_SPEED );
 	}
 
         if ( stop )
         {
             comp_it -> clear();
-            mFallingComponents--;
+            mFallingComponentsCnt--;
         }
     }
 
-    if ( mFallingComponents == 0 )
+    if ( mFallingComponentsCnt == 0 )
     {
         mIsCollapse = false;
         ChangeSelectBlocks();
@@ -526,8 +531,6 @@ void Game :: NextStep()
     int		field_index_by_length	= 0;
     int		field_index_by_height	= 0;
     int		field_index_by_width	= 0;
-
-
 
     if ( mIsCollapse )
         CollapseStep();
@@ -604,8 +607,17 @@ void Game :: NextStep()
             mMessagesList.push_back( Game :: COLLAPSE );
 
         delete mpCurrentFigure;
+
         mpCurrentFigure     = GetNewFigure();
-        mGameSpeed          = mGameLevel;
+
+        for ( int i = mGameLevel; i < LEVELS_CNT; i++ )
+            if ( mScore >= LEVELS_SCORE[ i ] )
+            {
+                mMessagesList.push_back( NEW_LEVEL );
+                mGameLevel = i + 1;
+            }
+
+        mGameSpeed = LEVELS_SPEED[ mGameLevel - 1 ];
         mFigureDownSteps    = 0;
         mScore              += Figure :: BlocksCount;
 
@@ -619,41 +631,42 @@ void Game :: NextStep()
             mIsGameOver = true;
             mMessagesList.push_back( GAME_OVER );
         }
+
     }
 
-        //Rotate the figure
-        if ( mIsRotate )
-	{
-            mRotatingStep++;
+    //Rotate the figure
+    if ( mIsRotate )
+    {
+        mRotatingStep++;
 
-            //Correcting figure position
-            if ( mRotatingStep <= HALF_BSIZE )
-                mpCurrentFigure -> SetPosi( mpCurrentFigure -> GetPosi() + mFigurePosCorrectVec );
+        //Correcting figure position
+        if ( mRotatingStep <= HALF_BSIZE )
+            mpCurrentFigure -> SetPosi( mpCurrentFigure -> GetPosi() + mFigurePosCorrectVec );
 
-            final_angle = mRotatingStep * mRotatingAngle;
+        final_angle = mRotatingStep * mRotatingAngle;
 
-            if ( mRotatingStep == ROTATE_STEPS_COUNT )
-	    {
-                mRotatingStep   = 0;
-                mIsRotate       = false;
-                is_to_commit    = true;
-	    }
+        if ( mRotatingStep == ROTATE_STEPS_COUNT )
+        {
+            mRotatingStep   = 0;
+            mIsRotate       = false;
+            is_to_commit    = true;
+        }
 
-            switch ( mRotatingPlane )
-	    {
-            case PLANE_XY :
-                mpCurrentFigure -> RotateOnXY( final_angle, is_to_commit );
-		break;
-            case PLANE_ZY :
-                mpCurrentFigure -> RotateOnZY( final_angle, is_to_commit );
-		break;
-	    default :
-                mpCurrentFigure -> RotateOnZX( final_angle, is_to_commit );
-	    }
+        switch ( mRotatingPlane )
+        {
+        case PLANE_XY :
+            mpCurrentFigure -> RotateOnXY( final_angle, is_to_commit );
+            break;
+        case PLANE_ZY :
+            mpCurrentFigure -> RotateOnZY( final_angle, is_to_commit );
+            break;
+        default :
+            mpCurrentFigure -> RotateOnZX( final_angle, is_to_commit );
+        }
 
-            if ( !mIsRotate )
-                ChangeSelectBlocks();
-	}
+        if ( !mIsRotate )
+            ChangeSelectBlocks();
+    }
 }
 
 void Game :: DrawField() const
@@ -835,27 +848,23 @@ void Game :: Rotate( RotatePlane plane, RotateSide side )
         mFigurePosCorrectStep = 0;
 
         if ( CheckToRotate() )
+        {
             mIsRotate = false;
+            mMessagesList.push_back( COULDNT_ROTATE_COLLISION );
+        }
     }
 }
 
 void Game :: DropDownFigure()
 {
-    mGameSpeed = SEVENTH_SPEED;
+    mGameSpeed = MAX_GAME_SPEED;
 }
-
-/*
-void Game :: SetGameSpeed( GameSpeed new_game_speed )
-{
-    mGameSpeed = new_game_speed;
-}
-*/
 
 void Game :: GetPrevColors()
 {
     for ( unsigned int i = 0; i < Figure :: BlocksCount; i++ )
-        if ( mpField[ mSelectBLocksPos[ i ].mX ][ mSelectBLocksPos[ i ].mY ] [ mSelectBLocksPos[ i ].mZ ] != NULL )
-            mpField[ mSelectBLocksPos[ i ].mX ][ mSelectBLocksPos[ i ].mY ] [ mSelectBLocksPos[ i ].mZ ]
+        if ( mpField[ mSelectBlocksPos[ i ].mX ][ mSelectBlocksPos[ i ].mY ] [ mSelectBlocksPos[ i ].mZ ] != NULL )
+            mpField[ mSelectBlocksPos[ i ].mX ][ mSelectBlocksPos[ i ].mY ] [ mSelectBlocksPos[ i ].mZ ]
                 -> SetMaterial( mSelectBlocksMaterials[ i ] );
 }
 
@@ -880,7 +889,7 @@ void Game :: ChangeSelectBlocks()
         for ( int j = block_height_pos - 1; j >= FIELD_BEGIN_Y - 1; j-- )
             if ( mpField[ block_length_pos ][ j ][ block_width_pos ] != NULL )
             {
-                mSelectBLocksPos[ i ] = Point3Di( block_length_pos, j, block_width_pos );
+                mSelectBlocksPos[ i ] = Point3Di( block_length_pos, j, block_width_pos );
                 mSelectBlocksMaterials[ i ] = mpField[ block_length_pos ][ j ][ block_width_pos ]
                     -> GetMaterial();
                 break;
@@ -888,7 +897,7 @@ void Game :: ChangeSelectBlocks()
     }
 
      for ( unsigned int i = 0; i < Figure :: BlocksCount; i++ )
-        mpField[ mSelectBLocksPos[ i ].mX ][ mSelectBLocksPos[ i ].mY ] [ mSelectBLocksPos[ i ].mZ ]
+        mpField[ mSelectBlocksPos[ i ].mX ][ mSelectBlocksPos[ i ].mY ] [ mSelectBlocksPos[ i ].mZ ]
             -> SetMaterial( materials[ SELECT_FIGURES_MATERIALS ] );
 }
 
@@ -899,17 +908,6 @@ void Game :: SetShift( Axises aAxis, ShiftDirection aDirection )
    mShiftChecksCnt = 5;
 }
 
-/*
-void Game :: ChangePause()
-{
-    mIsGame = !mIsGame;
-}
-
-bool Game :: IsPause()
-{
-    return !mIsGame;
-}
-*/
 void Game :: GetSelectFigures( bool* aSelectFigures )
 {
     for ( int i = 0; i < FIGURES_MAX_CNT; i++ )

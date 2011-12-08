@@ -1,7 +1,13 @@
 #include <QApplication>
+#include <QDesktopWidget>
 #include <QMouseEvent>
 #include <QKeyEvent>
+#include <QStyle>
+#include <Qt>
+ #include <QTime>
+#include <QWindowsStyle>
 #include <stdio.h>
+#include <time.h>
 #include "MainWindow.h"
 
 FigureShift MainWindow :: msFigureControl[ MainWindow :: ViewCnt ][ MainWindow :: ButtonsCnt ];
@@ -43,10 +49,11 @@ MainWindow :: MainWindow() : QMainWindow()
 
     CreateScene();
     CreateActions();
-    CreateMenus();   
+    CreateMenus();
 
     SetFigurShiftConstants();
 
+    move( 0, 0 );
     setMinimumSize( MIN_WIDTH, MIN_HEIGHT );
     setCentralWidget( mpScene );
     startTimer( 10 );
@@ -91,6 +98,8 @@ void MainWindow :: CreateMenus()
     mpSettingsMenu -> addAction( mpSelectFiguresAction );
     mpSettingsMenu -> addAction( mpChangePresentMusicAction );
     mpSettingsMenu -> addAction( mpChangePresentSoundsAction );
+
+    mpMainMenu -> setFixedSize( mpMainMenu -> sizeHint() );
 }
 
 void MainWindow :: CreateScene()
@@ -172,15 +181,14 @@ void MainWindow :: keyPressEvent( QKeyEvent* key )
 
             if ( mIsFullScreen )
             {
-                this -> showFullScreen();
-                this -> setCursor( Qt :: BlankCursor );
+               this -> setCursor( Qt :: BlankCursor );
+               this -> showFullScreen();
             }
             else
-            {
+            {                
                 this -> showNormal();
                 this -> setCursor( Qt :: ArrowCursor );
             }
-
             break;
         case Qt :: Key_Space :
 	    mpGame-> DropDownFigure();
@@ -212,9 +220,6 @@ void MainWindow :: mousePressEvent( QMouseEvent* mouse )
         return;
 
     Qt :: MouseButton button = mouse -> button();
-
-    //if ( button == Qt :: RightButton )
-        //mpScene -> mIsOneSide = !mpScene -> mIsOneSide;
 
     if ( ( button == Qt :: LeftButton ) || ( button == Qt :: RightButton )  )
 	mLastMousePos = mouse -> globalPos();
@@ -276,7 +281,6 @@ void MainWindow :: timerEvent( QTimerEvent * )
         mpGame-> NextStep();
 
     mpScene -> paintGL();
-
     if ( mIsGame )
         mpGame -> ClearMessagesList();
 }

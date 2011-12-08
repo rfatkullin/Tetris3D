@@ -3,6 +3,7 @@
 #include <QDebug>
 #include <math.h>
 #include <stdlib.h>
+#include <iostream>
 #include "Scene.h"
 #include "Game.h"
 
@@ -31,23 +32,24 @@ Scene :: Scene( Game* const new_game, QWidget* pwgt ) : QGLWidget( pwgt )
     GetCameraPosition();
     SetViewVectors();
 
-    mRatio = WIDTH_RATIO / ( float )HEIGHT_RATIO;
+    mRatio = HEIGHT_RATIO / ( float )WIDTH_RATIO;
     mFrustumAperture    =  45.0f / 180.0f * Geometry :: pi;
     mFrustumNearPlane	=  60;
-    mFrustumFarPlane	=  800;
+    mFrustumFarPlane	=  1000;
     mFrustumHalfWidth   =  mFrustumNearPlane * tan( mFrustumAperture );
-    mFrustumFocalLength =  mFrustumNearPlane / 2;
+    mFrustumFocalLength =  (mFrustumFarPlane + mFrustumNearPlane) * 0.8f;
     mFrustumEyeSep      =  mFrustumFocalLength / 30.0f;
     mIsOneSide		=  false;
     mShowHelp           =  true;
 
-//    QGLFormat fmt;
-//    fmt.setStereo( true );
-//    setFormat( fmt );
-    mIsStereo	 = false;
+    QGLFormat fmt;
+    fmt.setStereo( true );
+    setFormat( fmt );
+    mIsStereo	 = true;
 
     for ( int i = 0; i < RENDER_MESSAGES_CNT; i++ )
         mRenderMessages[ i ] = Game :: EMPTY;
+
 }
 
 Scene :: ~Scene()
@@ -115,7 +117,9 @@ void Scene :: paintGL()
 	    mFrustumLeft  = -mRatio * mFrustumHalfWidth - 0.5 * mFrustumEyeSep * mFrustumNearPlane / mFrustumFocalLength;
 	    mFrustumRight =  mRatio * mFrustumHalfWidth - 0.5 * mFrustumEyeSep * mFrustumNearPlane / mFrustumFocalLength;
 
-	    glFrustum( mFrustumLeft, mFrustumRight, -mFrustumHalfWidth, mFrustumHalfWidth, mFrustumNearPlane, mFrustumFarPlane );
+	    glFrustum(  mFrustumLeft, mFrustumRight,
+                       -mFrustumHalfWidth * mRatio, mFrustumHalfWidth * mRatio,
+                        mFrustumNearPlane, mFrustumFarPlane );
 
 	    glMatrixMode( GL_MODELVIEW );
 	    glDrawBuffer( GL_BACK_RIGHT );
@@ -138,7 +142,9 @@ void Scene :: paintGL()
 	mFrustumLeft  = -mRatio * mFrustumHalfWidth + 0.5 * mFrustumEyeSep * mFrustumNearPlane / mFrustumFocalLength;
 	mFrustumRight =  mRatio * mFrustumHalfWidth + 0.5 * mFrustumEyeSep * mFrustumNearPlane / mFrustumFocalLength;
 
-	glFrustum( mFrustumLeft, mFrustumRight, -mFrustumHalfWidth, mFrustumHalfWidth, mFrustumNearPlane, mFrustumFarPlane );
+	glFrustum(  mFrustumLeft, mFrustumRight,
+                   -mFrustumHalfWidth * mRatio, mFrustumHalfWidth * mRatio,
+                    mFrustumNearPlane, mFrustumFarPlane );
 
 	glMatrixMode( GL_MODELVIEW );
 	glDrawBuffer( GL_BACK_LEFT );
@@ -180,17 +186,11 @@ void Scene :: DrawTextInformation()
     int                                         messages_cnt        = messages.size();
     int                                         start_message_index = 0;
     float                                       alpha_can           = 1.0f / RENDER_MESSAGES_CNT;
-    char*                                       level_text_buffer   = new char[ 50 ];
-    char*                                       score_text_buffer   = new char[ 50 ];
-    QString                                     number_buff;
+    QString                                     level_text_buff;
+    QString                                     score_text_buff;
 
-    strcpy( level_text_buffer, "Level: " );
-    number_buff.setNum( mpGame -> GetLevel() );
-    strcat( level_text_buffer, number_buff.toStdString().c_str() );
-
-    strcpy( score_text_buffer, "Score: " );
-    number_buff.setNum( mpGame -> GetScore() );
-    strcat( score_text_buffer, number_buff.toStdString().c_str() );
+   level_text_buff.setNum( mpGame -> GetLevel() );
+   score_text_buff.setNum( mpGame -> GetScore() );
 
     if ( messages_cnt >= RENDER_MESSAGES_CNT )
     {
@@ -207,8 +207,8 @@ void Scene :: DrawTextInformation()
         mRenderMessages[ i ] = messages[ start_message_index + i ];
 
     glColor3f( 1.0f, 1.0f, 1.0f );
-    renderText( mWidth - INFO_X_OFFSET, INFO_Y_OFFSET, level_text_buffer );
-    renderText( mWidth - INFO_X_OFFSET, INFO_Y_OFFSET + 20, score_text_buffer );
+    renderText( mWidth - INFO_X_OFFSET, INFO_Y_OFFSET, ( "Level: " + level_text_buff.toStdString() ).c_str() );
+    renderText( mWidth - INFO_X_OFFSET, INFO_Y_OFFSET + 20, (  "Score: " + score_text_buff.toStdString() ).c_str() );
 
     for ( int i = 0; i < RENDER_MESSAGES_CNT; i++ )
     {
