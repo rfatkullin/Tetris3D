@@ -13,10 +13,10 @@ public :
                         SelectFiguresDialog( QWidget* parent = 0 );
     void                SetSelectFigures( bool* selected_figures );
     void                GetSelectFigures( bool* selected_figures );
+    void                SetPosition( int aX, int aY );
 private :
     static const int    mcFiguresCnt = 7;
 
-  //  QLabel*             mpSelectLabel;
     QCheckBox*          mpFigures[ mcFiguresCnt ];
     QPushButton*        mpOkButton;
     QPushButton*        mpCancelButton;

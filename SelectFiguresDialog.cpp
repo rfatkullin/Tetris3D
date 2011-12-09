@@ -37,6 +37,7 @@ SelectFiguresDialog :: SelectFiguresDialog( QWidget* parent ) : QDialog( parent 
     setLayout( p_common_layout );
     setWindowTitle( "Figures" );
     setFixedSize( sizeHint() );
+    setWindowFlags( Qt::Dialog | Qt::WindowTitleHint );
 }
 
 void SelectFiguresDialog :: SetSelectFigures( bool* selected_figures )
@@ -55,4 +56,9 @@ void SelectFiguresDialog :: GetSelectFigures( bool* select_figures )
             select_figures[ i ] = true;
         else
             select_figures[ i ] = false;
+}
+
+void SelectFiguresDialog :: SetPosition( int aX, int aY )
+{
+    move( aX - width() / 2, aY - height() / 2 );
 }

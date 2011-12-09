@@ -6,6 +6,8 @@
 #include <QAction>
 #include <QTime>
 #include <QMenu>
+#include <QFile>
+#include <QTextStream>
 #include "Scene.h"
 #include "SelectFiguresDialog.h"
 #include "GameOverDialog.h"
@@ -23,23 +25,33 @@ public :
 
 class MainWindow : public QMainWindow
 {
+    typedef std :: pair< QString, int > PlayerInfo;
+    typedef std :: list< PlayerInfo >   PlayerInfoList;
+
     Q_OBJECT
 public :
-			    MainWindow();
+                                MainWindow();
+                                ~MainWindow();
 protected :
-    void		    closeEvent( QCloseEvent *event );
+    void                        closeEvent( QCloseEvent *event );
 private slots :
-    void		    NewGame();
-    void		    Exit();
+    void                        NewGame();
+    void                        Exit();
+    void                        ViewTop();
+    void                        ViewControl();
+    void                        ViewAbout();
 private:
-    static const int        ViewCnt = 4;
-    static const int        ButtonsCnt = 4;
-    static const int	    NativeKeyEsc = 27;
-    static FigureShift      msFigureControl[ ViewCnt ][ ButtonsCnt ];
-    enum		    WindowMinSize{ MIN_WIDTH  = 800,
+    static const int            VIEW_CNT = 4;
+    static const int            BUTTONS_CNT = 4;
+    static const int            PLAYER_NAME_MAX_LENGTH = 16;
+    static const int            TOP_LIST_LENGTH = 100;
+    static const char* const    TOP_LIST_FILE;
+    static const char* const    SAVE_FILE;
+    static FigureShift          msFigureControl[ VIEW_CNT ][ BUTTONS_CNT ];
+    enum                        WindowMinSize{ MIN_WIDTH  = 800,
                                            MIN_HEIGHT = 625 };
 
-    enum                    ControlButtons{ S_BUTTON = 0,
+    enum                        ControlButtons{ S_BUTTON = 0,
                                             W_BUTTON = 1,
                                             A_BUTTON = 2,
                                             D_BUTTON = 3 };
@@ -49,6 +61,8 @@ private:
     void		    CreateActions();
     void		    CreateMenus();    
     void		    SelectRotate( int aX, int aY );
+    void                    ReadTop();
+    void                    ChangeTop();
 
     void		    keyPressEvent( QKeyEvent* key );
     void		    mousePressEvent( QMouseEvent* mouse );
@@ -65,20 +79,27 @@ private:
     QMenu*                  mpMainMenu;
     QMenu*                  mpSettingsMenu;
     QMenu*                  mpFiguresMenu;
+    QMenu*                  mpHelpMenu;
 
     QAction*                mpNewGameAction;
     QAction*                mpExitGameAction;
     QAction*                mpTrun3dAction;
     QAction*                mpSelectFiguresAction;
-
     QAction*                mpChangePresentMusicAction;
     QAction*                mpChangePresentSoundsAction;
+    QAction*                mpViewTopAction;
+    QAction*                mpControlAction;
+    QAction*                mpAboutAction;
 
     SelectFiguresDialog*    mpSelectFiguresDialog;
     GameOverDialog*         mpGameOverDialog;
     Qt :: MouseButton	    mLastMouseButton;
     QPoint		    mLastMousePos;
     bool		    mIsRightButtonPressed;
+
+    QFile*                  mpTopFile;
+    QTextStream             mTopStream;
+    PlayerInfoList          mTopList;
 
     bool                    mIsFullScreen;
 public slots :

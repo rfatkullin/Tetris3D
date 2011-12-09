@@ -4,13 +4,17 @@
 #include <QKeyEvent>
 #include <QStyle>
 #include <Qt>
- #include <QTime>
+#include <QTime>
 #include <QWindowsStyle>
 #include <stdio.h>
 #include <time.h>
 #include "MainWindow.h"
+#include "TopViewDialog.h"
+#include <stdio.h>
 
-FigureShift MainWindow :: msFigureControl[ MainWindow :: ViewCnt ][ MainWindow :: ButtonsCnt ];
+FigureShift MainWindow :: msFigureControl[ MainWindow :: VIEW_CNT ][ MainWindow :: BUTTONS_CNT ];
+const char* const       MainWindow :: TOP_LIST_FILE = "top.dat";
+const char* const       MainWindow :: SAVE_FILE     = "save.dat";
 
 void MainWindow :: SetFigurShiftConstants()
 {
@@ -38,6 +42,7 @@ void MainWindow :: SetFigurShiftConstants()
     msFigureControl[ 3 ][ 3 ] = FigureShift( Game :: Z_AXIS, Game :: SHIFT_DIRECTLY );
 }
 
+
 MainWindow :: MainWindow() : QMainWindow()
 {
     mpGame		    = new Game( this );
@@ -56,7 +61,18 @@ MainWindow :: MainWindow() : QMainWindow()
     move( 0, 0 );
     setMinimumSize( MIN_WIDTH, MIN_HEIGHT );
     setCentralWidget( mpScene );
+
+    mpTopFile = new QFile( TOP_LIST_FILE, this );
+    mTopStream.setDevice( mpTopFile );
+
+    ReadTop();
+
     startTimer( 10 );
+}
+
+MainWindow :: ~MainWindow()
+{
+
 }
 
 void MainWindow :: CreateActions()
@@ -85,12 +101,22 @@ void MainWindow :: CreateActions()
     mpChangePresentSoundsAction -> setChecked( true );
     connect( mpChangePresentSoundsAction, SIGNAL( toggled( bool ) ), mpGame, SLOT( SoundsStateChange( bool ) ) );
 
+    mpViewTopAction = new QAction( "Top", this );
+    connect( mpViewTopAction,  SIGNAL( triggered() ), SLOT( ViewTop() ) );
+
+    mpControlAction = new QAction( "Control", this );
+    connect( mpControlAction,  SIGNAL( triggered() ), SLOT( ViewControl() ) );
+
+    mpAboutAction = new QAction( "About Tetris3D", this );
+    connect( mpAboutAction,  SIGNAL( triggered() ), SLOT( ViewAbout() ) );
+
 }
 
 void MainWindow :: CreateMenus()
 {
     mpMainMenu = menuBar() -> addMenu( "Game" );
     mpMainMenu -> addAction( mpNewGameAction );
+    mpMainMenu -> addAction( mpViewTopAction );
     mpMainMenu -> addAction( mpExitGameAction );
 
     mpSettingsMenu = menuBar() -> addMenu( "Settings" );
@@ -99,7 +125,9 @@ void MainWindow :: CreateMenus()
     mpSettingsMenu -> addAction( mpChangePresentMusicAction );
     mpSettingsMenu -> addAction( mpChangePresentSoundsAction );
 
-    mpMainMenu -> setFixedSize( mpMainMenu -> sizeHint() );
+    mpHelpMenu = menuBar() -> addMenu( "Help" );
+    mpHelpMenu -> addAction( mpControlAction );
+    mpHelpMenu -> addAction( mpAboutAction );
 }
 
 void MainWindow :: CreateScene()
@@ -131,6 +159,7 @@ void MainWindow :: closeEvent( QCloseEvent* )
 
 void MainWindow :: keyPressEvent( QKeyEvent* key )
 {
+    GameOverDialog* game_over = NULL;
     int side = mpScene -> GetViewSide();
 
     switch ( key -> key() )
@@ -140,6 +169,7 @@ void MainWindow :: keyPressEvent( QKeyEvent* key )
             return;
             break;
         case Qt :: Key_Escape :
+            printf( "ESC\n" );
 	    Exit();
             break;
         case Qt :: Key_F1 :
@@ -148,10 +178,11 @@ void MainWindow :: keyPressEvent( QKeyEvent* key )
         case Qt :: Key_F2 :
             NewGame();
             break;
-//        case Qt :: Key_F5 :
-//            game_over = new GameOverDialog( 100 );
-//            game_over -> exec();
-//            break;
+        case Qt :: Key_F5 :
+            game_over = new GameOverDialog( 100, 100, 16, 100 );
+            game_over -> exec();
+            exit( 0 );
+            break;
         default:
             break;
     }
@@ -162,16 +193,6 @@ void MainWindow :: keyPressEvent( QKeyEvent* key )
     switch ( key -> key() )
     {
 
-//	case Qt :: Key_I :
-//	    mpScene -> mFrustumFocalLength++;
-//	    printf( "%f\n", mpScene -> mFrustumFocalLength );
-//	    mpScene -> mFrustumEyeSep = mpScene -> mFrustumFocalLength / 30.0f;
-//	    break;
-//	case Qt :: Key_K :
-//	    mpScene -> mFrustumFocalLength--;
-//	    printf( "%f\n", mpScene -> mFrustumFocalLength );
-//	    mpScene -> mFrustumEyeSep = mpScene -> mFrustumFocalLength / 30.0f;
-//	    break;
         case Qt :: Key_F4 :
             mpGame -> AmbientMusicStateChange( !mpGame -> AmbientMusicState() );
             break;
@@ -271,8 +292,9 @@ void MainWindow :: timerEvent( QTimerEvent * )
 {
     if ( mpGame -> IsGameOver() )
     {
-        mpGameOverDialog = new GameOverDialog( width() / 2, height() / 2, mpGame -> GetScore() );
+        mpGameOverDialog = new GameOverDialog( pos().x() + width() / 2, pos().y() + height() / 2, PLAYER_NAME_MAX_LENGTH, mpGame -> GetScore() );
         mpGameOverDialog -> exec();
+        ChangeTop();
         delete mpGameOverDialog;
         mIsGame = false;
     }
@@ -287,18 +309,23 @@ void MainWindow :: timerEvent( QTimerEvent * )
 
 void MainWindow :: SelectFigures()
 {
+    bool  game_state = false;
     bool* select_figures = new bool[ Game :: FIGURES_MAX_CNT ];
 
     mpGame -> GetSelectFigures( select_figures );
     mpSelectFiguresDialog -> SetSelectFigures( select_figures );
+    mpSelectFiguresDialog -> SetPosition( pos().x() + width() / 2, pos().y() + height() / 2 );
 
-    mIsGame = false;
+    game_state = mIsGame;
+    mIsGame    = false;
+
     if ( mpSelectFiguresDialog -> exec() == QDialog :: Accepted )
     {
         mpSelectFiguresDialog -> GetSelectFigures( select_figures );
         mpGame -> SetSelectFigures( select_figures );
     }
-    mIsGame = true;
+
+    mIsGame = game_state;
 
     delete [] select_figures;
 }
@@ -343,3 +370,95 @@ void MainWindow :: SelectRotate( int aX, int aY )
     }
 }
 
+
+void MainWindow :: ReadTop()
+{
+    QString player_name;
+    QString player_score_str;
+    bool    to_int_ok           = false;
+    int     player_score;
+    int     top_list_length     = 0;
+
+    if ( !mpTopFile -> open( QIODevice :: ReadOnly ) )
+        return;
+
+    while ( ( !mTopStream.atEnd() ) && ( top_list_length <= TOP_LIST_LENGTH ) )
+    {
+        mTopStream >> player_name >> player_score_str;
+
+        player_score = player_score_str.toInt( &to_int_ok );
+
+        if ( ( player_name.length() > PLAYER_NAME_MAX_LENGTH ) || ( !to_int_ok ) )
+            continue;
+
+        mTopList.push_back( PlayerInfo( player_name, player_score ) );
+        top_list_length++;
+    }
+
+    mpTopFile -> close();
+}
+
+void MainWindow :: ChangeTop()
+{
+    PlayerInfo player_info( mpGameOverDialog -> GetPlayerName(), mpGame -> GetScore() );
+    bool            is_insert = false;
+
+    for ( PlayerInfoList :: iterator it = mTopList.begin(); it != mTopList.end(); ++it )
+    {
+        if ( it -> second < player_info.second )
+        {
+            mTopList.insert( it, player_info );
+            is_insert = true;
+            break;
+        }
+    }
+
+    if ( !is_insert )
+         mTopList.push_back( player_info );
+
+    if ( mTopList.size() > TOP_LIST_LENGTH )
+        mTopList.pop_back();
+
+    mpTopFile -> open( QIODevice :: WriteOnly );
+
+    for ( PlayerInfoList :: iterator it = mTopList.begin(); it != mTopList.end(); ++it )
+        mTopStream << ( it -> first.toStdString().c_str() ) << '\t' << it -> second << '\n';
+
+    mpTopFile -> close();
+}
+
+void MainWindow :: ViewTop()
+{
+    bool game_state = false;
+
+    TopViewDialog* top_view_dialog;
+
+    game_state = mIsGame;
+    mIsGame = false;
+
+    top_view_dialog = new TopViewDialog( pos().x() + width() / 2, pos().y() + height() / 2, mTopList, TOP_LIST_LENGTH );
+
+    top_view_dialog -> exec();
+
+    delete top_view_dialog;
+    mIsGame = game_state;
+}
+
+void MainWindow :: ViewControl()
+{
+    bool game_state = false;
+
+    game_state = mIsGame;
+    mIsGame = false;
+
+    mIsGame = game_state;
+}
+
+void MainWindow :: ViewAbout()
+{
+    bool game_state = false;
+
+    game_state = mIsGame;
+    mIsGame = false;
+    mIsGame = game_state;
+}

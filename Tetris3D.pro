@@ -24,7 +24,8 @@ SOURCES += \
     PhisEntity.cpp \
     MainWindow.cpp \
     SelectFiguresDialog.cpp \
-    GameOverDIalog.cpp
+    GameOverDIalog.cpp \
+    TopViewDialog.cpp
 
 HEADERS += \
     Material.h \
@@ -36,7 +37,10 @@ HEADERS += \
     PhisEntity.h \
     MainWindow.h \
     SelectFiguresDialog.h \
-    GameOverDialog.h
+    GameOverDialog.h \
+    TopViewDialog.h
+
+
 
 
 
