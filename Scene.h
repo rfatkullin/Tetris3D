@@ -39,7 +39,6 @@ public:
     float                               mFrustumTop;
     float                               mFrustumLeft;
     float                               mFrustumRight;
-    bool                                mIsOneSide;
 
                                         Scene( Game* new_game, QWidget* pwgt = 0 );
                                         ~Scene();

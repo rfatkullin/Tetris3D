@@ -41,3 +41,23 @@ Material :: Material()
     for ( int i = 0; i < 4; i++ )
         mAmbient[ i ] = mDiffuse[ i ] = mSpecular[ i ] = 0.0f;
 }
+
+QTextStream& operator << ( QTextStream& stream, const Material& material )
+{
+    stream << material.mAmbient[ 0 ] << '\t' << material.mAmbient[ 1 ] << '\t'
+           << material.mAmbient[ 2 ] << '\t' << material.mAmbient[ 3 ] << '\t'
+           << material.mDiffuse[ 0 ] << '\t' << material.mDiffuse[ 1 ] << '\t'
+           << material.mDiffuse[ 2 ] << '\t' << material.mDiffuse[ 3 ] << '\t'
+           << material.mSpecular[ 0 ] << '\t' << material.mSpecular[ 1 ] << '\t'
+           << material.mSpecular[ 2 ] << '\t' << material.mSpecular[ 3 ];
+}
+
+ QTextStream& operator >> ( QTextStream& stream, Material& material )
+{
+    stream >> material.mAmbient[ 0 ]  >> material.mAmbient[ 1 ]
+           >> material.mAmbient[ 2 ]  >> material.mAmbient[ 3 ]
+           >> material.mDiffuse[ 0 ]  >> material.mDiffuse[ 1 ]
+           >> material.mDiffuse[ 2 ]  >> material.mDiffuse[ 3 ]
+           >> material.mSpecular[ 0 ] >> material.mSpecular[ 1 ]
+           >> material.mSpecular[ 2 ] >> material.mSpecular[ 3 ];
+}

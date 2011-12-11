@@ -7,10 +7,13 @@
 #include <QTime>
 #include <QMenu>
 #include <QFile>
+#include <QIcon>
 #include <QTextStream>
 #include "Scene.h"
 #include "SelectFiguresDialog.h"
 #include "GameOverDialog.h"
+#include "AboutDialog.h"
+#include "ControlDialog.h"
 
 struct FigureShift
 {
@@ -37,6 +40,8 @@ protected :
 private slots :
     void                        NewGame();
     void                        Exit();
+    void                        Save();
+    void                        Load();
     void                        ViewTop();
     void                        ViewControl();
     void                        ViewAbout();
@@ -45,11 +50,10 @@ private:
     static const int            BUTTONS_CNT = 4;
     static const int            PLAYER_NAME_MAX_LENGTH = 16;
     static const int            TOP_LIST_LENGTH = 100;
-    static const char* const    TOP_LIST_FILE;
-    static const char* const    SAVE_FILE;
+    static const char* const    TOP_LIST_FILE;  
     static FigureShift          msFigureControl[ VIEW_CNT ][ BUTTONS_CNT ];
     enum                        WindowMinSize{ MIN_WIDTH  = 800,
-                                           MIN_HEIGHT = 625 };
+                                               MIN_HEIGHT = 625 };
 
     enum                        ControlButtons{ S_BUTTON = 0,
                                             W_BUTTON = 1,
@@ -70,11 +74,12 @@ private:
     void		    mouseMoveEvent( QMouseEvent* mouse );
     void                    wheelEvent ( QWheelEvent * aEvent );
     void		    timerEvent( QTimerEvent * );
-    void		    resizeEvent( int new_width, int new_height );
+    void                    resizeEvent ( QResizeEvent * aEvent );
 
     Scene*                  mpScene;
     Game*                   mpGame;
     bool                    mIsGame;
+    bool                    mIsPause;
 
     QMenu*                  mpMainMenu;
     QMenu*                  mpSettingsMenu;
@@ -90,12 +95,17 @@ private:
     QAction*                mpViewTopAction;
     QAction*                mpControlAction;
     QAction*                mpAboutAction;
+    QAction*                mpSaveAction;
+    QAction*                mpLoadAction;
 
     SelectFiguresDialog*    mpSelectFiguresDialog;
     GameOverDialog*         mpGameOverDialog;
     Qt :: MouseButton	    mLastMouseButton;
     QPoint		    mLastMousePos;
     bool		    mIsRightButtonPressed;
+
+    AboutDialog*            mpAboutDialog;
+    ControlDialog*          mpControlDialog;
 
     QFile*                  mpTopFile;
     QTextStream             mTopStream;

@@ -14,7 +14,6 @@
 
 FigureShift MainWindow :: msFigureControl[ MainWindow :: VIEW_CNT ][ MainWindow :: BUTTONS_CNT ];
 const char* const       MainWindow :: TOP_LIST_FILE = "top.dat";
-const char* const       MainWindow :: SAVE_FILE     = "save.dat";
 
 void MainWindow :: SetFigurShiftConstants()
 {
@@ -47,10 +46,13 @@ MainWindow :: MainWindow() : QMainWindow()
 {
     mpGame		    = new Game( this );
     mpSelectFiguresDialog   = new SelectFiguresDialog( this );
+    mpAboutDialog           = new AboutDialog( this );
+    mpControlDialog         = new ControlDialog( this );
     mpGameOverDialog        = NULL;
     mIsRightButtonPressed   = false;
     mIsGame                 = false;
     mIsFullScreen           = false;
+    mIsPause                = false;
 
     CreateScene();
     CreateActions();
@@ -61,6 +63,7 @@ MainWindow :: MainWindow() : QMainWindow()
     move( 0, 0 );
     setMinimumSize( MIN_WIDTH, MIN_HEIGHT );
     setCentralWidget( mpScene );
+    setWindowIcon( QIcon( "Img/Icon.jpg" ) );
 
     mpTopFile = new QFile( TOP_LIST_FILE, this );
     mTopStream.setDevice( mpTopFile );
@@ -110,24 +113,32 @@ void MainWindow :: CreateActions()
     mpAboutAction = new QAction( "About Tetris3D", this );
     connect( mpAboutAction,  SIGNAL( triggered() ), SLOT( ViewAbout() ) );
 
+    mpSaveAction = new QAction( "Save game", this );
+    connect( mpSaveAction, SIGNAL( triggered() ), this, SLOT( Save() ) );
+
+    mpLoadAction = new QAction( "Load game", this );
+    connect( mpLoadAction, SIGNAL( triggered() ), this, SLOT( Load() ) );
 }
 
 void MainWindow :: CreateMenus()
 {
     mpMainMenu = menuBar() -> addMenu( "Game" );
     mpMainMenu -> addAction( mpNewGameAction );
-    mpMainMenu -> addAction( mpViewTopAction );
+    mpMainMenu -> addAction( mpSaveAction );
+    mpMainMenu -> addAction( mpLoadAction );
     mpMainMenu -> addAction( mpExitGameAction );
 
-    mpSettingsMenu = menuBar() -> addMenu( "Settings" );
-    mpSettingsMenu -> addAction( mpTrun3dAction );
+    mpSettingsMenu = menuBar() -> addMenu( "Settings" );  
     mpSettingsMenu -> addAction( mpSelectFiguresAction );
+    mpSettingsMenu -> addAction( mpTrun3dAction );
     mpSettingsMenu -> addAction( mpChangePresentMusicAction );
     mpSettingsMenu -> addAction( mpChangePresentSoundsAction );
 
     mpHelpMenu = menuBar() -> addMenu( "Help" );
+    mpHelpMenu -> addAction( mpViewTopAction );
     mpHelpMenu -> addAction( mpControlAction );
     mpHelpMenu -> addAction( mpAboutAction );
+
 }
 
 void MainWindow :: CreateScene()
@@ -149,6 +160,7 @@ void MainWindow :: NewGame()
 
 void MainWindow :: Exit()
 {
+    mpGame -> End();
     QApplication :: exit( 0 );
 }
 
@@ -159,44 +171,23 @@ void MainWindow :: closeEvent( QCloseEvent* )
 
 void MainWindow :: keyPressEvent( QKeyEvent* key )
 {
-    GameOverDialog* game_over = NULL;
     int side = mpScene -> GetViewSide();
 
     switch ( key -> key() )
     {
-	case Qt :: Key_P :
-            mIsGame = !mIsGame;
-            return;
-            break;
         case Qt :: Key_Escape :
-            printf( "ESC\n" );
-	    Exit();
+            Exit();
             break;
+
         case Qt :: Key_F1 :
             mpScene -> ChangeShowHelp();
             break;
+
         case Qt :: Key_F2 :
             NewGame();
             break;
-        case Qt :: Key_F5 :
-            game_over = new GameOverDialog( 100, 100, 16, 100 );
-            game_over -> exec();
-            exit( 0 );
-            break;
-        default:
-            break;
-    }
 
-    if ( !mIsGame )
-        return;
-
-    switch ( key -> key() )
-    {
-
-        case Qt :: Key_F4 :
-            mpGame -> AmbientMusicStateChange( !mpGame -> AmbientMusicState() );
-            break;
-        case Qt :: Key_F3 :
+         case Qt :: Key_F3 :
             mIsFullScreen = !mIsFullScreen;
             this -> menuBar() -> setVisible( !mIsFullScreen );
 
@@ -206,14 +197,43 @@ void MainWindow :: keyPressEvent( QKeyEvent* key )
                this -> showFullScreen();
             }
             else
-            {                
+            {
                 this -> showNormal();
                 this -> setCursor( Qt :: ArrowCursor );
             }
             break;
+
+        case Qt :: Key_F6 :
+            Load();
+            break;
+
+        default:
+            break;
+    }
+
+    if ( !mIsGame )
+        return;
+
+    if ( key -> key() == Qt :: Key_P )
+        mIsPause = !mIsPause;
+
+    if ( mIsPause )
+        return;
+
+    switch ( key -> key() )
+    {
+        case Qt :: Key_F4 :
+            mpGame -> AmbientMusicStateChange( !mpGame -> AmbientMusicState() );
+            break;
+
+        case Qt :: Key_F5 :
+            Save();
+            break;
+
         case Qt :: Key_Space :
 	    mpGame-> DropDownFigure();
             break;
+
         case Qt :: Key_S :
             mpGame -> SetShift( msFigureControl[ side ][ S_BUTTON ].mAxis,
                                 msFigureControl[ side ][ S_BUTTON ].mDirection );
@@ -237,8 +257,8 @@ void MainWindow :: keyPressEvent( QKeyEvent* key )
 
 void MainWindow :: mousePressEvent( QMouseEvent* mouse )
 {
-    if ( !mIsGame )
-        return;
+    //if ( !mIsGame )
+      //  return;
 
     Qt :: MouseButton button = mouse -> button();
 
@@ -250,18 +270,19 @@ void MainWindow :: mousePressEvent( QMouseEvent* mouse )
 
     mLastMouseButton = button;
 }
+
 void MainWindow :: mouseReleaseEvent( QMouseEvent* mouse )
 {
-    if ( !mIsGame )
+    if ( !mIsGame || mIsPause  )
         return;
 
-    if (  mLastMouseButton == Qt :: RightButton )
+    if ( ( !mIsPause ) && ( mLastMouseButton == Qt :: RightButton ) )
         SelectRotate( mouse -> globalX(), mouse -> globalY() );
 }
 
 void MainWindow :: wheelEvent ( QWheelEvent * aEvent )
 {
-    if ( !mIsGame )
+    if ( !mIsGame || mIsPause )
         return;
 
     if ( aEvent -> delta() > 0 )
@@ -272,9 +293,6 @@ void MainWindow :: wheelEvent ( QWheelEvent * aEvent )
 
 void MainWindow :: mouseMoveEvent( QMouseEvent* mouse )
 {
-    if ( !mIsGame )
-        return;
-
     if ( mLastMouseButton != Qt :: LeftButton )
 	return;
 
@@ -283,9 +301,14 @@ void MainWindow :: mouseMoveEvent( QMouseEvent* mouse )
     mLastMousePos = mouse -> globalPos();
 }
 
-void MainWindow :: resizeEvent( int aNewWidth, int aNewHeight )
+void MainWindow :: resizeEvent ( QResizeEvent * aEvent )
 {
-     mpScene -> Resize( aNewWidth, aNewHeight );
+    QSize win_size = aEvent -> size();
+
+    if ( ( !mIsFullScreen ) && ( ( win_size.width() != MIN_WIDTH ) || ( win_size.height() != MIN_HEIGHT ) ) )
+        resize( MIN_WIDTH, MIN_HEIGHT );
+
+    mpScene -> Resize( win_size.width(), win_size.height() );
 }
 
 void MainWindow :: timerEvent( QTimerEvent * )
@@ -299,11 +322,12 @@ void MainWindow :: timerEvent( QTimerEvent * )
         mIsGame = false;
     }
 
-   if ( mIsGame )
+   if ( mIsGame && ( !mIsPause ) )
         mpGame-> NextStep();
 
     mpScene -> paintGL();
-    if ( mIsGame )
+
+if ( mIsGame && ( !mIsPause ) )
         mpGame -> ClearMessagesList();
 }
 
@@ -370,7 +394,6 @@ void MainWindow :: SelectRotate( int aX, int aY )
     }
 }
 
-
 void MainWindow :: ReadTop()
 {
     QString player_name;
@@ -436,7 +459,7 @@ void MainWindow :: ViewTop()
     game_state = mIsGame;
     mIsGame = false;
 
-    top_view_dialog = new TopViewDialog( pos().x() + width() / 2, pos().y() + height() / 2, mTopList, TOP_LIST_LENGTH );
+    top_view_dialog = new TopViewDialog( pos().x() + width() / 2, pos().y() + height() / 2, mTopList, TOP_LIST_LENGTH, this );
 
     top_view_dialog -> exec();
 
@@ -451,6 +474,8 @@ void MainWindow :: ViewControl()
     game_state = mIsGame;
     mIsGame = false;
 
+    mpControlDialog -> Show();
+
     mIsGame = game_state;
 }
 
@@ -460,5 +485,20 @@ void MainWindow :: ViewAbout()
 
     game_state = mIsGame;
     mIsGame = false;
+
+    mpAboutDialog -> Show();
+
     mIsGame = game_state;
+}
+
+void MainWindow :: Save()
+{
+    if ( ( mIsGame ) && ( !mIsPause ) )
+        mpGame -> Save();
+}
+
+void MainWindow :: Load()
+{
+    mpGame -> Load();
+    mIsGame = true;
 }

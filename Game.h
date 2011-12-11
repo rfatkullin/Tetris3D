@@ -3,6 +3,7 @@
 #include <phonon/AudioOutput>
 #include <QObject>
 #include <QSound>
+#include <QFile>
 #include "GameObjects.h"
 
 #ifndef GAME_H
@@ -18,21 +19,25 @@ public slots :
     void                        Start();
     void			AmbientMusicStateChange( bool aState );
     void			SoundsStateChange( bool aState );
+    void                        Save();
+    void                        Load();
 private slots :
     void			PrepairFallSound();
     void			PlayAmbientMusic();
 public:
-    static const int            MESSAGES_CNT = 7;
+    static const int            MESSAGES_CNT = 9;
     enum                        Messages { EMPTY = 0,
                                            NEW_LEVEL,
                                            COLLAPSE,
                                            COULDNT_ROTATE_COLLISION,
                                            COULDNT_SHIFT_COLLISION,
                                            NEW_GAME,
-                                           GAME_OVER
+                                           GAME_OVER,
+                                           SAVE_GAME,
+                                           LOAD_GAME
                                           };
 
-    enum                        RotatePlane { PLANE_XY,
+    enum                        RotatePlane { PLANE_XY = 0,
                                               PLANE_ZY,
                                               PLANE_ZX };
 
@@ -50,8 +55,8 @@ public:
                                                SELECT_FIGURES_MATERIALS = 6,
                                                BOTTOM_FIGURES_MATERIALS = 7 };
 
-    static const char*          MESSAGES[ MESSAGES_CNT ];
-
+    static const char* const    MESSAGES[ MESSAGES_CNT ];
+    static const char* const    SAVE_FILE;
     static const int            LEVELS_CNT    = 7;
     static const unsigned int   LEVELS_SCORE[ LEVELS_CNT ];
     static const unsigned int   LEVELS_SPEED[ LEVELS_CNT ];
@@ -114,6 +119,8 @@ public:
     const std :: vector < Messages >&   GetMessages() const;
     void                                ClearMessagesList();
 
+    void                        TurnOnSelecting();
+    void                        TurnOffSelecting();
 private:
     enum                        LightPosition  { LightPosByX = 400 , LightPosByY = 800, LightPosByZ = 300 };
     static const int            SAFETY_DISTANCE;
@@ -121,6 +128,9 @@ private:
 
     static float                msLightPosition[ 4 ];
     static Figures              msGameFigures[ FIGURES_MAX_CNT ];
+
+    QFile*                      mpSaveFile;
+    QTextStream                 mSaveStream;
 
     std :: vector < Figures >   mPresentFigures;
     std :: vector < Block* >	mBoardBlocks;
@@ -156,6 +166,8 @@ private:
     void                        CollapseStep();
     int                         mFallingComponentsCnt;
 
+    int                         mFieldBlocksCnt;
+
     static const int                    MaxSelectBlockCount = 4;
     Point3Di                            mSelectBlocksPos[ MaxSelectBlockCount ];
     Material                            mSelectBlocksMaterials[ MaxSelectBlockCount ];
@@ -182,5 +194,17 @@ private:
 
     std :: vector < Messages >          mMessagesList;
 };
+
+QTextStream& operator << ( QTextStream& stream, const Game :: RotatePlane& plane );
+QTextStream& operator >> ( QTextStream& stream, Game :: RotatePlane& plane );
+
+QTextStream& operator << ( QTextStream& aStream, const bool& aBoolValue);
+QTextStream& operator >> ( QTextStream& aStream, bool& aBoolValue );
+
+QTextStream& operator << ( QTextStream& aStream, const Game :: Axises& aAxis);
+QTextStream& operator >> ( QTextStream& aStream, Game :: Axises& aAxis );
+
+QTextStream& operator << ( QTextStream& aStream, const Game :: ShiftDirection& aShiftDirection);
+QTextStream& operator >> ( QTextStream& aStream, Game :: ShiftDirection& aShiftDirection );
 
 #endif

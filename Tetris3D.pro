@@ -25,7 +25,9 @@ SOURCES += \
     MainWindow.cpp \
     SelectFiguresDialog.cpp \
     GameOverDIalog.cpp \
-    TopViewDialog.cpp
+    TopViewDialog.cpp \
+    AboutDialog.cpp \
+    ControlDialog.cpp
 
 HEADERS += \
     Material.h \
@@ -38,7 +40,17 @@ HEADERS += \
     MainWindow.h \
     SelectFiguresDialog.h \
     GameOverDialog.h \
-    TopViewDialog.h
+    TopViewDialog.h \
+    AboutDialog.h \
+    ControlDialog.h
+
+
+
+
+
+
+
+
 
 
 

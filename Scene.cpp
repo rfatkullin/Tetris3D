@@ -32,20 +32,19 @@ Scene :: Scene( Game* const new_game, QWidget* pwgt ) : QGLWidget( pwgt )
     GetCameraPosition();
     SetViewVectors();
 
-    mRatio = HEIGHT_RATIO / ( float )WIDTH_RATIO;
+    mRatio              = HEIGHT_RATIO / ( float )WIDTH_RATIO;
     mFrustumAperture    =  45.0f / 180.0f * Geometry :: pi;
     mFrustumNearPlane	=  60;
     mFrustumFarPlane	=  1000;
     mFrustumHalfWidth   =  mFrustumNearPlane * tan( mFrustumAperture );
     mFrustumFocalLength =  (mFrustumFarPlane + mFrustumNearPlane) * 0.8f;
     mFrustumEyeSep      =  mFrustumFocalLength / 30.0f;
-    mIsOneSide		=  false;
     mShowHelp           =  true;
+    mIsStereo           = false;
 
     QGLFormat fmt;
     fmt.setStereo( true );
     setFormat( fmt );
-    mIsStereo	 = true;
 
     for ( int i = 0; i < RENDER_MESSAGES_CNT; i++ )
         mRenderMessages[ i ] = Game :: EMPTY;
@@ -74,7 +73,6 @@ void Scene :: initializeGL()
 
 void Scene :: resizeGL( int aNewWidth, int aNewHeight )
 {
-    Resize( aNewWidth, aNewHeight );
 }
 
 void Scene :: Resize( int aNewWidth, int aNewHeight )
@@ -109,32 +107,31 @@ void Scene :: paintGL()
     {
 	right_vec_to_dir    = ( mFrustumEyeSep / 2.0f ) * right_vec_to_dir;
 
-	if ( !mIsOneSide )
-	{
-	    glMatrixMode( GL_PROJECTION );
-	    glLoadIdentity();
 
-	    mFrustumLeft  = -mRatio * mFrustumHalfWidth - 0.5 * mFrustumEyeSep * mFrustumNearPlane / mFrustumFocalLength;
-	    mFrustumRight =  mRatio * mFrustumHalfWidth - 0.5 * mFrustumEyeSep * mFrustumNearPlane / mFrustumFocalLength;
+        glMatrixMode( GL_PROJECTION );
+        glLoadIdentity();
 
-	    glFrustum(  mFrustumLeft, mFrustumRight,
-                       -mFrustumHalfWidth * mRatio, mFrustumHalfWidth * mRatio,
-                        mFrustumNearPlane, mFrustumFarPlane );
+        mFrustumLeft  = -mRatio * mFrustumHalfWidth - 0.5 * mFrustumEyeSep * mFrustumNearPlane / mFrustumFocalLength;
+        mFrustumRight =  mRatio * mFrustumHalfWidth - 0.5 * mFrustumEyeSep * mFrustumNearPlane / mFrustumFocalLength;
 
-	    glMatrixMode( GL_MODELVIEW );
-	    glDrawBuffer( GL_BACK_RIGHT );
-	    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-	    glLoadIdentity();
-	    gluLookAt( camera_positon.mX + right_vec_to_dir.mX,
-		       camera_positon.mY + right_vec_to_dir.mY,
-		       camera_positon.mZ + right_vec_to_dir.mZ,
-		       camera_positon.mX + right_vec_to_dir.mX + camera_directon.mX,
-		       camera_positon.mY + right_vec_to_dir.mY + camera_directon.mY,
-		       camera_positon.mZ + right_vec_to_dir.mZ + camera_directon.mZ,
-		       0, 1, 0 );
-	    mpGame -> DrawWorld();
-	    glLightfv( GL_LIGHT0, GL_POSITION, mpGame -> GetLightPosition() );
-	}
+        glFrustum(  mFrustumLeft, mFrustumRight,
+                   -mFrustumHalfWidth * mRatio, mFrustumHalfWidth * mRatio,
+                    mFrustumNearPlane, mFrustumFarPlane );
+
+        glMatrixMode( GL_MODELVIEW );
+        glDrawBuffer( GL_BACK_RIGHT );
+        glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+        glLoadIdentity();
+        gluLookAt( camera_positon.mX + right_vec_to_dir.mX,
+                   camera_positon.mY + right_vec_to_dir.mY,
+                   camera_positon.mZ + right_vec_to_dir.mZ,
+                   camera_positon.mX + right_vec_to_dir.mX + camera_directon.mX,
+                   camera_positon.mY + right_vec_to_dir.mY + camera_directon.mY,
+                   camera_positon.mZ + right_vec_to_dir.mZ + camera_directon.mZ,
+                   0, 1, 0 );
+        mpGame -> DrawWorld();
+        glLightfv( GL_LIGHT0, GL_POSITION, mpGame -> GetLightPosition() );
+
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -229,6 +226,12 @@ void Scene :: DrawTextInformation()
             case Game :: NEW_GAME :
                 glColor4f( 1.0f, 1.0f, 0.0f, 1.0f - i * alpha_can );
                 break;
+            case Game :: SAVE_GAME :
+                glColor4f( 0.0f, 1.0f, 0.0f, 1.0f - i * alpha_can );
+                break;
+            case Game :: LOAD_GAME :
+                glColor4f( 0.0f, 1.0f, 0.0f, 1.0f - i * alpha_can );
+                break;
             case Game :: GAME_OVER :
                 glColor4f( 1.0f, 0.0f, 0.0f, 1.0f - i * alpha_can );
                 break;
@@ -243,11 +246,13 @@ void Scene :: DrawTextInformation()
     if ( mShowHelp )
     {
         glColor3f( 1.0f, 1.0f, 1.0f );
-        renderText( mWidth - HELP_X_OFFSET, mHeight - HELP_Y_OFFSET,      "Pause                P"  );
-        renderText( mWidth - HELP_X_OFFSET, mHeight - HELP_Y_OFFSET + 20, "This help            F1" );
-        renderText( mWidth - HELP_X_OFFSET, mHeight - HELP_Y_OFFSET + 40, "New game         F2" );
-        renderText( mWidth - HELP_X_OFFSET, mHeight - HELP_Y_OFFSET + 60, "Full screen         F3" );
-        renderText( mWidth - HELP_X_OFFSET, mHeight - HELP_Y_OFFSET + 80, "Ambient music  F4" );
+        renderText( mWidth - HELP_X_OFFSET, mHeight - HELP_Y_OFFSET,       "Pause                P"  );
+        renderText( mWidth - HELP_X_OFFSET, mHeight - HELP_Y_OFFSET + 20,  "This help            F1" );
+        renderText( mWidth - HELP_X_OFFSET, mHeight - HELP_Y_OFFSET + 40,  "New game         F2" );
+        renderText( mWidth - HELP_X_OFFSET, mHeight - HELP_Y_OFFSET + 60,  "Full screen         F3" );
+        renderText( mWidth - HELP_X_OFFSET, mHeight - HELP_Y_OFFSET + 80,  "Ambient music  F4" );
+        renderText( mWidth - HELP_X_OFFSET, mHeight - HELP_Y_OFFSET + 100, "Save game        F5" );
+        renderText( mWidth - HELP_X_OFFSET, mHeight - HELP_Y_OFFSET + 120, "Load game        F6" );
     }
 
 

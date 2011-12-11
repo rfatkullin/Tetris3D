@@ -1,3 +1,4 @@
+#include <QTextStream>
 #include <vector>
 #include "GeomEntity.h"
 #include "PhisEntity.h"
@@ -38,6 +39,8 @@ public:
     bool                        IsIntersect( Block* block );
     void                        Draw( Point3Df figure_location  );
 
+    friend QTextStream& operator << ( QTextStream& stream, const Block& material );
+    friend QTextStream& operator >> ( QTextStream& stream, Block& material );
     virtual float		LowerBoundXf();
     virtual float		UpperBoundXf();
     virtual float		LowerBoundYf();
@@ -87,6 +90,9 @@ public :
     void                        SetBlocksAbsCoor();
     void                        SetBlocksRelCoor();
 
+    friend QTextStream& operator << ( QTextStream& stream, const Figure& material );
+    friend QTextStream& operator >> ( QTextStream& stream, Figure& material )	;
+
     virtual float		LowerBoundXf();
     virtual float		UpperBoundXf();
     virtual float		LowerBoundYf();
@@ -110,5 +116,8 @@ public :
 
     virtual void		Draw();
 };
+
+QTextStream& operator << ( QTextStream& stream, const Figures& figure );
+QTextStream& operator >> ( QTextStream& stream, Figures& figure );
 
 #endif

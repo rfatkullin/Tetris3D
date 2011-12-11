@@ -4,21 +4,25 @@
 #include <time.h>
 #include "Game.h"
 
-const int       Game :: SAFETY_DISTANCE = 16.0 * BSIZE * BSIZE;
+const int           Game :: SAFETY_DISTANCE = 16.0 * BSIZE * BSIZE;
 
-float		Game :: msLightPosition[ 4 ];
-Figures         Game :: msGameFigures[ Game :: FIGURES_MAX_CNT ];
+float               Game :: msLightPosition[ 4 ];
+Figures             Game :: msGameFigures[ Game :: FIGURES_MAX_CNT ];
 
-const char*     Game :: MESSAGES[ Game :: MESSAGES_CNT ] = {  "Empty!",
+const char* const   Game :: MESSAGES[ Game :: MESSAGES_CNT ] = {  "Empty!",
                                                               "New level!",
                                                               "Collapse!",
                                                               "Could not rotate - collision!",
                                                               "Could not shift - collision!",
                                                               "New game!",
-                                                              "Game over!"
+                                                              "Game over!",
+                                                              "Save game!",
+                                                              "Load game!"
                                                            };
 
-const unsigned int   Game :: LEVELS_SPEED[ Game :: LEVELS_CNT ] = { 1,
+const char* const   Game :: SAVE_FILE = "save.dat";
+
+const unsigned int  Game :: LEVELS_SPEED[ Game :: LEVELS_CNT ] = { 1,
                                                                     2,
                                                                     4,
                                                                     8,
@@ -27,7 +31,7 @@ const unsigned int   Game :: LEVELS_SPEED[ Game :: LEVELS_CNT ] = { 1,
                                                                     14
                                                                   };
 
-const unsigned int   Game :: LEVELS_SCORE[ Game :: LEVELS_CNT ] = {  0,
+const unsigned int  Game :: LEVELS_SCORE[ Game :: LEVELS_CNT ] = {  0,
                                                                      200,
                                                                      400,
                                                                      600,
@@ -36,7 +40,7 @@ const unsigned int   Game :: LEVELS_SCORE[ Game :: LEVELS_CNT ] = {  0,
                                                                      1200
                                                                    };
 
-const unsigned int   Game :: MAX_GAME_SPEED = LEVELS_SPEED[ Game :: LEVELS_CNT - 1 ];
+const unsigned int  Game :: MAX_GAME_SPEED = LEVELS_SPEED[ Game :: LEVELS_CNT - 1 ];
 
 Game :: ~Game()
 {
@@ -74,11 +78,12 @@ void Game :: InitializeStaticData()
 Game :: Game( QObject* parent ) : QObject( parent )
 {
     mScore                  = 0;
+    mFieldBlocksCnt         = 0;
     mpCurrentFigure         = NULL;
     mGameLevel              = 1;
     mIsSound		    = true;
     mIsGameOver             = false;
-    mIsAmbientMusic         = false;
+    mIsAmbientMusic         = true;
     mpAmbientMusicObject    = new Phonon :: MediaObject( this );
     mpBlockFallSoundObject  = new Phonon :: MediaObject( this );
     mpAudioAmbient	    = new Phonon :: AudioOutput( Phonon :: MusicCategory, this );
@@ -99,18 +104,21 @@ Game :: Game( QObject* parent ) : QObject( parent )
     mPresentFigures.clear();
     for ( int i = 0; i < FIGURES_MAX_CNT; i++ )
 	mPresentFigures.push_back( msGameFigures[ i ] );
+
+    mpSaveFile = new QFile( SAVE_FILE, this );
+    mSaveStream.setDevice( mpSaveFile );
 }
 
 void Game :: CreateBorderBlocks()
 {
-    for ( int i = 0; i < LENGTH; ++i )
-	for ( int j = 0; j < WIDTH; ++j )
-	    for ( int k = 0; k < HEIGHT; ++k )
+    for ( unsigned int i = 0; i < LENGTH; ++i )
+        for ( unsigned int j = 0; j < WIDTH; ++j )
+            for ( unsigned int k = 0; k < HEIGHT; ++k )
 		mpField[ i ][ k ][ j ] = NULL;
 
-    for ( int i = 1; i < HEIGHT - 1; ++i )
+    for ( unsigned int i = 1; i < HEIGHT - 1; ++i )
     {
-	for ( int j = 0; j < LENGTH; ++j )
+        for ( unsigned int j = 0; j < LENGTH; ++j )
 	{
             mpField[ j ][ i ][ 0 ]         = new Block( ( int )HALF_BSIZE + j * BSIZE,
                                                         ( int )HALF_BSIZE + i * BSIZE,
@@ -175,6 +183,7 @@ void Game :: Start()
     int      block_width_pos;
 
     mFigurePosCorrectStep      = 0;
+    mFieldBlocksCnt            = 0;
     mpCurrentFigure            = GetNewFigure();
     mFigureDownSteps           = 0;    
     mRotatingStep              = 0;
@@ -227,7 +236,11 @@ void Game :: End()
 		    mpField[ i ][ k ][ j ] = NULL;
 		}
 
-    GetPrevColors();
+    TurnOffSelecting();
+
+    for ( ComponentsVec :: iterator comp_it = component_block.begin(); comp_it != component_block.end(); ++comp_it )
+        ( *comp_it ).clear();
+    component_block.clear();
 
     if ( mpCurrentFigure != NULL )
         delete mpCurrentFigure;
@@ -447,9 +460,9 @@ bool Game :: CheckToCollapse()
                     mpField[ i ][ k ][ j ] = NULL;
                 }
 
-            //mFieldBlockCnt -= ONE_LEVEL_BLOCKS_CNT;
-            mScore         += ONE_LEVEL_BLOCKS_CNT;
-            mIsCollapse = true;
+            mFieldBlocksCnt -= ONE_LEVEL_BLOCKS_CNT;
+            mScore          += ONE_LEVEL_BLOCKS_CNT;
+            mIsCollapse     = true;
          }
     }
 
@@ -620,6 +633,7 @@ void Game :: NextStep()
         mGameSpeed = LEVELS_SPEED[ mGameLevel - 1 ];
         mFigureDownSteps    = 0;
         mScore              += Figure :: BlocksCount;
+        mFieldBlocksCnt     += Figure :: BlocksCount;
 
         ChangeSelectBlocks();
 
@@ -860,12 +874,21 @@ void Game :: DropDownFigure()
     mGameSpeed = MAX_GAME_SPEED;
 }
 
-void Game :: GetPrevColors()
+
+void Game :: TurnOffSelecting()
 {
     for ( unsigned int i = 0; i < Figure :: BlocksCount; i++ )
         if ( mpField[ mSelectBlocksPos[ i ].mX ][ mSelectBlocksPos[ i ].mY ] [ mSelectBlocksPos[ i ].mZ ] != NULL )
             mpField[ mSelectBlocksPos[ i ].mX ][ mSelectBlocksPos[ i ].mY ] [ mSelectBlocksPos[ i ].mZ ]
                 -> SetMaterial( mSelectBlocksMaterials[ i ] );
+}
+
+void Game :: TurnOnSelecting()
+{
+    for ( unsigned int i = 0; i < Figure :: BlocksCount; i++ )
+        if ( mpField[ mSelectBlocksPos[ i ].mX ][ mSelectBlocksPos[ i ].mY ] [ mSelectBlocksPos[ i ].mZ ] != NULL )
+            mpField[ mSelectBlocksPos[ i ].mX ][ mSelectBlocksPos[ i ].mY ] [ mSelectBlocksPos[ i ].mZ ]
+                -> SetMaterial( materials[ SELECT_FIGURES_MATERIALS ] );
 }
 
 void Game :: ChangeSelectBlocks()
@@ -876,7 +899,7 @@ void Game :: ChangeSelectBlocks()
     int      block_width_pos;
     int      block_height_pos;
 
-    GetPrevColors();
+    TurnOffSelecting();
 
     fig_pos = mpCurrentFigure -> GetPosi();
     for ( unsigned int i = 0; i < Figure :: BlocksCount; i++ )
@@ -985,3 +1008,254 @@ void Game :: ClearMessagesList()
 {
     mMessagesList.clear();
 }
+
+void Game :: Save()
+{
+    TurnOffSelecting();
+    mpSaveFile -> open( QIODevice :: WriteOnly );
+
+    mSaveStream << mPresentFigures.size() << '\n';
+    for ( std :: vector < Figures > :: iterator it = mPresentFigures.begin(); it != mPresentFigures.end(); ++it )
+        mSaveStream << ( *it ) << '\t';
+    mSaveStream << '\n';
+
+    mSaveStream << mIsCollapse << '\n';
+
+    if ( !mIsCollapse )
+    {
+        mSaveStream << mFieldBlocksCnt << '\n';
+        for ( int i = FIELD_BEGIN_X; i < FIELD_END_X; ++i )
+            for ( int k = FIELD_BEGIN_Y; k < FIELD_END_Y; ++k )
+                for ( int j = FIELD_BEGIN_Z; j < FIELD_END_Z; ++j )
+                    if ( mpField[ i ][ k ][ j ] != NULL )
+                    {
+                        mSaveStream << i << '\t' << k << '\t' << j << '\n';
+                        mSaveStream << *mpField[ i ][ k ][ j ] << '\n';
+                    }
+    }
+    else
+    {
+        mSaveStream << component_block.size() << '\n';
+        for ( ComponentsVec :: iterator comp_it = component_block.begin(); comp_it != component_block.end(); ++comp_it )
+        {
+            mSaveStream << ( *comp_it ).size() << '\n';
+            for ( BlocksVec :: iterator block_it = ( *comp_it ).begin(); block_it != ( *comp_it ).end(); ++block_it )
+            {
+                mSaveStream <<  *( block_it -> first );
+                mSaveStream << ( block_it -> second.first ) << '\t' << ( block_it -> second.second ) << '\n';
+            }
+        }
+    }
+
+    mSaveStream << *mpCurrentFigure;
+
+    mSaveStream << mScore           << '\n';
+
+    mSaveStream << mGameLevel       << '\n';
+
+    mSaveStream << mGameSpeed       << '\n';
+
+    mSaveStream << mRotatingAngle   << '\n';
+
+    mSaveStream << mIsRotate        << '\n';
+
+    mSaveStream << mFigureDownSteps << '\n';
+
+    mSaveStream << mRotatingStep    << '\n';
+
+    mSaveStream << mRotatingPlane   << '\n';
+
+    mSaveStream << mFigurePosCorrectVec.mX << '\t'
+                << mFigurePosCorrectVec.mY << '\t'
+                << mFigurePosCorrectVec.mZ << '\n';
+
+    mSaveStream << mFigurePosCorrectStep << '\n';
+
+    mSaveStream << mFallingComponentsCnt << '\n';
+
+    for ( int i = 0; i < MaxSelectBlockCount; i++ )
+        mSaveStream << mSelectBlocksPos[ i ].mX << '\t'
+                    << mSelectBlocksPos[ i ].mY << '\t'
+                    << mSelectBlocksPos[ i ].mZ << '\n';
+
+    for ( int i = 0; i < MaxSelectBlockCount; ++i )
+        mSaveStream << mSelectBlocksMaterials[ i ] << '\t';
+
+    mSaveStream << mShiftChecksCnt  << '\n';
+    mSaveStream << mShiftAxis       << '\n';
+    mSaveStream << mShiftDirection  << '\n';
+
+    mpSaveFile -> close();
+    mMessagesList.push_back( SAVE_GAME );
+
+    TurnOnSelecting();
+}
+
+void Game :: Load()
+{
+    Block*  tmp_block = NULL;
+    Figures tmp_present_figure;
+    int     tmp_first;
+    int     tmp_second;
+    int     present_figures_cnt = 0;
+    int     component_block_cnt = 0;
+    int     block_cnt           = 0;
+    int     blocks_i_ind        = 0;
+    int     blocks_k_ind        = 0;
+    int     blocks_j_ind        = 0;
+
+
+    if ( !mpSaveFile -> open( QIODevice :: ReadOnly ) )
+        return;
+
+    End();
+
+    mPresentFigures.clear();
+    mSaveStream >> present_figures_cnt;
+    for ( int i = 0; i < present_figures_cnt; ++i )
+    {
+        mSaveStream >> tmp_present_figure;
+        mPresentFigures.push_back( tmp_present_figure );
+    }
+
+    mSaveStream >> mIsCollapse;
+
+    if ( !mIsCollapse )
+    {
+        mSaveStream >> mFieldBlocksCnt;
+        for ( int i = 0; i < mFieldBlocksCnt; ++i )
+        {
+            mSaveStream >> blocks_i_ind >> blocks_k_ind >> blocks_j_ind;
+            mpField[ blocks_i_ind ][ blocks_k_ind ][ blocks_j_ind ] = new Block();
+            mSaveStream >> *mpField[ blocks_i_ind ][ blocks_k_ind ][ blocks_j_ind ];
+        }
+    }
+    else
+    {
+        mSaveStream >> component_block_cnt;
+        for ( int i = 0; i < component_block_cnt; i++ )
+        {
+            component_block.push_back( BlocksVec() );
+            mSaveStream >> block_cnt;
+            for ( int j = 0; j < block_cnt; j++ )
+            {
+                tmp_block = new Block();
+                mSaveStream >> *tmp_block;
+                mSaveStream >> tmp_first >> tmp_second;
+                component_block.back().push_back( std :: pair< Block*, std :: pair< int, int > >(
+                                                  tmp_block,
+                                                  std :: pair< int, int >( tmp_first, tmp_second ) ) );
+
+            }
+        }
+    }
+
+    mpCurrentFigure = GetNewFigure();
+    mSaveStream >> *mpCurrentFigure;
+
+    mSaveStream >> mScore;
+
+    mSaveStream >> mGameLevel;
+
+    mSaveStream >> mGameSpeed;
+
+    mSaveStream >> mRotatingAngle;
+
+    mSaveStream >> mIsRotate;
+
+    mSaveStream >> mFigureDownSteps;
+
+    mSaveStream >> mRotatingStep;
+
+    mSaveStream >> mRotatingPlane;
+
+    mSaveStream >> mFigurePosCorrectVec.mX
+                >> mFigurePosCorrectVec.mY
+                >> mFigurePosCorrectVec.mZ;
+
+    mSaveStream >> mFigurePosCorrectStep;
+
+
+    mSaveStream >> mFallingComponentsCnt;
+
+    for ( int i = 0; i < MaxSelectBlockCount; i++ )
+        mSaveStream >> mSelectBlocksPos[ i ].mX
+                    >> mSelectBlocksPos[ i ].mY
+                    >> mSelectBlocksPos[ i ].mZ;
+
+    for ( int i = 0; i < MaxSelectBlockCount; ++i )
+        mSaveStream >> mSelectBlocksMaterials[ i ];
+
+    mSaveStream >> mShiftChecksCnt;
+    mSaveStream >> mShiftAxis;
+    mSaveStream >> mShiftDirection;
+
+    mpSaveFile -> close();
+    mMessagesList.push_back( LOAD_GAME );
+
+    TurnOnSelecting();
+}
+
+QTextStream& operator << ( QTextStream& stream, const Game :: RotatePlane& plane )
+{
+    stream << static_cast< int >( plane );
+
+    return stream;
+}
+
+QTextStream& operator >> ( QTextStream& stream, Game :: RotatePlane& plane )
+{
+    int tmp_plane;
+    stream >> tmp_plane;
+    plane = static_cast< Game :: RotatePlane >( tmp_plane );
+
+    return stream;
+}
+
+QTextStream& operator << ( QTextStream& aStream, const bool& aBoolValue)
+{
+    aStream << static_cast< int >( aBoolValue );
+
+    return aStream;
+}
+
+QTextStream& operator >> ( QTextStream& aStream, bool& aBoolValue )
+{
+    int tmp_bool_value;
+
+    aStream >> tmp_bool_value;
+    aBoolValue = static_cast< bool > ( tmp_bool_value );
+
+    return aStream;
+}
+
+QTextStream& operator << ( QTextStream& aStream, const Game :: Axises& aAxis)
+{
+    aStream << static_cast< int >( aAxis );
+
+    return aStream;
+}
+
+QTextStream& operator >> ( QTextStream& aStream, Game :: Axises& aAxis )
+{
+    int tmp_axis;
+    aStream >> tmp_axis;
+    aAxis = static_cast< Game :: Axises >( aAxis );
+
+    return aStream;
+}
+
+QTextStream& operator << ( QTextStream& aStream, const Game :: ShiftDirection& aShiftDirection)
+{
+    aStream << static_cast< int > (aShiftDirection );
+}
+
+QTextStream& operator >> ( QTextStream& aStream, Game :: ShiftDirection& aShiftDirection )
+{
+    int tmp_shift_direction;
+    aStream >> tmp_shift_direction;
+    aShiftDirection = static_cast < Game :: ShiftDirection >( tmp_shift_direction );
+
+    return aStream;
+}
+

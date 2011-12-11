@@ -916,3 +916,70 @@ Point3Di Figure :: GetAheadMostBlockPosi()
     return mpBlocks[ index_of_block ] -> GetPosi() + mPosI;
 }
 
+QTextStream& operator << ( QTextStream& aStream, const Block& aBlock )
+{
+    aStream << aBlock.mPosI.mX << '\t' << aBlock.mPosI.mY << '\t' << aBlock.mPosI.mZ << '\n';
+    aStream << aBlock.mPosF.mX << '\t' << aBlock.mPosF.mY << '\t' << aBlock.mPosF.mZ << '\n';
+    aStream << aBlock.mMaterial << '\n';
+
+    for ( int i = 0; i < Block :: BLOCKS_VERTEX_CNT; i++ )
+        aStream << aBlock.mVerticesF[ i ].mX << '\t'
+                << aBlock.mVerticesF[ i ].mY << '\t'
+                << aBlock.mVerticesF[ i ].mZ << '\t';
+
+    return aStream;
+}
+
+QTextStream& operator >> ( QTextStream& aStream, Block& aBlock )
+{
+    aStream >> aBlock.mPosI.mX >> aBlock.mPosI.mY >> aBlock.mPosI.mZ;
+    aStream >> aBlock.mPosF.mX >> aBlock.mPosF.mY >> aBlock.mPosF.mZ;
+    aStream >> aBlock.mMaterial;
+
+    for ( int i = 0; i < Block :: BLOCKS_VERTEX_CNT; i++ )
+        aStream >> aBlock.mVerticesF[ i ].mX
+               >> aBlock.mVerticesF[ i ].mY
+               >> aBlock.mVerticesF[ i ].mZ;
+
+    return aStream;
+}
+
+QTextStream& operator << ( QTextStream& aStream, const Figure& aFigure )
+{
+    aStream << aFigure.mPosI.mX << '\t' << aFigure.mPosI.mY << '\t' << aFigure.mPosI.mZ << '\n';
+    aStream << aFigure.mPosF.mX << '\t' << aFigure.mPosF.mY << '\t' << aFigure.mPosF.mZ << '\n';
+    aStream << aFigure.mMaterial << '\n';
+
+    for ( int i = 0; i < Figure :: BlocksCount; i++ )
+        aStream << *aFigure.mpBlocks[ i ] << '\n';
+
+    return aStream;
+}
+
+QTextStream& operator >> ( QTextStream& aStream, Figure& aFigure )
+{
+    aStream >> aFigure.mPosI.mX >> aFigure.mPosI.mY >> aFigure.mPosI.mZ;
+    aStream >> aFigure.mPosF.mX >> aFigure.mPosF.mY >> aFigure.mPosF.mZ;
+    aStream >> aFigure.mMaterial;
+
+    for ( int i = 0; i < Figure :: BlocksCount; i++ )
+        aStream >> *aFigure.mpBlocks[ i ];
+
+    return aStream;
+}
+
+QTextStream& operator << ( QTextStream& aStream, const Figures& aFigure )
+{
+    aStream << static_cast< unsigned int >( aFigure );
+
+    return aStream;
+}
+
+QTextStream& operator >> ( QTextStream& aStream, Figures& aFigure )
+{
+    int tmp_figure;
+    aStream >> tmp_figure;
+    aFigure = static_cast< Figures >( tmp_figure );
+
+    return aStream;
+}

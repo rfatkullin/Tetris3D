@@ -2,6 +2,8 @@
 #ifndef MATERIAL_H
 #define MATERIAL_H
 
+#include <QTextStream>
+
 class Material
 {
 private :
@@ -11,10 +13,14 @@ private :
 public :
         Material();
         Material( float a_r, float a_g, float a_b, float a_a,
-		  float d_r, float d_g, float d_b, float d_a,
+                  float d_r, float d_g, float d_b, float d_a,
 		  float s_r, float s_g, float s_b, float s_a
 		);
-	const float* GetMaterialForAmbient();
+
+        friend QTextStream& operator << ( QTextStream& stream, const Material& material );
+        friend QTextStream& operator >> ( QTextStream& stream, Material& material );
+
+        const float* GetMaterialForAmbient();
 	const float* GetMaterialForDiffuse();
 	const float* GetMaterialForSpecular();
 };
