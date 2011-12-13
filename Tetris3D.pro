@@ -44,6 +44,11 @@ HEADERS += \
     AboutDialog.h \
     ControlDialog.h
 
+OTHER_FILES += \
+    save.dat \
+    Help.html
+
+
 
 
 

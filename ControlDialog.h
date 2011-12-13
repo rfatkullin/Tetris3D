@@ -5,6 +5,7 @@
 #include <QLayout>
 #include <QLabel>
 #include <QScrollArea>
+#include <QTextBrowser>
 
 class ControlDialog : public QDialog
 {

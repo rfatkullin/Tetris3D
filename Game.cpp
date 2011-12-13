@@ -1248,6 +1248,8 @@ QTextStream& operator >> ( QTextStream& aStream, Game :: Axises& aAxis )
 QTextStream& operator << ( QTextStream& aStream, const Game :: ShiftDirection& aShiftDirection)
 {
     aStream << static_cast< int > (aShiftDirection );
+
+    return aStream;
 }
 
 QTextStream& operator >> ( QTextStream& aStream, Game :: ShiftDirection& aShiftDirection )

@@ -4,32 +4,14 @@
  ControlDialog :: ControlDialog( QWidget* parent ) : QDialog( parent )
  {
     QVBoxLayout*    layout = new QVBoxLayout();
-    QLabel*         help = new QLabel();
-    QScrollArea*    scroll_area = new QScrollArea();
+    QTextBrowser*   help = new QTextBrowser();
 
     setFixedSize( DIALOG_WIDTH, DIALOG_HEIGHT );
+    help -> setSource( QString( "Help.html" ) );
+    help -> setAlignment( Qt :: AlignCenter );
 
-    help -> setText( "<Qt>"
-                     "<HTML>"
-                     "<BODY>"
-                     "<H3 align = 'center' > TETRIS 3D </H3>"
-                     "<P> Hello!. This is help by game Tetris3D </P>"
-                     "<P> OLOLOLOSHENKI!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11 </P>"
-                     "<P> OLOLOLOSHENKI!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11 </P>"
-                     "<P> OLOLOLOSHENKI!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11 </P>"
-                     "<P> OLOLOLOSHENKI!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11 </P>"
-                     "<P> OLOLOLOSHENKI!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11 </P>"
-                     "<P> OLOLOLOSHENKI!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11 </P>"
-                     "<P> OLOLOLOSHENKI!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11 </P>"
-                     "<P> OLOLOLOSHENKI!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11 </P>"
-                     "</BODY>"
-                     "</HTML>"
-                     "</Qt>"
-                    );
-
-    scroll_area -> setWidget( help );
-
-    layout -> addWidget( scroll_area );
+    layout -> addWidget( help );
+    layout -> setAlignment( Qt :: AlignCenter );
 
     setLayout( layout );
 }

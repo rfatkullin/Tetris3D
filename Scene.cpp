@@ -145,7 +145,7 @@ void Scene :: paintGL()
 
 	glMatrixMode( GL_MODELVIEW );
 	glDrawBuffer( GL_BACK_LEFT );
-	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+        glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 	glLoadIdentity();
 	gluLookAt( camera_positon.mX - right_vec_to_dir.mX,
 		   camera_positon.mY - right_vec_to_dir.mY,
