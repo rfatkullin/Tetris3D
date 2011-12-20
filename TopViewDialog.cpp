@@ -6,7 +6,7 @@
 #include "TopViewDialog.h"
 
 
-TopViewDialog :: TopViewDialog( int aX, int aY, const PlayerInfoList& aTopList, int aMaxListLength,  QWidget* aParent ) : QDialog( aParent )
+TopViewDialog :: TopViewDialog( int aX, int aY, const PlayerInfoList& aTopList, int aMaxListLength,  QWidget* apParent ) : QDialog( apParent )
 {
     QWidget*        tmp_widget             = new QWidget();
     QScrollArea*    scroll_area            = new QScrollArea();

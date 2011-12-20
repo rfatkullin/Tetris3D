@@ -12,6 +12,7 @@ CONFIG   -= app_bundle
 
 TEMPLATE = app
 
+RC_FILE = resource.rc
 
 SOURCES += \
     Material.cpp \
@@ -46,7 +47,11 @@ HEADERS += \
 
 OTHER_FILES += \
     save.dat \
-    Help.html
+    Help.html \
+    resource.rc \
+    Tetris3D.rar
+
+
 
 
 

@@ -9,7 +9,7 @@
 class AboutDialog : public QDialog
 {
 public:
-            AboutDialog( QWidget* parent );
+            AboutDialog( QWidget* apParent );
     void    Show();
 };
 

@@ -1,7 +1,7 @@
 #include "ControlDialog.h"
 
 
- ControlDialog :: ControlDialog( QWidget* parent ) : QDialog( parent )
+ ControlDialog :: ControlDialog( QWidget* apParent ) : QDialog( apParent )
  {
     QVBoxLayout*    layout = new QVBoxLayout();
     QTextBrowser*   help = new QTextBrowser();

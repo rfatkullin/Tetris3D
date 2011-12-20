@@ -1,28 +1,28 @@
 #include "GeomEntity.h"
 
-GeomEntity :: GeomEntity( int new_x, int new_y, int new_z )
+GeomEntity :: GeomEntity( int aNewX, int aNewY, int aNewZ )
 {
-    mPosI    = Point3Di( new_x, new_y, new_z );
+    mPosI    = Point3Di( aNewX, aNewY, aNewZ );
     mPosF    = mPosI;
 
 }
 
-GeomEntity :: GeomEntity( float new_x, float new_y, float new_z )
+GeomEntity :: GeomEntity( float aNewX, float aNewY, float aNewZ )
 {
-    mPosF = Point3Df( new_x, new_y, new_z );
+    mPosF = Point3Df( aNewX, aNewY, aNewZ );
     mPosI = mPosF;
 }
 
-GeomEntity :: GeomEntity( Point3Di new_pos )
+GeomEntity :: GeomEntity( Point3Di aNewPos )
 {
-    mPosI = new_pos;
-    mPosF = new_pos;
+    mPosI = aNewPos;
+    mPosF = aNewPos;
 }
 
-GeomEntity :: GeomEntity( Point3Df new_pos )
+GeomEntity :: GeomEntity( Point3Df aNewPos )
 {
-    mPosI = new_pos;
-    mPosF = new_pos;
+    mPosI = aNewPos;
+    mPosF = aNewPos;
 }
 
 
@@ -66,60 +66,60 @@ int GeomEntity :: GetPosByZi() const
     return mPosI.mZ;
 }
 
-void GeomEntity :: SetPosByXi( int new_x )
+void GeomEntity :: SetPosByXi( int aNewX )
 {
-    mPosI.mX = new_x;
-    mPosF.mX = static_cast< float > ( new_x );
+    mPosI.mX = aNewX;
+    mPosF.mX = static_cast< float > ( aNewX );
 }
 
-void GeomEntity :: SetPosByYi( int new_y )
+void GeomEntity :: SetPosByYi( int aNewY )
 {
-    mPosI.mY = new_y;
-    mPosF.mY = static_cast< float > ( new_y );
+    mPosI.mY = aNewY;
+    mPosF.mY = static_cast< float > ( aNewY );
 }
 
-void GeomEntity :: SetPosByZi( int new_z )
+void GeomEntity :: SetPosByZi( int aNewZ )
 {
-    mPosI.mZ = new_z;
-    mPosF.mZ = static_cast< float > ( new_z );
+    mPosI.mZ = aNewZ;
+    mPosF.mZ = static_cast< float > ( aNewZ );
 }
 
- void GeomEntity :: SetPosByXf( float new_x )
+ void GeomEntity :: SetPosByXf( float aNewX )
  {
-    mPosF.mX = new_x;
+    mPosF.mX = aNewX;
  }
 
-void GeomEntity :: SetPosByYf( float new_y )
+void GeomEntity :: SetPosByYf( float aNewY )
 {
-    mPosF.mY = new_y;
+    mPosF.mY = aNewY;
 }
 
-void GeomEntity :: SetPosByZf( float new_z )
+void GeomEntity :: SetPosByZf( float aNewZ )
 {
-    mPosF.mZ = new_z;
+    mPosF.mZ = aNewZ;
 }
 
-void GeomEntity :: SetPosi( int new_x, int new_y, int new_z )
+void GeomEntity :: SetPosi( int aNewX, int aNewY, int aNewZ )
 {
-    mPosI = Point3Di( new_x, new_y, new_z );
+    mPosI = Point3Di( aNewX, aNewY, aNewZ );
     mPosF = mPosI;
 }
 
-void GeomEntity :: SetPosf( float new_x, float new_y, float new_z )
+void GeomEntity :: SetPosf( float aNewX, float aNewY, float aNewZ )
 {
-    mPosF.mX = new_x;
-    mPosF.mY = new_y;
-    mPosF.mZ = new_z;
+    mPosF.mX = aNewX;
+    mPosF.mY = aNewY;
+    mPosF.mZ = aNewZ;
 }
 
-void GeomEntity :: SetPosi( Point3Di new_pos )
+void GeomEntity :: SetPosi( Point3Di aNewPos )
 {
-    mPosI = new_pos;
-    mPosF = new_pos;
+    mPosI = aNewPos;
+    mPosF = aNewPos;
 }
 
-void GeomEntity :: SetPosf( Point3Df new_pos )
+void GeomEntity :: SetPosf( Point3Df aNewPos )
 {
-    mPosF = new_pos;
+    mPosF = aNewPos;
 }
 

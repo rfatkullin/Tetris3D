@@ -1,6 +1,6 @@
 #include "AboutDialog.h"
 
-AboutDialog :: AboutDialog( QWidget* parent ) : QDialog( parent )
+AboutDialog :: AboutDialog( QWidget* apParent ) : QDialog( apParent )
 {
     QPushButton* ok_button          = new QPushButton( "OK" );
     QVBoxLayout* ver_layout         = new QVBoxLayout();

@@ -12,8 +12,8 @@
 #include "TopViewDialog.h"
 #include <stdio.h>
 
-FigureShift MainWindow :: msFigureControl[ MainWindow :: VIEW_CNT ][ MainWindow :: BUTTONS_CNT ];
-const char* const       MainWindow :: TOP_LIST_FILE = "top.dat";
+FigureShift         MainWindow :: msFigureControl[ MainWindow :: VIEW_CNT ][ MainWindow :: BUTTONS_CNT ];
+const char* const   MainWindow :: TOP_LIST_FILE = "top.dat";
 
 void MainWindow :: SetFigurShiftConstants()
 {
@@ -169,11 +169,11 @@ void MainWindow :: closeEvent( QCloseEvent* )
     Exit();
 }
 
-void MainWindow :: keyPressEvent( QKeyEvent* key )
+void MainWindow :: keyPressEvent( QKeyEvent* apKey )
 {
     int side = mpScene -> GetViewSide();
 
-    switch ( key -> key() )
+    switch ( apKey -> key() )
     {
         case Qt :: Key_Escape :
             Exit();
@@ -214,13 +214,13 @@ void MainWindow :: keyPressEvent( QKeyEvent* key )
     if ( !mIsGame )
         return;
 
-    if ( key -> key() == Qt :: Key_P )
+    if ( apKey -> key() == Qt :: Key_P )
         mIsPause = !mIsPause;
 
     if ( mIsPause )
         return;
 
-    switch ( key -> key() )
+    switch ( apKey -> key() )
     {
         case Qt :: Key_F4 :
             mpGame -> AmbientMusicStateChange( !mpGame -> AmbientMusicState() );
@@ -255,15 +255,12 @@ void MainWindow :: keyPressEvent( QKeyEvent* key )
     }
 }
 
-void MainWindow :: mousePressEvent( QMouseEvent* mouse )
+void MainWindow :: mousePressEvent( QMouseEvent* apMouse )
 {
-    //if ( !mIsGame )
-      //  return;
-
-    Qt :: MouseButton button = mouse -> button();
+    Qt :: MouseButton button = apMouse -> button();
 
     if ( ( button == Qt :: LeftButton ) || ( button == Qt :: RightButton )  )
-	mLastMousePos = mouse -> globalPos();
+	mLastMousePos = apMouse -> globalPos();
 
     if ( button == Qt :: RightButton )
 	mIsRightButtonPressed = true;
@@ -271,39 +268,39 @@ void MainWindow :: mousePressEvent( QMouseEvent* mouse )
     mLastMouseButton = button;
 }
 
-void MainWindow :: mouseReleaseEvent( QMouseEvent* mouse )
+void MainWindow :: mouseReleaseEvent( QMouseEvent* apMouse )
 {
     if ( !mIsGame || mIsPause  )
         return;
 
     if ( ( !mIsPause ) && ( mLastMouseButton == Qt :: RightButton ) )
-        SelectRotate( mouse -> globalX(), mouse -> globalY() );
+        SelectRotate( apMouse -> globalX(), apMouse -> globalY() );
 }
 
-void MainWindow :: wheelEvent ( QWheelEvent * aEvent )
+void MainWindow :: wheelEvent ( QWheelEvent * apEvent )
 {
     if ( !mIsGame || mIsPause )
         return;
 
-    if ( aEvent -> delta() > 0 )
+    if ( apEvent -> delta() < 0 )
         mpGame-> Rotate( Game :: PLANE_ZX, Game :: ROTATE_BY_CLOCK_WISE );
     else
         mpGame-> Rotate( Game :: PLANE_ZX, Game :: ROTATE_BY_ANTI_CLOCKWISE );
 }
 
-void MainWindow :: mouseMoveEvent( QMouseEvent* mouse )
+void MainWindow :: mouseMoveEvent( QMouseEvent* apMouse )
 {
     if ( mLastMouseButton != Qt :: LeftButton )
 	return;
 
-    mpScene -> ChangeCameraPosition( mouse -> globalX() - mLastMousePos.x(),
-                          mouse -> globalY() - mLastMousePos.y() );
-    mLastMousePos = mouse -> globalPos();
+    mpScene -> ChangeCameraPosition( apMouse -> globalX() - mLastMousePos.x(),
+                          apMouse -> globalY() - mLastMousePos.y() );
+    mLastMousePos = apMouse -> globalPos();
 }
 
-void MainWindow :: resizeEvent ( QResizeEvent * aEvent )
+void MainWindow :: resizeEvent ( QResizeEvent * apEvent )
 {
-    QSize win_size = aEvent -> size();
+    QSize win_size = apEvent -> size();
 
     if ( ( !mIsFullScreen ) && ( ( win_size.width() != MIN_WIDTH ) || ( win_size.height() != MIN_HEIGHT ) ) )
         resize( MIN_WIDTH, MIN_HEIGHT );
@@ -315,19 +312,22 @@ void MainWindow :: timerEvent( QTimerEvent * )
 {
     if ( mpGame -> IsGameOver() )
     {
-        mpGameOverDialog = new GameOverDialog( pos().x() + width() / 2, pos().y() + height() / 2, PLAYER_NAME_MAX_LENGTH, mpGame -> GetScore() );
+        mpGameOverDialog = new GameOverDialog( pos().x() + width() / 2,
+                                               pos().y() + height() / 2,
+                                               PLAYER_NAME_MAX_LENGTH,
+                                               mpGame -> GetScore() );
         mpGameOverDialog -> exec();
         ChangeTop();
         delete mpGameOverDialog;
         mIsGame = false;
     }
 
-   if ( mIsGame && ( !mIsPause ) )
+    if ( mIsGame && ( !mIsPause ) )
         mpGame-> NextStep();
 
-    mpScene -> paintGL();
+    mpScene -> Draw();
 
-if ( mIsGame && ( !mIsPause ) )
+    if ( mIsGame && ( !mIsPause ) )
         mpGame -> ClearMessagesList();
 }
 
@@ -499,6 +499,6 @@ void MainWindow :: Save()
 
 void MainWindow :: Load()
 {
-    mpGame -> Load();
-    mIsGame = true;
+    if ( mpGame -> Load() )
+        mIsGame = true;
 }

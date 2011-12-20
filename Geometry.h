@@ -11,19 +11,19 @@ class Geometry
 public :
     static const float pi;
     static const float eps;
-    static Point3Df    Normalize( const Point3Df& vec );
-    static Point3Di    VectorMul( const Point3Di& a, const Point3Di& b );
-    static Point3Df    VectorMul( const Point3Df& a, const Point3Df& b );
-    static float       Max( float a, float b );
-    static float       Min( float a, float b );
-    static float       MixedMul( const Point3Df& a, const Point3Df& b, const Point3Df& c );
-    static float       MixedMul( const Point3Di& a, const Point3Di& b, const Point3Di& c );
-    static float       ScalarMul( const Point3Df& a, const  Point3Df& b );
-    static float       ScalarMul( const Point3Di& a, const Point3Di& b );
-    static float       Square( float aValue );
+    static float       MixedMul(  const Point3Df& aA, const Point3Df& aB, const Point3Df& aC );
+    static float       MixedMul(  const Point3Di& aA, const Point3Di& aB, const Point3Di& aC );
+    static Point3Di    VectorMul( const Point3Di& aA, const Point3Di& aB );
+    static Point3Df    VectorMul( const Point3Df& aA, const Point3Df& aB );
+    static float       ScalarMul( const Point3Df& aA, const Point3Df& aB );
+    static float       ScalarMul( const Point3Di& aA, const Point3Di& aB );
     static float       ParalSquare( Point2Df& aA, Point2Df& aB );
-    static bool        InRange( float x, float a, float b );
-    static int         Sign( float a );
+    static bool        InRange( float aX, float aA, float aB );
+    static Point3Df    Normalize( const Point3Df& aVec );
+    static float       Max( float aA, float aB );
+    static float       Min( float aA, float aB );
+    static float       Square( float aValue );
+    static int         Sign( float aA );
 };
 
 struct Point3Di
@@ -32,12 +32,12 @@ struct Point3Di
     int mY;
     int mZ;
 
-    Point3Di( int new_x, int new_y, int new_z );// : x( new_x ), y( new_y ), z( new_z ) { }
+    Point3Di( int aNewX, int aNewY, int aNewZ );
     Point3Di() : mX( 0 ), mY( 0 ), mZ( 0 ) {}
-    Point3Di& operator = ( const Point3Di& right_obj );
-    Point3Di& operator = ( const Point3Df& right_obj );
-    Point3Di operator - ( const Point3Di& right_obj );
-    Point3Di operator + ( const Point3Di& right_obj );
+    Point3Di& operator = ( const Point3Di& aRightObj );
+    Point3Di& operator = ( const Point3Df& aRightObj );
+    Point3Di  operator - ( const Point3Di& aRightObj );
+    Point3Di  operator + ( const Point3Di& aRightObj );
 
     int   Length() const;
 };
@@ -48,14 +48,26 @@ struct Point3Df
     float mY;
     float mZ;
 
-    Point3Df( float new_x, float new_y, float new_z ) : mX( new_x ), mY( new_y ), mZ( new_z ) { }
-    Point3Df() : mX( 0.0f ), mY( 0.0f ), mZ( 0.0f ) {}
-    Point3Df( const Point3Df& obj ) : mX( obj.mX ), mY( obj.mY ), mZ( obj.mZ ) { }
-    Point3Df( const Point3Di& obj ) : mX( ( float )obj.mX ), mY( ( float )obj.mY ), mZ( ( float )obj.mZ ) { }
-    Point3Df& operator = ( const Point3Df& right_obj );
-    Point3Df& operator = ( const Point3Di& right_obj );
-    Point3Df  operator - ( const Point3Df& right_obj );
-    Point3Df  operator + ( const Point3Df& right_obj );
+    Point3Df( float aNewX, float aNewY, float aNewZ ) : mX( aNewX ), mY( aNewY ), mZ( aNewZ ) { }
+    Point3Df() : mX( 0.0f ),
+                 mY( 0.0f ),
+                 mZ( 0.0f )
+                 {}
+
+    Point3Df( const Point3Df& aObj ) : mX( aObj.mX ),
+                                       mY( aObj.mY ),
+                                       mZ( aObj.mZ )
+                                       {}
+
+    Point3Df( const Point3Di& aObj ) : mX( static_cast< float >( aObj.mX ) ),
+                                       mY( static_cast< float >( aObj.mY ) ),
+                                       mZ( static_cast< float >( aObj.mZ ) )
+                                       {}
+
+    Point3Df& operator = ( const Point3Df& RightObj );
+    Point3Df& operator = ( const Point3Di& RightObj );
+    Point3Df  operator - ( const Point3Df& RightObj );
+    Point3Df  operator + ( const Point3Df& RightObj );
 
     float   Length() const;
 };
@@ -65,24 +77,35 @@ struct Point2Df
     float mX;
     float mY;
 
-    Point2Df( float new_x, float new_y ) : mX( new_x ), mY( new_y ) {}
-    Point2Df() : mX( 0.0f ), mY( 0.0f ) {}
-    Point2Df& operator = ( const Point2Df& right_obj );
-    Point2Df  operator - ( const Point2Df& right_obj );
-    Point2Df  operator + ( const Point2Df& right_obj );
+    Point2Df( float aNewX, float aNewY ) : mX( aNewX ),
+                                           mY( aNewY )
+                                           {}
+
+    Point2Df() : mX( 0.0f ),
+                 mY( 0.0f )
+                 {}
+
+    Point2Df& operator = ( const Point2Df& RightObj );
+    Point2Df  operator - ( const Point2Df& RightObj );
+    Point2Df  operator + ( const Point2Df& RightObj );
 
 };
 
-Point3Df operator * ( float a, const Point3Df& obj );
-Point3Df GetNormalVector( Point3Df p1, Point3Df p2, Point3Df p3 );
+Point3Df operator * ( float aA, const Point3Df& aObj );
+Point3Df GetNormalVector( Point3Df aP1, Point3Df aP2, Point3Df aP3 );
 
 struct SphericalCoor
 {
     float mTeta;
     float mAlpha;
 
-    SphericalCoor( float new_teta, float new_alpha ) : mTeta( new_teta ), mAlpha( new_alpha ) { }
-    SphericalCoor() : mTeta( 0.0f ), mAlpha( 0.0f ) { }
+    SphericalCoor( float aNewTeta, float aNewAlpha ) : mTeta( aNewTeta ),
+                                                       mAlpha( aNewAlpha )
+                                                       {}
+
+    SphericalCoor() : mTeta( 0.0f ),
+                      mAlpha( 0.0f )
+                      {}
 };
 
 #endif

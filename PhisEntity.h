@@ -6,13 +6,16 @@
 class PhisEntity
 {
 protected:
-    Material	    mMaterial;
+    Material                mMaterial;
 public:
-                    PhisEntity( Material new_material );
-    Material        GetMaterial()  const;
-    void            SetMaterial( Material new_material );
+    const static int        MATERIALS_CNT = 8;
+    const static Material   msMaterials[ MATERIALS_CNT ];
 
-    virtual void    Draw() = 0;
+                            PhisEntity( Material aNewMaterial );
+    Material                GetMaterial()  const;
+    void                    SetMaterial( Material aNewMaterial );
+
+    virtual void            Draw() = 0;
 };
 
 #endif // PHISENTITY_H

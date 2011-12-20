@@ -2,7 +2,7 @@
 #include <QRegExpValidator>
 #include "GameOverDialog.h"
 
-GameOverDialog :: GameOverDialog( int aX, int aY, int aMaxPlayerNameLength, int aScore, QWidget* parent ) : QDialog( parent )
+GameOverDialog :: GameOverDialog( int aX, int aY, int aMaxPlayerNameLength, int aScore, QWidget* apParent ) : QDialog( apParent )
 {
     QRegExp       player_name_valid( "[A-Za-z]+[_A-Za-z0-9]*" );
     QString       score;

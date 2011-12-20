@@ -3,8 +3,7 @@
 #include <stdio.h>
 #include <time.h>
 #include "Game.h"
-
-const int           Game :: SAFETY_DISTANCE = 16.0 * BSIZE * BSIZE;
+#include "PhisEntity.h"
 
 float               Game :: msLightPosition[ 4 ];
 Figures             Game :: msGameFigures[ Game :: FIGURES_MAX_CNT ];
@@ -75,7 +74,7 @@ void Game :: InitializeStaticData()
     msGameFigures[ 6 ] = ZFigure;
 }
 
-Game :: Game( QObject* parent ) : QObject( parent )
+Game :: Game( QObject* apParent ) : QObject( apParent )
 {
     mScore                  = 0;
     mFieldBlocksCnt         = 0;
@@ -123,12 +122,12 @@ void Game :: CreateBorderBlocks()
             mpField[ j ][ i ][ 0 ]         = new Block( ( int )HALF_BSIZE + j * BSIZE,
                                                         ( int )HALF_BSIZE + i * BSIZE,
                                                         ( int )HALF_BSIZE ,
-							materials[ BOTTOM_FIGURES_MATERIALS ] );
+							PhisEntity :: msMaterials[ BOTTOM_FIGURES_MATERIALS ] );
 
             mpField[ j ][ i ][ WIDTH - 1 ] = new Block( ( int )( HALF_BSIZE + j * BSIZE ),
                                                         ( int )( HALF_BSIZE + i * BSIZE ),
                                                         ( int )( HALF_BSIZE + ( WIDTH - 1 ) * BSIZE ),
-							materials[ BOTTOM_FIGURES_MATERIALS ] );
+							PhisEntity :: msMaterials[ BOTTOM_FIGURES_MATERIALS ] );
 
 	    mBoardBlocks.push_back( mpField[ j ][ i ][ 0 ] );
 	    mBoardBlocks.push_back( mpField[ j ][ i ][ WIDTH - 1 ] );
@@ -139,12 +138,12 @@ void Game :: CreateBorderBlocks()
             mpField[ 0 ][ i ][ j ]          = new Block( ( int )( BSIZE / 2 ),
                                                          ( int )( HALF_BSIZE + i * BSIZE ),
                                                          ( int )( HALF_BSIZE + j * BSIZE ),
-							 materials[ BOTTOM_FIGURES_MATERIALS ] );
+							 PhisEntity :: msMaterials[ BOTTOM_FIGURES_MATERIALS ] );
 
             mpField[ LENGTH - 1 ][ i ][ j ] = new Block( ( int )( HALF_BSIZE + ( LENGTH - 1 ) * BSIZE ),
                                                          ( int )( HALF_BSIZE + i * BSIZE ),
                                                          ( int )( HALF_BSIZE + j * BSIZE ),
-							 materials[ BOTTOM_FIGURES_MATERIALS ] );
+							 PhisEntity :: msMaterials[ BOTTOM_FIGURES_MATERIALS ] );
 
 	    mBoardBlocks.push_back( mpField[ 0 ][ i ][ j ] );
 	    mBoardBlocks.push_back( mpField[ LENGTH - 1 ][ i ][ j ] );
@@ -157,7 +156,7 @@ void Game :: CreateBorderBlocks()
             mpField[ i ][ 0 ][ j ] = new Block( ( int )HALF_BSIZE + i * BSIZE,
                                                 ( int )BSIZE / 2,
                                                 ( int )HALF_BSIZE + j * BSIZE,
-						materials[ BOTTOM_FIGURES_MATERIALS ] );
+						PhisEntity :: msMaterials[ BOTTOM_FIGURES_MATERIALS ] );
 
 	    mBoardBlocks.push_back( mpField[ i ][ 0 ][ j ] );
 	}
@@ -168,7 +167,7 @@ void Game :: CreateBorderBlocks()
             mpField[ i ][ HEIGHT - 1 ][ j ] = new Block( ( int )( HALF_BSIZE + i * BSIZE ),
                                                          ( int )( HALF_BSIZE + ( HEIGHT - 1 ) * BSIZE ),
                                                          ( int )( HALF_BSIZE + j * BSIZE ),
-							 materials[ BOTTOM_FIGURES_MATERIALS ] );
+							 PhisEntity :: msMaterials[ BOTTOM_FIGURES_MATERIALS ] );
 
 	    mBoardBlocks.push_back( mpField[ i ][ HEIGHT - 1 ][ j ] );
 	}
@@ -216,7 +215,7 @@ void Game :: Start()
 
     for ( unsigned int i = 0; i < Figure :: BlocksCount; i++ )
         mpField[ mSelectBlocksPos[ i ].mX ][ mSelectBlocksPos[ i ].mY ][ mSelectBlocksPos[ i ].mZ ]
-            -> SetMaterial( materials[ SELECT_FIGURES_MATERIALS ] );
+            -> SetMaterial( PhisEntity :: msMaterials[ SELECT_FIGURES_MATERIALS ] );
 
      if ( mIsAmbientMusic )
         mpAmbientMusicObject -> play();
@@ -238,9 +237,9 @@ void Game :: End()
 
     TurnOffSelecting();
 
-    for ( ComponentsVec :: iterator comp_it = component_block.begin(); comp_it != component_block.end(); ++comp_it )
+    for ( ComponentsVec :: iterator comp_it = mCollapseComponents.begin(); comp_it != mCollapseComponents.end(); ++comp_it )
         ( *comp_it ).clear();
-    component_block.clear();
+    mCollapseComponents.clear();
 
     if ( mpCurrentFigure != NULL )
         delete mpCurrentFigure;
@@ -249,18 +248,18 @@ void Game :: End()
 
 }
 
-Point2Df Game :: GetFigurePositionOnXZ( int width_x, int width_z )
+Point2Df Game :: GetFigurePositionOnXZ( int aWidthX, int aWidthZ )
 {
-    if ( ( width_x / 2 ) % BSIZE == 0 )
+    if ( ( aWidthX / 2 ) % BSIZE == 0 )
     {
-        if ( ( width_z / 2 ) % BSIZE == 0 )
+        if ( ( aWidthZ / 2 ) % BSIZE == 0 )
 	    return Point2Df( 0.0f, 0.0f );
 	else
             return Point2Df( 0.0f, HALF_BSIZE );
     }
     else
     {
-        if ( ( width_z / 2 ) % BSIZE == 0 )
+        if ( ( aWidthZ / 2 ) % BSIZE == 0 )
             return Point2Df( BSIZE / 2, 0.0f );
 	else
             return Point2Df( BSIZE / 2, HALF_BSIZE );
@@ -280,7 +279,7 @@ Figure* Game :: GetNewFigure()
 
     Figure* new_figure = new Figure( 0.0f, 0.0f, 0.0f,
                                mPresentFigures[ rand() % mPresentFigures.size() ],
-                               materials[ rand() % FIGURES_MATERIALS ] );
+                               PhisEntity :: msMaterials[ rand() % FIGURES_MATERIALS ] );
 
     lower_bound_x = new_figure -> LowerBoundXi();
     upper_bound_x = new_figure -> UpperBoundXi();
@@ -375,42 +374,42 @@ int MinI( int a, int b )
     return a;
 }
 
-void Game :: PickUpComponent( int a_i, int a_k, int a_j )
+void Game :: PickUpComponent( int aI, int aK, int aJ )
 {
-    mpCollapseComponent[ a_i ][ a_k ][ a_j ] = 1;
-    component_block.back().push_back(
-	std :: pair< Block*, std :: pair < int, int > > ( mpField[ a_i ][ a_k ][ a_j ],
-							  std :: pair< int, int >( a_i, a_j ) ) );
+    mpCollapseComponent[ aI ][ aK ][ aJ ] = 1;
+    mCollapseComponents.back().push_back(
+	std :: pair< Block*, std :: pair < int, int > > ( mpField[ aI ][ aK ][ aJ ],
+							  std :: pair< int, int >( aI, aJ ) ) );
 
-    if ( ( a_i - 1 > FIELD_BEGIN_X )			&&
-	 (  mpField[ a_i - 1 ][ a_k ][ a_j ] != NULL )	&&
-	 ( mpCollapseComponent[ a_i - 1 ][ a_k ][ a_j ] == 0 ) )
-	    PickUpComponent( a_i - 1, a_k, a_j );
+    if ( ( aI - 1 > FIELD_BEGIN_X )			&&
+	 (  mpField[ aI - 1 ][ aK ][ aJ ] != NULL )	&&
+	 ( mpCollapseComponent[ aI - 1 ][ aK ][ aJ ] == 0 ) )
+	    PickUpComponent( aI - 1, aK, aJ );
 
-    if ( ( a_i + 1 < FIELD_END_X )			&&
-	 (  mpField[ a_i + 1 ][ a_k ][ a_j ] != NULL )	&&
-	 ( mpCollapseComponent[ a_i + 1 ][ a_k ][ a_j ] == 0 ) )
-	    PickUpComponent( a_i + 1, a_k, a_j );
+    if ( ( aI + 1 < FIELD_END_X )			&&
+	 (  mpField[ aI + 1 ][ aK ][ aJ ] != NULL )	&&
+	 ( mpCollapseComponent[ aI + 1 ][ aK ][ aJ ] == 0 ) )
+	    PickUpComponent( aI + 1, aK, aJ );
 
-     if ( ( a_k - 1 > FIELD_BEGIN_Y )			&&
-	  (  mpField[ a_i ][ a_k - 1 ][ a_j ] != NULL ) &&
-	  ( mpCollapseComponent[ a_i ][ a_k - 1 ][ a_j ] == 0 ) )
-	    PickUpComponent( a_i, a_k - 1, a_j );
+     if ( ( aK - 1 > FIELD_BEGIN_Y )			&&
+	  (  mpField[ aI ][ aK - 1 ][ aJ ] != NULL ) &&
+	  ( mpCollapseComponent[ aI ][ aK - 1 ][ aJ ] == 0 ) )
+	    PickUpComponent( aI, aK - 1, aJ );
 
-    if ( ( a_k + 1 < FIELD_END_Y )			&&
-	 (  mpField[ a_i ][ a_k + 1 ][ a_j ] != NULL )  &&
-	 ( mpCollapseComponent[ a_i ][ a_k + 1 ][ a_j ] == 0 ) )
-	    PickUpComponent( a_i, a_k + 1, a_j );
+    if ( ( aK + 1 < FIELD_END_Y )			&&
+	 (  mpField[ aI ][ aK + 1 ][ aJ ] != NULL )  &&
+	 ( mpCollapseComponent[ aI ][ aK + 1 ][ aJ ] == 0 ) )
+	    PickUpComponent( aI, aK + 1, aJ );
 
-    if ( ( a_j - 1 > FIELD_BEGIN_Z )			&&
-	 (  mpField[ a_i ][ a_k ][ a_j - 1 ] != NULL )	&&
-	 ( mpCollapseComponent[ a_i ][ a_k ][ a_j - 1 ] == 0 ) )
-	    PickUpComponent( a_i, a_k, a_j - 1 );
+    if ( ( aJ - 1 > FIELD_BEGIN_Z )			&&
+	 (  mpField[ aI ][ aK ][ aJ - 1 ] != NULL )	&&
+	 ( mpCollapseComponent[ aI ][ aK ][ aJ - 1 ] == 0 ) )
+	    PickUpComponent( aI, aK, aJ - 1 );
 
-    if ( ( a_j + 1 < FIELD_END_Z )			&&
-	 (  mpField[ a_i ][ a_k ][ a_j + 1 ] != NULL )	&&
-	 ( mpCollapseComponent[ a_i ][ a_k ][ a_j + 1 ] == 0 ) )
-	    PickUpComponent( a_i, a_k, a_j + 1 );
+    if ( ( aJ + 1 < FIELD_END_Z )			&&
+	 (  mpField[ aI ][ aK ][ aJ + 1 ] != NULL )	&&
+	 ( mpCollapseComponent[ aI ][ aK ][ aJ + 1 ] == 0 ) )
+	    PickUpComponent( aI, aK, aJ + 1 );
 }
 
 void Game :: PrepairToCollapse()
@@ -427,7 +426,7 @@ void Game :: PrepairToCollapse()
 		if ( ( mpField[ i ][ k ][ j ] != NULL ) && ( mpCollapseComponent[ i ][ k ][ j ] == 0 ) )
                 {
                     mFallingComponentsCnt++;
-                    component_block.push_back( BlocksVec() );
+                    mCollapseComponents.push_back( BlocksVec() );
 		    PickUpComponent( i, k, j );
                 }
     for ( int k = FIELD_BEGIN_Y; k < FIELD_END_Y; ++k )
@@ -480,7 +479,7 @@ void Game :: CollapseStep()
     int i;
     int j;
 
-    for ( ComponentsVec :: iterator comp_it = component_block.begin(); comp_it != component_block.end(); ++comp_it )
+    for ( ComponentsVec :: iterator comp_it = mCollapseComponents.begin(); comp_it != mCollapseComponents.end(); ++comp_it )
     {
         stop = false;
 
@@ -750,7 +749,7 @@ void Game :: DrawWorld() const
     if ( mpCurrentFigure != NULL )
         mpCurrentFigure -> Draw();
 
-    for ( ComponentsVec :: const_iterator comp_it = component_block.begin(); comp_it != component_block.end(); ++comp_it )
+    for ( ComponentsVec :: const_iterator comp_it = mCollapseComponents.begin(); comp_it != mCollapseComponents.end(); ++comp_it )
 	for ( BlocksVec :: const_iterator block_it = comp_it -> begin(); block_it != comp_it -> end(); ++block_it  )
             ( block_it -> first ) -> Draw();
 }
@@ -761,26 +760,26 @@ float* Game :: GetLightPosition() const
 }
 
 
-bool Game :: ShiftFigureByXAxis( ShiftDirection shift )
+bool Game :: ShiftFigureByXAxis( ShiftDirection aShift )
 {
     std :: vector < Block* >    collision_block;
     bool                        result = false;
     int                         x_coor_collision_blocks;
 
-    if ( shift < 0 )
+    if ( aShift < 0 )
         x_coor_collision_blocks = mpCurrentFigure -> GetLeftMostBlockPosi().mX / BSIZE;
     else
         x_coor_collision_blocks = mpCurrentFigure -> GetRightMostBlockPosi().mX / BSIZE;
 
     for ( int i = FIELD_BEGIN_Y; i < FIELD_END_Y; ++i )
         for ( int j = FIELD_BEGIN_Z; j < FIELD_END_Z; ++j )
-            if ( ( x_coor_collision_blocks + shift >= 0 ) && ( x_coor_collision_blocks + shift < LENGTH ) && ( mpField[ x_coor_collision_blocks + shift ][ i ][ j ] != NULL ) )
-                collision_block.push_back( mpField[ x_coor_collision_blocks + shift ][ i ][ j ] );
+            if ( ( x_coor_collision_blocks + aShift >= 0 ) && ( x_coor_collision_blocks + aShift < LENGTH ) && ( mpField[ x_coor_collision_blocks + aShift ][ i ][ j ] != NULL ) )
+                collision_block.push_back( mpField[ x_coor_collision_blocks + aShift ][ i ][ j ] );
 
-    mpCurrentFigure -> SetPosi( mpCurrentFigure -> GetPosi() + Point3Di( shift * BSIZE, 0, 0 ) );
+    mpCurrentFigure -> SetPosi( mpCurrentFigure -> GetPosi() + Point3Di( aShift * BSIZE, 0, 0 ) );
     if ( mpCurrentFigure -> CheckToCollisonWithBlocks( collision_block ) ) //Cancel shift
     {
-        mpCurrentFigure -> SetPosi( mpCurrentFigure -> GetPosi() - Point3Di( shift * BSIZE, 0, 0 ) );
+        mpCurrentFigure -> SetPosi( mpCurrentFigure -> GetPosi() - Point3Di( aShift * BSIZE, 0, 0 ) );
         result = false;
     }
     else
@@ -793,26 +792,26 @@ bool Game :: ShiftFigureByXAxis( ShiftDirection shift )
     return result;
 }
 
-bool Game :: ShiftFigureByZAxis( ShiftDirection shift )
+bool Game :: ShiftFigureByZAxis( ShiftDirection aShift )
 {
     std :: vector < Block* >    collision_block;
     bool                        result = false;
     int                         z_coor_collision_blocks;
 
-    if ( shift < 0 )
+    if ( aShift < 0 )
         z_coor_collision_blocks = mpCurrentFigure -> GetBackMostBlockPosi().mZ/ BSIZE;
     else
         z_coor_collision_blocks = mpCurrentFigure -> GetAheadMostBlockPosi().mZ/ BSIZE;
 
     for ( int i = FIELD_BEGIN_Y; i < FIELD_END_Y; ++i )
         for ( int j = FIELD_BEGIN_X; j < FIELD_END_X; ++j )
-            if ( ( z_coor_collision_blocks + shift >= 0  ) && ( z_coor_collision_blocks + shift < WIDTH ) && ( mpField[ j ][ i ][ z_coor_collision_blocks + shift ] != NULL ) )
-              collision_block.push_back( mpField[ j ][ i ][ z_coor_collision_blocks + shift ] );
+            if ( ( z_coor_collision_blocks + aShift >= 0  ) && ( z_coor_collision_blocks + aShift < WIDTH ) && ( mpField[ j ][ i ][ z_coor_collision_blocks + aShift ] != NULL ) )
+              collision_block.push_back( mpField[ j ][ i ][ z_coor_collision_blocks + aShift ] );
 
-    mpCurrentFigure -> SetPosi( mpCurrentFigure -> GetPosi() + Point3Di( 0, 0, shift * BSIZE ) );
+    mpCurrentFigure -> SetPosi( mpCurrentFigure -> GetPosi() + Point3Di( 0, 0, aShift * BSIZE ) );
     if ( mpCurrentFigure -> CheckToCollisonWithBlocks( collision_block ) ) //Cancel shift
     {
-        mpCurrentFigure -> SetPosi( mpCurrentFigure -> GetPosi() - Point3Di( 0, 0, shift * BSIZE ) );
+        mpCurrentFigure -> SetPosi( mpCurrentFigure -> GetPosi() - Point3Di( 0, 0, aShift * BSIZE ) );
         result = false;
     }
     else
@@ -825,12 +824,12 @@ bool Game :: ShiftFigureByZAxis( ShiftDirection shift )
     return result;
 }
 
-void Game :: Rotate( RotatePlane plane, RotateSide side )
+void Game :: Rotate( RotatePlane aPlane, RotateSide aSide )
 {
     if ( !mIsRotate )
     {
-        mRotatingAngle = Geometry :: pi / 2 / ROTATE_STEPS_COUNT * side;
-        mRotatingPlane = plane;
+        mRotatingAngle = Geometry :: pi / 2 / ROTATE_STEPS_COUNT * aSide;
+        mRotatingPlane = aPlane;
         mIsRotate = true;
 
         int lower_bound_x = mpCurrentFigure -> LowerBoundXi();
@@ -846,17 +845,17 @@ void Game :: Rotate( RotatePlane plane, RotateSide side )
         case PLANE_XY :
                 if ( ( ( upper_bound_x - lower_bound_x ) / 2 % BSIZE != 0 ) ^
                  ( ( upper_bound_y - lower_bound_y ) / 2 % BSIZE != 0 ) )
-                mFigurePosCorrectVec = Point3Di( side, -1, 0 );
+                mFigurePosCorrectVec = Point3Di( aSide, -1, 0 );
 	    break;
         case PLANE_ZY :
                 if ( ( ( upper_bound_y - lower_bound_y ) / 2 % BSIZE != 0 ) ^
                  ( ( upper_bound_z - lower_bound_z ) / 2 % BSIZE != 0 ) )
-                mFigurePosCorrectVec = Point3Di( 0, -1, -side );
+                mFigurePosCorrectVec = Point3Di( 0, -1, -aSide );
 	     break;
 	default :
                 if ( ( ( upper_bound_x - lower_bound_x ) / 2 % BSIZE != 0 ) ^
                  ( ( upper_bound_z - lower_bound_z ) / 2 % BSIZE != 0 ) )
-                mFigurePosCorrectVec = Point3Di( side, 0, side );
+                mFigurePosCorrectVec = Point3Di( aSide, 0, aSide );
 	}
 
         mFigurePosCorrectStep = 0;
@@ -888,7 +887,7 @@ void Game :: TurnOnSelecting()
     for ( unsigned int i = 0; i < Figure :: BlocksCount; i++ )
         if ( mpField[ mSelectBlocksPos[ i ].mX ][ mSelectBlocksPos[ i ].mY ] [ mSelectBlocksPos[ i ].mZ ] != NULL )
             mpField[ mSelectBlocksPos[ i ].mX ][ mSelectBlocksPos[ i ].mY ] [ mSelectBlocksPos[ i ].mZ ]
-                -> SetMaterial( materials[ SELECT_FIGURES_MATERIALS ] );
+                -> SetMaterial( PhisEntity :: msMaterials[ SELECT_FIGURES_MATERIALS ] );
 }
 
 void Game :: ChangeSelectBlocks()
@@ -921,7 +920,7 @@ void Game :: ChangeSelectBlocks()
 
      for ( unsigned int i = 0; i < Figure :: BlocksCount; i++ )
         mpField[ mSelectBlocksPos[ i ].mX ][ mSelectBlocksPos[ i ].mY ] [ mSelectBlocksPos[ i ].mZ ]
-            -> SetMaterial( materials[ SELECT_FIGURES_MATERIALS ] );
+            -> SetMaterial( PhisEntity :: msMaterials[ SELECT_FIGURES_MATERIALS ] );
 }
 
 void Game :: SetShift( Axises aAxis, ShiftDirection aDirection )
@@ -931,19 +930,19 @@ void Game :: SetShift( Axises aAxis, ShiftDirection aDirection )
    mShiftChecksCnt = 5;
 }
 
-void Game :: GetSelectFigures( bool* aSelectFigures )
+void Game :: GetSelectFigures( bool* apSelectFigures )
 {
     for ( int i = 0; i < FIGURES_MAX_CNT; i++ )
-        aSelectFigures[ i ] = false;
+        apSelectFigures[ i ] = false;
     for ( std :: vector < Figures > :: iterator it = mPresentFigures.begin(); it != mPresentFigures.end(); ++it )
-        aSelectFigures[ ( *it ) ] = true;
+        apSelectFigures[ ( *it ) ] = true;
 }
 
-void Game :: SetSelectFigures( bool* aSelectFigures )
+void Game :: SetSelectFigures( bool* apSelectFigures )
 {
      mPresentFigures.clear();
      for ( int i = 0; i < FIGURES_MAX_CNT; i++ )
-        if ( aSelectFigures[ i ] )
+        if ( apSelectFigures[ i ] )
             mPresentFigures.push_back( msGameFigures[ i ] );
 }
 
@@ -1035,8 +1034,8 @@ void Game :: Save()
     }
     else
     {
-        mSaveStream << component_block.size() << '\n';
-        for ( ComponentsVec :: iterator comp_it = component_block.begin(); comp_it != component_block.end(); ++comp_it )
+        mSaveStream << mCollapseComponents.size() << '\n';
+        for ( ComponentsVec :: iterator comp_it = mCollapseComponents.begin(); comp_it != mCollapseComponents.end(); ++comp_it )
         {
             mSaveStream << ( *comp_it ).size() << '\n';
             for ( BlocksVec :: iterator block_it = ( *comp_it ).begin(); block_it != ( *comp_it ).end(); ++block_it )
@@ -1073,12 +1072,12 @@ void Game :: Save()
 
     mSaveStream << mFallingComponentsCnt << '\n';
 
-    for ( int i = 0; i < MaxSelectBlockCount; i++ )
+    for ( int i = 0; i < MAX_SELECT_BLOCKS_CNT; i++ )
         mSaveStream << mSelectBlocksPos[ i ].mX << '\t'
                     << mSelectBlocksPos[ i ].mY << '\t'
                     << mSelectBlocksPos[ i ].mZ << '\n';
 
-    for ( int i = 0; i < MaxSelectBlockCount; ++i )
+    for ( int i = 0; i < MAX_SELECT_BLOCKS_CNT; ++i )
         mSaveStream << mSelectBlocksMaterials[ i ] << '\t';
 
     mSaveStream << mShiftChecksCnt  << '\n';
@@ -1091,7 +1090,7 @@ void Game :: Save()
     TurnOnSelecting();
 }
 
-void Game :: Load()
+bool Game :: Load()
 {
     Block*  tmp_block = NULL;
     Figures tmp_present_figure;
@@ -1106,7 +1105,7 @@ void Game :: Load()
 
 
     if ( !mpSaveFile -> open( QIODevice :: ReadOnly ) )
-        return;
+        return false;
 
     End();
 
@@ -1135,14 +1134,14 @@ void Game :: Load()
         mSaveStream >> component_block_cnt;
         for ( int i = 0; i < component_block_cnt; i++ )
         {
-            component_block.push_back( BlocksVec() );
+            mCollapseComponents.push_back( BlocksVec() );
             mSaveStream >> block_cnt;
             for ( int j = 0; j < block_cnt; j++ )
             {
                 tmp_block = new Block();
                 mSaveStream >> *tmp_block;
                 mSaveStream >> tmp_first >> tmp_second;
-                component_block.back().push_back( std :: pair< Block*, std :: pair< int, int > >(
+                mCollapseComponents.back().push_back( std :: pair< Block*, std :: pair< int, int > >(
                                                   tmp_block,
                                                   std :: pair< int, int >( tmp_first, tmp_second ) ) );
 
@@ -1178,12 +1177,12 @@ void Game :: Load()
 
     mSaveStream >> mFallingComponentsCnt;
 
-    for ( int i = 0; i < MaxSelectBlockCount; i++ )
+    for ( int i = 0; i < MAX_SELECT_BLOCKS_CNT; i++ )
         mSaveStream >> mSelectBlocksPos[ i ].mX
                     >> mSelectBlocksPos[ i ].mY
                     >> mSelectBlocksPos[ i ].mZ;
 
-    for ( int i = 0; i < MaxSelectBlockCount; ++i )
+    for ( int i = 0; i < MAX_SELECT_BLOCKS_CNT; ++i )
         mSaveStream >> mSelectBlocksMaterials[ i ];
 
     mSaveStream >> mShiftChecksCnt;
@@ -1194,22 +1193,24 @@ void Game :: Load()
     mMessagesList.push_back( LOAD_GAME );
 
     TurnOnSelecting();
+
+    return true;
 }
 
-QTextStream& operator << ( QTextStream& stream, const Game :: RotatePlane& plane )
+QTextStream& operator << ( QTextStream& aStream, const Game :: RotatePlane& aPlane )
 {
-    stream << static_cast< int >( plane );
+    aStream << static_cast< int >( aPlane );
 
-    return stream;
+    return aStream;
 }
 
-QTextStream& operator >> ( QTextStream& stream, Game :: RotatePlane& plane )
+QTextStream& operator >> ( QTextStream& aStream, Game :: RotatePlane& aPlane )
 {
     int tmp_plane;
-    stream >> tmp_plane;
-    plane = static_cast< Game :: RotatePlane >( tmp_plane );
+    aStream >> tmp_plane;
+    aPlane = static_cast< Game :: RotatePlane >( tmp_plane );
 
-    return stream;
+    return aStream;
 }
 
 QTextStream& operator << ( QTextStream& aStream, const bool& aBoolValue)

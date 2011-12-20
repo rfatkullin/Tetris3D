@@ -1,7 +1,7 @@
 #include <QLayout>
 #include "SelectFiguresDialog.h"
 
-SelectFiguresDialog :: SelectFiguresDialog( QWidget* parent ) : QDialog( parent )
+SelectFiguresDialog :: SelectFiguresDialog( QWidget* apParent ) : QDialog( apParent )
 {
     QVBoxLayout* p_figures_layout   = new QVBoxLayout();
     QVBoxLayout* p_ok_cancel_layout = new QVBoxLayout();
@@ -40,22 +40,22 @@ SelectFiguresDialog :: SelectFiguresDialog( QWidget* parent ) : QDialog( parent 
     setWindowFlags( Qt::Dialog | Qt::WindowTitleHint );
 }
 
-void SelectFiguresDialog :: SetSelectFigures( bool* selected_figures )
+void SelectFiguresDialog :: SetSelectFigures( bool* apSelectedFigures )
 {
     for ( int i = 0; i < mcFiguresCnt; i++ )
-        if ( selected_figures[ i ] )
+        if ( apSelectedFigures[ i ] )
             mpFigures[ i ] -> setChecked( true );
         else
             mpFigures[ i ] -> setChecked( false );
 }
 
-void SelectFiguresDialog :: GetSelectFigures( bool* select_figures )
+void SelectFiguresDialog :: GetSelectFigures( bool* apSelectedFigures )
 {
     for ( int i = 0; i < mcFiguresCnt; i++ )
         if ( mpFigures[ i ] -> isChecked() )
-            select_figures[ i ] = true;
+            apSelectedFigures[ i ] = true;
         else
-            select_figures[ i ] = false;
+            apSelectedFigures[ i ] = false;
 }
 
 void SelectFiguresDialog :: SetPosition( int aX, int aY )

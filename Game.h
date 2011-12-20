@@ -16,163 +16,153 @@ class Game : public QObject
 {
     Q_OBJECT
 public slots :
-    void                        Start();
-    void			AmbientMusicStateChange( bool aState );
-    void			SoundsStateChange( bool aState );
-    void                        Save();
-    void                        Load();
+    void                                Start();
+    void                                AmbientMusicStateChange( bool aState );
+    void                                SoundsStateChange( bool aState );
+    void                                Save();
+    bool                                Load();
 private slots :
-    void			PrepairFallSound();
-    void			PlayAmbientMusic();
+    void                                PrepairFallSound();
+    void                                PlayAmbientMusic();
 public:
-    static const int            MESSAGES_CNT = 9;
-    enum                        Messages { EMPTY = 0,
-                                           NEW_LEVEL,
-                                           COLLAPSE,
-                                           COULDNT_ROTATE_COLLISION,
-                                           COULDNT_SHIFT_COLLISION,
-                                           NEW_GAME,
-                                           GAME_OVER,
-                                           SAVE_GAME,
-                                           LOAD_GAME
+    static const int                    MESSAGES_CNT = 9;
+    enum                                Messages { EMPTY = 0,
+                                                   NEW_LEVEL,
+                                                   COLLAPSE,
+                                                   COULDNT_ROTATE_COLLISION,
+                                                   COULDNT_SHIFT_COLLISION,
+                                                   NEW_GAME,
+                                                   GAME_OVER,
+                                                   SAVE_GAME,
+                                                   LOAD_GAME
                                           };
 
-    enum                        RotatePlane { PLANE_XY = 0,
-                                              PLANE_ZY,
-                                              PLANE_ZX };
+    enum                                RotatePlane { PLANE_XY = 0,
+                                                      PLANE_ZY,
+                                                      PLANE_ZX };
 
-    enum                        RotateSide { ROTATE_BY_CLOCK_WISE     = 1,
-                                             ROTATE_BY_ANTI_CLOCKWISE = -1 };
+    enum                                RotateSide { ROTATE_BY_CLOCK_WISE     = 1,
+                                                     ROTATE_BY_ANTI_CLOCKWISE = -1 };
 
-    enum                        Axises { X_AXIS,
-                                         Y_AXIS,
-                                         Z_AXIS };
+    enum                                Axises { X_AXIS,
+                                                 Y_AXIS,
+                                                 Z_AXIS };
 
-    enum                        ShiftDirection { SHIFT_DIRECTLY = 1,
-                                                 SHIFT_BACK     = -1 };
+    enum                                ShiftDirection { SHIFT_DIRECTLY = 1,
+                                                         SHIFT_BACK     = -1 };
 
-    enum                        MaterialType { FIGURES_MATERIALS        = 6,
-                                               SELECT_FIGURES_MATERIALS = 6,
-                                               BOTTOM_FIGURES_MATERIALS = 7 };
+    enum                                MaterialType { FIGURES_MATERIALS        = 6,
+                                                       SELECT_FIGURES_MATERIALS = 6,
+                                                       BOTTOM_FIGURES_MATERIALS = 7 };
 
-    static const char* const    MESSAGES[ MESSAGES_CNT ];
-    static const char* const    SAVE_FILE;
-    static const int            LEVELS_CNT    = 7;
-    static const unsigned int   LEVELS_SCORE[ LEVELS_CNT ];
-    static const unsigned int   LEVELS_SPEED[ LEVELS_CNT ];
-    static const unsigned int   MAX_GAME_SPEED;
+    static const char* const            MESSAGES[ MESSAGES_CNT ];
 
-    const unsigned int static	WIDTH                = 8;
-    const unsigned int static	LENGTH               = 8;
-    const unsigned int static   HEIGHT               = 20;
-    const unsigned int static   FIGURES_MAX_CNT      = 7;
-    const int static            FIELD_BEGIN_X        = 1;
-    const int static            FIELD_BEGIN_Y        = 1;
-    const int static            FIELD_BEGIN_Z        = 1;
-    const int static            FIELD_END_X          = static_cast< int >( LENGTH - 1 );
-    const int static            FIELD_END_Y          = static_cast< int >( HEIGHT - 1 );
-    const int static            FIELD_END_Z          = static_cast< int >( WIDTH - 1 );
-    const int static            FIELD_LOWER_BOUND_X  = FIELD_BEGIN_X * Block :: BLOCK_SIZE;
-    const int static            FIELD_UPPER_BOUND_X  = FIELD_END_X   * Block :: BLOCK_SIZE;
-    const int static            FIELD_LOWER_BOUND_Y  = FIELD_BEGIN_Y * Block :: BLOCK_SIZE;
-    const int static            FIELD_UPPER_BOUND_Y  = FIELD_END_Y   * Block :: BLOCK_SIZE;
-    const int static            FIELD_LOWER_BOUND_Z  = FIELD_BEGIN_Z * Block :: BLOCK_SIZE;
-    const int static            FIELD_UPPER_BOUND_Z  = FIELD_END_Z   * Block :: BLOCK_SIZE;
-    const int static            ONE_LEVEL_BLOCKS_CNT = ( FIELD_END_X - FIELD_BEGIN_X ) *
-                                                           ( FIELD_END_Z - FIELD_BEGIN_Z );
-    const int static            ROTATE_STEPS_COUNT   = 20;
-    const int static            BSIZE                = ( int )Block :: BLOCK_SIZE;
-    const int static            HALF_BSIZE           = ( int )Block :: BLOCK_SIZE / 2;
-    const int static            FIGURE_START_Y_POS   = FIELD_END_Y - 2;
+    static const char* const            SAVE_FILE;
 
-				Game( QObject* parent = 0 );
-				~Game();
+    static const int                    LEVELS_CNT    = 7;
+    static const unsigned int           LEVELS_SCORE[ LEVELS_CNT ];
+    static const unsigned int           LEVELS_SPEED[ LEVELS_CNT ];
+    static const unsigned int           MAX_GAME_SPEED;
 
-    unsigned int		GetLevel() const;
-    float*			GetLightPosition() const;
+    const unsigned int static           WIDTH                = 8;
+    const unsigned int static           LENGTH               = 8;
+    const unsigned int static           HEIGHT               = 20;
+    const unsigned int static           FIGURES_MAX_CNT      = 7;
+    const int static                    FIELD_BEGIN_X        = 1;
+    const int static                    FIELD_BEGIN_Y        = 1;
+    const int static                    FIELD_BEGIN_Z        = 1;
+    const int static                    FIELD_END_X          = static_cast< int >( LENGTH - 1 );
+    const int static                    FIELD_END_Y          = static_cast< int >( HEIGHT - 1 );
+    const int static                    FIELD_END_Z          = static_cast< int >( WIDTH - 1 );
+    const int static                    FIELD_LOWER_BOUND_X  = FIELD_BEGIN_X * Block :: BLOCK_SIZE;
+    const int static                    FIELD_UPPER_BOUND_X  = FIELD_END_X   * Block :: BLOCK_SIZE;
+    const int static                    FIELD_LOWER_BOUND_Y  = FIELD_BEGIN_Y * Block :: BLOCK_SIZE;
+    const int static                    FIELD_UPPER_BOUND_Y  = FIELD_END_Y   * Block :: BLOCK_SIZE;
+    const int static                    FIELD_LOWER_BOUND_Z  = FIELD_BEGIN_Z * Block :: BLOCK_SIZE;
+    const int static                    FIELD_UPPER_BOUND_Z  = FIELD_END_Z   * Block :: BLOCK_SIZE;
+    const int static                    ONE_LEVEL_BLOCKS_CNT = ( FIELD_END_X - FIELD_BEGIN_X ) *
+                                                                   ( FIELD_END_Z - FIELD_BEGIN_Z );
+    const int static                    ROTATE_STEPS_COUNT   = 20;
+    const int static                    BSIZE                = ( int )Block :: BLOCK_SIZE;
+    const int static                    HALF_BSIZE           = ( int )Block :: BLOCK_SIZE / 2;
+    const int static                    FIGURE_START_Y_POS   = FIELD_END_Y - 2;
 
-    void			NextStep();
-    void			DropDownFigure();
+                                        Game( QObject* apParent = 0 );
+                                        ~Game();
 
-    void                        GetSelectFigures( bool* select_figures );
-    void                        SetSelectFigures( bool* select_figures );
-    void			SearchAndSetSteps( int i, int k, int j, int color );
+    unsigned int                        GetLevel() const;
+    float*                              GetLightPosition() const;
+
+    void                                NextStep();
+    void                                DropDownFigure();
+
+    void                                GetSelectFigures( bool* apSelectFigures );
+    void                                SetSelectFigures( bool* apSelectFigures );
 
     //Game state
-    void			GameOver();
-    void			End();
-    bool                        IsGameOver();
+    void                                GameOver();
+    void                                End();
+    bool                                IsGameOver();
 
     //Draw
-    void			DrawWorld() const;
-    void			DrawField() const;
-    void			DrawBlocksOnTheField() const;
+    void                                DrawWorld() const;
+    void                                DrawField() const;
+    void                                DrawBlocksOnTheField() const;
 
     //Figure control
-    void                        SetShift( Axises axis, ShiftDirection direction );
-    void			Rotate( RotatePlane plane, RotateSide side );
+    void                                SetShift( Axises aAxis, ShiftDirection aDirection );
+    void                                Rotate( RotatePlane aPlane, RotateSide aSide );
 
-    bool                        AmbientMusicState();
+    bool                                AmbientMusicState();
 
-    int                         GetScore() const;
+    int                                 GetScore() const;
 
     const std :: vector < Messages >&   GetMessages() const;
     void                                ClearMessagesList();
 
-    void                        TurnOnSelecting();
-    void                        TurnOffSelecting();
+    void                                TurnOnSelecting();
+    void                                TurnOffSelecting();
 private:
-    enum                        LightPosition  { LightPosByX = 400 , LightPosByY = 800, LightPosByZ = 300 };
-    static const int            SAFETY_DISTANCE;
+    enum                                LightPosition  { LightPosByX = 400 , LightPosByY = 800, LightPosByZ = 300 };
+
+    static const int                    SAFETY_DISTANCE       = 16.0 * BSIZE * BSIZE;
+    static const int                    MAX_SELECT_BLOCKS_CNT = 4;
+    static float                        msLightPosition[ 4 ];
+    static Figures                      msGameFigures[ FIGURES_MAX_CNT ];
 
 
-    static float                msLightPosition[ 4 ];
-    static Figures              msGameFigures[ FIGURES_MAX_CNT ];
+    QFile*                              mpSaveFile;
+    QTextStream                         mSaveStream;
 
-    QFile*                      mpSaveFile;
-    QTextStream                 mSaveStream;
+    std :: vector < Figures >           mPresentFigures;
+    std :: vector < Block* >            mBoardBlocks;
+    Block*                              mpField[ LENGTH ][ HEIGHT ][ WIDTH ];
+    Figure*                             mpCurrentFigure;
+    int                                 mFieldBlocksCnt;
 
-    std :: vector < Figures >   mPresentFigures;
-    std :: vector < Block* >	mBoardBlocks;
-    Block*			mpField[ LENGTH ][ HEIGHT ][ WIDTH ];
-    int                         mpCollapseComponent[ LENGTH ][ HEIGHT ][ WIDTH ];
-    void			CreateBorderBlocks();
+    unsigned int                        mScore;
+    unsigned int                        mGameLevel;
+    unsigned int                        mGameSpeed;
+    bool                                mIsGameOver;
 
-    Figure*			mpCurrentFigure;
+    int                                 mFigureDownSteps;
 
-    unsigned int		mScore;
-    unsigned int		mGameLevel;
-    unsigned int                mGameSpeed;
-    bool                        mIsGameOver;
+    RotatePlane                         mRotatingPlane;
+    Point3Di                            mFigurePosCorrectVec;
+    float                               mRotatingAngle;
+    bool                                mIsRotate;
+    int                                 mFigurePosCorrectStep;
+    int                                 mRotatingStep;
 
-    float			mRotatingAngle;
-    bool			mIsRotate;
-    void			MoveDownFigure();
+    int                                 mpCollapseComponent[ LENGTH ][ HEIGHT ][ WIDTH ];
+    ComponentsVec                       mCollapseComponents;
+    bool                                mIsCollapse;
+    int                                 mFallingComponentsCnt;
 
-    int                         mFigureDownSteps;
-    int                         mRotatingStep;
 
-    RotatePlane                 mRotatingPlane;
-    Point3Di                    mFigurePosCorrectVec;
-    int                         mFigurePosCorrectStep;
-    bool                        CheckToRotate();
-    bool			CheckToCollisionByXY();
+    Point3Di                            mSelectBlocksPos[ MAX_SELECT_BLOCKS_CNT ];
+    Material                            mSelectBlocksMaterials[ MAX_SELECT_BLOCKS_CNT ];
 
-    ComponentsVec               component_block;
-    bool                        mIsCollapse;
-    bool                        CheckToCollapse();
-    void			PickUpComponent( int a_i, int a_k, int a_j );
-    void			PrepairToCollapse();
-    void                        CollapseStep();
-    int                         mFallingComponentsCnt;
-
-    int                         mFieldBlocksCnt;
-
-    static const int                    MaxSelectBlockCount = 4;
-    Point3Di                            mSelectBlocksPos[ MaxSelectBlockCount ];
-    Material                            mSelectBlocksMaterials[ MaxSelectBlockCount ];
-    void                                ChangeSelectBlocks();
-    void                                GetPrevColors();
 
     int                                 mShiftChecksCnt;
     Axises                              mShiftAxis;
@@ -185,26 +175,38 @@ private:
     bool                                mIsSound;
     bool                                mIsAmbientMusic;
 
-    bool                                ShiftFigureByXAxis( ShiftDirection shift );
-    bool                                ShiftFigureByZAxis( ShiftDirection shift );
+    std :: vector < Messages >          mMessagesList;
+
+    bool                                ShiftFigureByXAxis( ShiftDirection aShift );
+    bool                                ShiftFigureByZAxis( ShiftDirection aShift );
 
     static void                         InitializeStaticData();
-    Point2Df                            GetFigurePositionOnXZ( int width_x, int width_z );
+    void                                CreateBorderBlocks();
+
+    Point2Df                            GetFigurePositionOnXZ( int aWidthX, int aWidthZ );
     Figure*                             GetNewFigure();
 
-    std :: vector < Messages >          mMessagesList;
+    void                                ChangeSelectBlocks();
+    void                                GetPrevColors();
+
+    bool                                CheckToRotate();
+
+    bool                                CheckToCollapse();
+    void                                PickUpComponent( int aI, int aK, int aJ );
+    void                                PrepairToCollapse();
+    void                                CollapseStep();
 };
 
-QTextStream& operator << ( QTextStream& stream, const Game :: RotatePlane& plane );
-QTextStream& operator >> ( QTextStream& stream, Game :: RotatePlane& plane );
+QTextStream&    operator << ( QTextStream& aStream, const Game :: RotatePlane& aPlane );
+QTextStream&    operator >> ( QTextStream& aStream, Game :: RotatePlane& aPlane );
 
-QTextStream& operator << ( QTextStream& aStream, const bool& aBoolValue);
-QTextStream& operator >> ( QTextStream& aStream, bool& aBoolValue );
+QTextStream&    operator << ( QTextStream& aStream, const bool& aBoolValue);
+QTextStream&    operator >> ( QTextStream& aStream, bool& aBoolValue );
 
-QTextStream& operator << ( QTextStream& aStream, const Game :: Axises& aAxis);
-QTextStream& operator >> ( QTextStream& aStream, Game :: Axises& aAxis );
+QTextStream&    operator << ( QTextStream& aStream, const Game :: Axises& aAxis);
+QTextStream&    operator >> ( QTextStream& aStream, Game :: Axises& aAxis );
 
-QTextStream& operator << ( QTextStream& aStream, const Game :: ShiftDirection& aShiftDirection);
-QTextStream& operator >> ( QTextStream& aStream, Game :: ShiftDirection& aShiftDirection );
+QTextStream&    operator << ( QTextStream& aStream, const Game :: ShiftDirection& aShiftDirection);
+QTextStream&    operator >> ( QTextStream& aStream, Game :: ShiftDirection& aShiftDirection );
 
 #endif

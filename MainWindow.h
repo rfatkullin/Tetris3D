@@ -20,7 +20,7 @@ struct FigureShift
 public :
                             FigureShift(){}
                             FigureShift( Game :: Axises aAxis, Game :: ShiftDirection aDirection ) :
-                                                    mAxis( aAxis ), mDirection( aDirection ) {}
+                                         mAxis( aAxis ), mDirection( aDirection ) {}
     Game :: Axises          mAxis;
     Game :: ShiftDirection  mDirection;
 
@@ -32,11 +32,9 @@ class MainWindow : public QMainWindow
     typedef std :: list< PlayerInfo >   PlayerInfoList;
 
     Q_OBJECT
-public :
-                                MainWindow();
-                                ~MainWindow();
-protected :
-    void                        closeEvent( QCloseEvent *event );
+public slots :
+    void		    SelectFigures();
+
 private slots :
     void                        NewGame();
     void                        Exit();
@@ -45,6 +43,14 @@ private slots :
     void                        ViewTop();
     void                        ViewControl();
     void                        ViewAbout();
+
+protected :
+    void                        closeEvent( QCloseEvent *event );
+
+public :
+                                MainWindow();
+                                ~MainWindow();
+
 private:
     static const int            VIEW_CNT = 4;
     static const int            BUTTONS_CNT = 4;
@@ -52,6 +58,7 @@ private:
     static const int            TOP_LIST_LENGTH = 100;
     static const char* const    TOP_LIST_FILE;  
     static FigureShift          msFigureControl[ VIEW_CNT ][ BUTTONS_CNT ];
+
     enum                        WindowMinSize{ MIN_WIDTH  = 800,
                                                MIN_HEIGHT = 625 };
 
@@ -60,60 +67,59 @@ private:
                                             A_BUTTON = 2,
                                             D_BUTTON = 3 };
 
-    static void             SetFigurShiftConstants();
-    void		    CreateScene();
-    void		    CreateActions();
-    void		    CreateMenus();    
-    void		    SelectRotate( int aX, int aY );
-    void                    ReadTop();
-    void                    ChangeTop();
+    Scene*                      mpScene;
+    Game*                       mpGame;
+    bool                        mIsGame;
+    bool                        mIsPause;
 
-    void		    keyPressEvent( QKeyEvent* key );
-    void		    mousePressEvent( QMouseEvent* mouse );
-    void		    mouseReleaseEvent( QMouseEvent* mouse );
-    void		    mouseMoveEvent( QMouseEvent* mouse );
-    void                    wheelEvent ( QWheelEvent * aEvent );
-    void		    timerEvent( QTimerEvent * );
-    void                    resizeEvent ( QResizeEvent * aEvent );
+    QMenu*                      mpMainMenu;
+    QMenu*                      mpSettingsMenu;
+    QMenu*                      mpFiguresMenu;
+    QMenu*                      mpHelpMenu;
 
-    Scene*                  mpScene;
-    Game*                   mpGame;
-    bool                    mIsGame;
-    bool                    mIsPause;
+    QAction*                    mpNewGameAction;
+    QAction*                    mpExitGameAction;
+    QAction*                    mpTrun3dAction;
+    QAction*                    mpSelectFiguresAction;
+    QAction*                    mpChangePresentMusicAction;
+    QAction*                    mpChangePresentSoundsAction;
+    QAction*                    mpViewTopAction;
+    QAction*                    mpControlAction;
+    QAction*                    mpAboutAction;
+    QAction*                    mpSaveAction;
+    QAction*                    mpLoadAction;
 
-    QMenu*                  mpMainMenu;
-    QMenu*                  mpSettingsMenu;
-    QMenu*                  mpFiguresMenu;
-    QMenu*                  mpHelpMenu;
+    SelectFiguresDialog*        mpSelectFiguresDialog;
+    GameOverDialog*             mpGameOverDialog;
+    AboutDialog*                mpAboutDialog;
+    ControlDialog*              mpControlDialog;
 
-    QAction*                mpNewGameAction;
-    QAction*                mpExitGameAction;
-    QAction*                mpTrun3dAction;
-    QAction*                mpSelectFiguresAction;
-    QAction*                mpChangePresentMusicAction;
-    QAction*                mpChangePresentSoundsAction;
-    QAction*                mpViewTopAction;
-    QAction*                mpControlAction;
-    QAction*                mpAboutAction;
-    QAction*                mpSaveAction;
-    QAction*                mpLoadAction;
+    Qt :: MouseButton	        mLastMouseButton;
+    QPoint		        mLastMousePos;
+    bool		        mIsRightButtonPressed;
 
-    SelectFiguresDialog*    mpSelectFiguresDialog;
-    GameOverDialog*         mpGameOverDialog;
-    Qt :: MouseButton	    mLastMouseButton;
-    QPoint		    mLastMousePos;
-    bool		    mIsRightButtonPressed;
+    QFile*                      mpTopFile;
+    QTextStream                 mTopStream;
+    PlayerInfoList              mTopList;
 
-    AboutDialog*            mpAboutDialog;
-    ControlDialog*          mpControlDialog;
+    bool                        mIsFullScreen;
 
-    QFile*                  mpTopFile;
-    QTextStream             mTopStream;
-    PlayerInfoList          mTopList;
+    static void                 SetFigurShiftConstants();
+    void                        CreateScene();
+    void                        CreateActions();
+    void                        CreateMenus();
+    void                        SelectRotate( int aX, int aY );
+    void                        ReadTop();
+    void                        ChangeTop();
 
-    bool                    mIsFullScreen;
-public slots :
-    void		    SelectFigures();
+    void		        keyPressEvent( QKeyEvent* apKey );
+    void		        mousePressEvent( QMouseEvent* apMouse );
+    void		        mouseReleaseEvent( QMouseEvent* apMouse );
+    void		        mouseMoveEvent( QMouseEvent* apMouse );
+    void                        wheelEvent ( QWheelEvent * apEvent );
+    void		        timerEvent( QTimerEvent * apEvent );
+    void                        resizeEvent ( QResizeEvent * apEvent );
+
 };
 
 

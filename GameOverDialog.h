@@ -11,7 +11,7 @@ class GameOverDialog : public QDialog
 {
     Q_OBJECT
 public :
-                        GameOverDialog( int aX, int aY, int aMaxPlayerNameLength, int aScore, QWidget* parent = 0 );
+                        GameOverDialog( int aX, int aY, int aMaxPlayerNameLength, int aScore, QWidget* apParent = 0 );
     QString             GetPlayerName();
 private :
     QLabel*             mpGameOverLabel;

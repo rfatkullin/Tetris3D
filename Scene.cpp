@@ -12,11 +12,13 @@ const Point3Di Scene :: mCameraShift            = Point3Di ( ( Game :: LENGTH / 
                                                              ( Game :: WIDTH / 2  ) * Block :: BLOCK_SIZE );
 const float  Scene :: CAMERA_POS_CHANGE_KOEFF    = 0.01f;
 const float  Scene :: CAMERA_RADIUS              = 450.0f;
-Point2Df     Scene :: mSectorVecs[ Scene :: SectorVecCnt ];
+Point2Df     Scene :: mSectorVecs[ Scene :: SECTOR_VEC_CNT ];
 
-Scene :: Scene( Game* const new_game, QWidget* pwgt ) : QGLWidget( pwgt )
+Scene :: Scene( Game* const apNewGame, QWidget* apPwgt ) : QGLWidget( apPwgt )
 {
-    mpGame = new_game;
+    QGLFormat fmt;
+
+    mpGame = apNewGame;
     setMouseTracking( false  );
     for ( int i = 0; i < 4; i++	    )
     {
@@ -33,16 +35,15 @@ Scene :: Scene( Game* const new_game, QWidget* pwgt ) : QGLWidget( pwgt )
     SetViewVectors();
 
     mRatio              = HEIGHT_RATIO / ( float )WIDTH_RATIO;
-    mFrustumAperture    =  45.0f / 180.0f * Geometry :: pi;
-    mFrustumNearPlane	=  60;
-    mFrustumFarPlane	=  1000;
-    mFrustumHalfWidth   =  mFrustumNearPlane * tan( mFrustumAperture );
-    mFrustumFocalLength =  (mFrustumFarPlane + mFrustumNearPlane) * 0.8f;
-    mFrustumEyeSep      =  mFrustumFocalLength / 30.0f;
-    mShowHelp           =  true;
+    mFrustumAperture    = 45.0f / 180.0f * Geometry :: pi;
+    mFrustumNearPlane	= 60;
+    mFrustumFarPlane	= 1000;
+    mFrustumHalfWidth   = mFrustumNearPlane * tan( mFrustumAperture );
+    mFrustumFocalLength = (mFrustumFarPlane + mFrustumNearPlane) * 0.8f;
+    mFrustumEyeSep      = mFrustumFocalLength / 30.0f;
+    mShowHelp           = true;
     mIsStereo           = false;
 
-    QGLFormat fmt;
     fmt.setStereo( true );
     setFormat( fmt );
 
@@ -71,7 +72,7 @@ void Scene :: initializeGL()
 
 }
 
-void Scene :: resizeGL( int aNewWidth, int aNewHeight )
+void Scene :: resizeGL( int, int )
 {
 }
 
@@ -258,31 +259,31 @@ void Scene :: DrawTextInformation()
 
 }
 
-void Scene :: SetLigthOption( float ambient[ 4 ], float diffuse[ 4 ], float specular[ 4 ] )
+void Scene :: SetLigthOption( float aAmbient[ 4 ], float aDiffuse[ 4 ], float aSpecular[ 4 ] )
 {
     for ( int i = 0; i < 4; i++	    )
     {
-	mAmbientLight[ i ] = ambient[ i ];
-        mDiffuseLight[ i ] = diffuse[ i ];
-	mSpecularLight[ i ] = specular[ i ];
+	mAmbientLight[ i ] = aAmbient[ i ];
+        mDiffuseLight[ i ] = aDiffuse[ i ];
+	mSpecularLight[ i ] = aSpecular[ i ];
     }
     glLightfv( GL_LIGHT0, GL_AMBIENT, mAmbientLight );
     glLightfv( GL_LIGHT0, GL_DIFFUSE, mDiffuseLight );
     glLightfv( GL_LIGHT0, GL_SPECULAR, mSpecularLight );
 }
 
-void Scene :: set3D( bool is_3d)
+void Scene :: set3D( bool aIs3D )
 {
-    if ( is_3d )
+    if ( aIs3D  )
 	mIsStereo = true;
     else
 	mIsStereo = false;
 }
 
-void Scene :: ChangeCameraPosition( float x, float y )
+void Scene :: ChangeCameraPosition( float aX, float aY )
 {
-    float next_teta       = mCameraPosition.mTeta  + CAMERA_POS_CHANGE_KOEFF * y;
-    float next_alpha      = mCameraPosition.mAlpha - CAMERA_POS_CHANGE_KOEFF * x;
+    float next_teta       = mCameraPosition.mTeta  + CAMERA_POS_CHANGE_KOEFF * aY;
+    float next_alpha      = mCameraPosition.mAlpha - CAMERA_POS_CHANGE_KOEFF * aX;
     int   next_alpha_sign = Geometry :: Sign( next_alpha );
 
     if ( Geometry :: InRange( next_teta, -Geometry :: pi / 2, Geometry :: pi / 2 ) )
@@ -317,9 +318,9 @@ int Scene :: GetViewSide()
     int             sign1        = 0;
     int             sign2        = 0;
 
-    for ( unsigned int i = 0; i < SectorVecCnt; i++ )
+    for ( unsigned int i = 0; i < SECTOR_VEC_CNT; i++ )
     {
-        next_vec_ind = ( i + 1 ) % SectorVecCnt;
+        next_vec_ind = ( i + 1 ) % SECTOR_VEC_CNT;
 
         sign1 = Geometry :: Sign( Geometry :: ParalSquare( current_pos, mSectorVecs[ i ] ) );
         sign2 = Geometry :: Sign( Geometry :: ParalSquare( current_pos, mSectorVecs[ next_vec_ind ] ) );
@@ -336,4 +337,8 @@ void Scene :: ChangeShowHelp()
     mShowHelp = !mShowHelp;
 }
 
+void Scene :: Draw()
+{
+    paintGL();
+}
 

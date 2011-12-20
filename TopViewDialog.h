@@ -15,7 +15,7 @@ public :
     typedef std :: pair< QString, int > PlayerInfo;
     typedef std :: list< PlayerInfo >   PlayerInfoList;
 
-    TopViewDialog( int aX, int aY, const PlayerInfoList& aTopList, int aMaxListLength,  QWidget* aParent );
+    TopViewDialog( int aX, int aY, const PlayerInfoList& aTopList, int aMaxListLength,  QWidget* apParent );
 
 };
 

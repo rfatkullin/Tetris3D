@@ -14,7 +14,7 @@ private :
                      DIALOG_HEIGHT = 500
                    };
 public :
-    ControlDialog( QWidget* parent );
+    ControlDialog( QWidget* apParent );
     void Show();
 };
 

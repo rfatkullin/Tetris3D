@@ -1,24 +1,24 @@
 #include "Material.h"
 
-Material :: Material( float a_r, float a_g, float a_b, float a_a,
-		      float d_r, float d_g, float d_b, float d_a,
-		      float s_r, float s_g, float s_b, float s_a
+Material :: Material( float aAR, float aAG, float aAB, float aAA,
+		      float aDR, float aDG, float aDB, float aDA,
+		      float aSR, float aSG, float aSB, float aSA
 		    )
 {
-    mAmbient[ 0 ] = a_r;
-    mAmbient[ 1 ] = a_g;
-    mAmbient[ 2 ] = a_b;
-    mAmbient[ 3 ] = a_a;
+    mAmbient[ 0 ] = aAR;
+    mAmbient[ 1 ] = aAG;
+    mAmbient[ 2 ] = aAB;
+    mAmbient[ 3 ] = aAA;
 
-    mDiffuse[ 0 ] = d_r;
-    mDiffuse[ 1 ] = d_g;
-    mDiffuse[ 2 ] = d_b;
-    mDiffuse[ 3 ] = d_a;
+    mDiffuse[ 0 ] = aDR;
+    mDiffuse[ 1 ] = aDG;
+    mDiffuse[ 2 ] = aDB;
+    mDiffuse[ 3 ] = aDA;
 
-    mSpecular[ 0 ] = s_r;
-    mSpecular[ 1 ] = s_g;
-    mSpecular[ 2 ] = s_b;
-    mSpecular[ 3 ] = s_a;
+    mSpecular[ 0 ] = aSR;
+    mSpecular[ 1 ] = aSG;
+    mSpecular[ 2 ] = aSB;
+    mSpecular[ 3 ] = aSA;
 }
 
 const float* Material :: GetMaterialForAmbient()
@@ -42,22 +42,26 @@ Material :: Material()
         mAmbient[ i ] = mDiffuse[ i ] = mSpecular[ i ] = 0.0f;
 }
 
-QTextStream& operator << ( QTextStream& stream, const Material& material )
+QTextStream& operator << ( QTextStream& aStream, const Material& aMaterial )
 {
-    stream << material.mAmbient[ 0 ] << '\t' << material.mAmbient[ 1 ] << '\t'
-           << material.mAmbient[ 2 ] << '\t' << material.mAmbient[ 3 ] << '\t'
-           << material.mDiffuse[ 0 ] << '\t' << material.mDiffuse[ 1 ] << '\t'
-           << material.mDiffuse[ 2 ] << '\t' << material.mDiffuse[ 3 ] << '\t'
-           << material.mSpecular[ 0 ] << '\t' << material.mSpecular[ 1 ] << '\t'
-           << material.mSpecular[ 2 ] << '\t' << material.mSpecular[ 3 ];
+    aStream << aMaterial.mAmbient[ 0 ] << '\t' << aMaterial.mAmbient[ 1 ] << '\t'
+           << aMaterial.mAmbient[ 2 ] << '\t' << aMaterial.mAmbient[ 3 ] << '\t'
+           << aMaterial.mDiffuse[ 0 ] << '\t' << aMaterial.mDiffuse[ 1 ] << '\t'
+           << aMaterial.mDiffuse[ 2 ] << '\t' << aMaterial.mDiffuse[ 3 ] << '\t'
+           << aMaterial.mSpecular[ 0 ] << '\t' << aMaterial.mSpecular[ 1 ] << '\t'
+           << aMaterial.mSpecular[ 2 ] << '\t' << aMaterial.mSpecular[ 3 ];
+
+    return aStream;
 }
 
- QTextStream& operator >> ( QTextStream& stream, Material& material )
+ QTextStream& operator >> ( QTextStream& aStream, Material& aMaterial )
 {
-    stream >> material.mAmbient[ 0 ]  >> material.mAmbient[ 1 ]
-           >> material.mAmbient[ 2 ]  >> material.mAmbient[ 3 ]
-           >> material.mDiffuse[ 0 ]  >> material.mDiffuse[ 1 ]
-           >> material.mDiffuse[ 2 ]  >> material.mDiffuse[ 3 ]
-           >> material.mSpecular[ 0 ] >> material.mSpecular[ 1 ]
-           >> material.mSpecular[ 2 ] >> material.mSpecular[ 3 ];
+    aStream >> aMaterial.mAmbient[ 0 ]  >> aMaterial.mAmbient[ 1 ]
+           >> aMaterial.mAmbient[ 2 ]  >> aMaterial.mAmbient[ 3 ]
+           >> aMaterial.mDiffuse[ 0 ]  >> aMaterial.mDiffuse[ 1 ]
+           >> aMaterial.mDiffuse[ 2 ]  >> aMaterial.mDiffuse[ 3 ]
+           >> aMaterial.mSpecular[ 0 ] >> aMaterial.mSpecular[ 1 ]
+           >> aMaterial.mSpecular[ 2 ] >> aMaterial.mSpecular[ 3 ];
+
+    return aStream;
 }

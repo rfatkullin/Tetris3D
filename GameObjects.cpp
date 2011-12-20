@@ -13,82 +13,82 @@ const double Block :: NOT_SAFETY_DISTANCE   = Block :: BLOCK_SIZE * Block :: BLO
 //Block
 
 const Point3Di Block :: msVerticesI[ Block :: BLOCKS_VERTEX_CNT ] = {
-        Point3Di( -( int )Block :: BLOCK_SIZE / 2,  ( int )Block :: BLOCK_SIZE / 2, -( int )Block :: BLOCK_SIZE / 2 ),
-        Point3Di( -( int )Block :: BLOCK_SIZE / 2,  ( int )Block :: BLOCK_SIZE / 2,  ( int )Block :: BLOCK_SIZE / 2 ),
-        Point3Di(  ( int )Block :: BLOCK_SIZE / 2,  ( int )Block :: BLOCK_SIZE / 2,  ( int )Block :: BLOCK_SIZE / 2 ),
-        Point3Di(  ( int )Block :: BLOCK_SIZE / 2,  ( int )Block :: BLOCK_SIZE / 2, -( int )Block :: BLOCK_SIZE / 2 ),
-        Point3Di(  ( int )Block :: BLOCK_SIZE / 2, -( int )Block :: BLOCK_SIZE / 2, -( int )Block :: BLOCK_SIZE / 2 ),
-        Point3Di(  ( int )Block :: BLOCK_SIZE / 2, -( int )Block :: BLOCK_SIZE / 2,  ( int )Block :: BLOCK_SIZE / 2 ),
-        Point3Di( -( int )Block :: BLOCK_SIZE / 2, -( int )Block :: BLOCK_SIZE / 2,  ( int )Block :: BLOCK_SIZE / 2 ),
-        Point3Di( -( int )Block :: BLOCK_SIZE / 2, -( int )Block :: BLOCK_SIZE / 2, -( int )Block :: BLOCK_SIZE / 2 )
+        Point3Di( -Block :: BLOCK_SIZE / 2,  Block :: BLOCK_SIZE / 2, -Block :: BLOCK_SIZE / 2 ),
+        Point3Di( -Block :: BLOCK_SIZE / 2,  Block :: BLOCK_SIZE / 2,  Block :: BLOCK_SIZE / 2 ),
+        Point3Di(  Block :: BLOCK_SIZE / 2,  Block :: BLOCK_SIZE / 2,  Block :: BLOCK_SIZE / 2 ),
+        Point3Di(  Block :: BLOCK_SIZE / 2,  Block :: BLOCK_SIZE / 2, -Block :: BLOCK_SIZE / 2 ),
+        Point3Di(  Block :: BLOCK_SIZE / 2, -Block :: BLOCK_SIZE / 2, -Block :: BLOCK_SIZE / 2 ),
+        Point3Di(  Block :: BLOCK_SIZE / 2, -Block :: BLOCK_SIZE / 2,  Block :: BLOCK_SIZE / 2 ),
+        Point3Di( -Block :: BLOCK_SIZE / 2, -Block :: BLOCK_SIZE / 2,  Block :: BLOCK_SIZE / 2 ),
+        Point3Di( -Block :: BLOCK_SIZE / 2, -Block :: BLOCK_SIZE / 2, -Block :: BLOCK_SIZE / 2 )
 };
 
-Block :: Block() : GeomEntity( 0, 0, 0 ), PhisEntity( materials[ 3 ] )
+Block :: Block() : GeomEntity( 0, 0, 0 ), PhisEntity( PhisEntity :: msMaterials[ 3 ] )
 {
      for ( unsigned int i = 0; i < BLOCKS_VERTEX_CNT; i++ )
         mVerticesF[ i ] = msVerticesI[ i ];
 }
 
-Block :: Block( int new_x, int new_y, int new_z, Material new_material ) : GeomEntity( new_x, new_y, new_z ), PhisEntity( new_material )
+Block :: Block( int aNewX, int aNewY, int aNewZ, Material aNewMaterial ) : GeomEntity( aNewX, aNewY, aNewZ ), PhisEntity( aNewMaterial )
 {
     for ( unsigned int i = 0; i < BLOCKS_VERTEX_CNT; i++ )
         mVerticesF[ i ] = msVerticesI[ i ];
 }
 
-Block :: Block( Point3Di new_pos, Material new_material ) : GeomEntity( new_pos ), PhisEntity( new_material )
+Block :: Block( Point3Di aNewPos, Material aNewMaterial ) : GeomEntity( aNewPos ), PhisEntity( aNewMaterial )
 {
     for ( unsigned int i = 0; i < BLOCKS_VERTEX_CNT; i++ )
         mVerticesF[ i ] = msVerticesI[ i ];
 }
 
-Block :: Block( const Block& block) : GeomEntity( block.mPosI ), PhisEntity( block.mMaterial )
+Block :: Block( const Block& aBlock) : GeomEntity( aBlock.mPosI ), PhisEntity( aBlock.mMaterial )
 {
      for ( unsigned int i = 0; i < BLOCKS_VERTEX_CNT; i++ )
-        mVerticesF[ i ] = block.mVerticesF[ i ];
+        mVerticesF[ i ] = aBlock.mVerticesF[ i ];
 }
 
-Block :: Block( float new_x, float new_y, float new_z, Material new_material )  : GeomEntity( new_x, new_y, new_z ), PhisEntity( new_material )
-{
-     for ( unsigned int i = 0; i < BLOCKS_VERTEX_CNT; i++ )
-        mVerticesF[ i ] = msVerticesI[ i ];
-}
-
-Block :: Block( Point3Df new_Pos, Material new_material ) : GeomEntity( new_Pos ), PhisEntity( new_material )
+Block :: Block( float aNewX, float aNewY, float aNewZ, Material aNewMaterial )  : GeomEntity( aNewX, aNewY, aNewZ ), PhisEntity( aNewMaterial )
 {
      for ( unsigned int i = 0; i < BLOCKS_VERTEX_CNT; i++ )
         mVerticesF[ i ] = msVerticesI[ i ];
 }
 
-void Block :: Rotate( float &a, float &b, float angle )
+Block :: Block( Point3Df aNewPos, Material aNewMaterial ) : GeomEntity( aNewPos ), PhisEntity( aNewMaterial )
 {
-    float cos_angle = cos( angle );
-    float sin_angle = sin( angle );
-    float old_a = a;
-
-    a = a * cos_angle + b * sin_angle;
-    b = -old_a * sin_angle + b * cos_angle;
+     for ( unsigned int i = 0; i < BLOCKS_VERTEX_CNT; i++ )
+        mVerticesF[ i ] = msVerticesI[ i ];
 }
 
-void Block :: RotateOnZY( float angle, bool change_const )
+void Block :: Rotate( float &aA, float &aB, float aAngle )
 {
-    int	    prev_y = 0;
+    float cos_angle = cos( aAngle );
+    float sin_angle = sin( aAngle );
+    float old_a = aA;
 
-    if ( !change_const )
+    aA =  aA    * cos_angle + aB * sin_angle;
+    aB = -old_a * sin_angle + aB * cos_angle;
+}
+
+void Block :: RotateOnZY( float aAngle, bool aChangeConst )
+{
+    int prev_y = 0;
+
+    if ( !aChangeConst )
     {
 	mPosF = mPosI;
-        Rotate( mPosF.mY, mPosF.mZ, angle );
+        Rotate( mPosF.mY, mPosF.mZ, aAngle );
 
 	for ( unsigned int i = 0; i < BLOCKS_VERTEX_CNT; ++i )
 	{
 	    mVerticesF[ i ] = msVerticesI[ i ];
-            Rotate( mVerticesF[ i ].mY,  mVerticesF[ i ].mZ, angle  );
+            Rotate( mVerticesF[ i ].mY,  mVerticesF[ i ].mZ, aAngle  );
 	}
     }
     else
     {	
         prev_y = mPosI.mY;
 
-        if ( angle > Geometry :: eps )
+        if ( aAngle > Geometry :: eps )
 	{
             mPosI.mY =  mPosI.mZ;
             mPosI.mZ = -prev_y;
@@ -106,26 +106,26 @@ void Block :: RotateOnZY( float angle, bool change_const )
 
 }
 
-void Block :: RotateOnZX( float angle, bool change_const )
+void Block :: RotateOnZX( float aAngle, bool aChangeConst )
 {
     int	 prev_z = 0;
 
-    if ( !change_const )
+    if ( !aChangeConst )
     {
 	mPosF = mPosI;
-	Rotate( mPosF.mZ, mPosF.mX, angle );
+	Rotate( mPosF.mZ, mPosF.mX, aAngle );
 
 	for ( unsigned int i = 0; i < BLOCKS_VERTEX_CNT; ++i )
 	{
 	    mVerticesF[ i ] = msVerticesI[ i ];
-	    Rotate( mVerticesF[ i ].mZ, mVerticesF[ i ].mX, angle  );
+	    Rotate( mVerticesF[ i ].mZ, mVerticesF[ i ].mX, aAngle  );
 	}
     }
     else
     {
 	prev_z = mPosI.mZ;
 
-        if ( angle > Geometry :: eps )
+        if ( aAngle > Geometry :: eps )
 	{
 	    mPosI.mZ =  mPosI.mX;
 	    mPosI.mX =  -prev_z;
@@ -142,26 +142,26 @@ void Block :: RotateOnZX( float angle, bool change_const )
     }
 }
 
-void Block :: RotateOnXY( float angle, bool change_const )
+void Block :: RotateOnXY( float aAngle, bool aChangeConst )
 {
     int prev_x = 0;
 
-    if ( !change_const )
+    if ( !aChangeConst )
     {
 	mPosF = mPosI;
-	Rotate( mPosF.mX, mPosF.mY, angle );
+	Rotate( mPosF.mX, mPosF.mY, aAngle );
 
 	for ( unsigned int i = 0; i < BLOCKS_VERTEX_CNT; ++i )
 	{
 	    mVerticesF[ i ] = msVerticesI[ i ];
-	    Rotate( mVerticesF[ i ].mX, mVerticesF[ i ].mY, angle  );
+	    Rotate( mVerticesF[ i ].mX, mVerticesF[ i ].mY, aAngle  );
 	}
     }
     else
     {	
 	prev_x = mPosI.mX;
 
-        if ( angle > Geometry :: eps )
+        if ( aAngle > Geometry :: eps )
 	{
 	    mPosI.mX =  mPosI.mY;
 	    mPosI.mY = -prev_x;
@@ -178,17 +178,17 @@ void Block :: RotateOnXY( float angle, bool change_const )
     }
 }
 
-void Block :: DrawSide( Point3Df p1, Point3Df p2, Point3Df p3, Point3Df p4 )
+void Block :: DrawSide( Point3Df aP1, Point3Df aP2, Point3Df aP3, Point3Df aP4 )
 {
     glEnable(GL_NORMALIZE);
-    Point3Df NormalVector = GetNormalVector( p1, p3, p2 );
+    Point3Df NormalVector = GetNormalVector( aP1, aP3, aP2 );
 
     glBegin( GL_QUADS );
 	glNormal3f( NormalVector.mX, NormalVector.mY, NormalVector.mZ );
-	glVertex3f( p1.mX, p1.mY, p1.mZ );	
-	glVertex3f( p2.mX, p2.mY, p2.mZ );	
-	glVertex3f( p3.mX, p3.mY, p3.mZ );	
-	glVertex3f( p4.mX, p4.mY, p4.mZ );
+	glVertex3f( aP1.mX, aP1.mY, aP1.mZ );
+	glVertex3f( aP2.mX, aP2.mY, aP2.mZ );
+	glVertex3f( aP3.mX, aP3.mY, aP3.mZ );
+	glVertex3f( aP4.mX, aP4.mY, aP4.mZ );
     glEnd();
 }
 
@@ -197,7 +197,7 @@ void Block :: Draw()
     Draw( Point3Df( 0.0f, 0.0f, 0.0f ) );
 }
 
-void Block :: Draw( Point3Df fig_pos )
+void Block :: Draw( Point3Df aFigPos )
 {
     /*
 	Вершины куба занумерованы в след. порядке( делим куб на 4 части ):
@@ -210,45 +210,111 @@ void Block :: Draw( Point3Df fig_pos )
     glMaterialfv( GL_FRONT, GL_SPECULAR, mMaterial.GetMaterialForSpecular() );
 
     //Firts side
-    DrawSide(	Point3Df( fig_pos.mX + mPosF.mX + mVerticesF[ 0 ].mX, fig_pos.mY + mPosF.mY + mVerticesF[ 0 ].mY, fig_pos.mZ + mPosF.mZ + mVerticesF[ 0 ].mZ ),
-                Point3Df( fig_pos.mX + mPosF.mX + mVerticesF[ 1 ].mX, fig_pos.mY + mPosF.mY + mVerticesF[ 1 ].mY, fig_pos.mZ + mPosF.mZ + mVerticesF[ 1 ].mZ ),
-                Point3Df( fig_pos.mX + mPosF.mX + mVerticesF[ 2 ].mX, fig_pos.mY + mPosF.mY + mVerticesF[ 2 ].mY, fig_pos.mZ + mPosF.mZ + mVerticesF[ 2 ].mZ ),
-                Point3Df( fig_pos.mX + mPosF.mX + mVerticesF[ 3 ].mX, fig_pos.mY + mPosF.mY + mVerticesF[ 3 ].mY, fig_pos.mZ + mPosF.mZ + mVerticesF[ 3 ].mZ )
+    DrawSide(	Point3Df( aFigPos.mX + mPosF.mX + mVerticesF[ 0 ].mX,
+                          aFigPos.mY + mPosF.mY + mVerticesF[ 0 ].mY,
+                          aFigPos.mZ + mPosF.mZ + mVerticesF[ 0 ].mZ ),
+
+                Point3Df( aFigPos.mX + mPosF.mX + mVerticesF[ 1 ].mX,
+                          aFigPos.mY + mPosF.mY + mVerticesF[ 1 ].mY,
+                          aFigPos.mZ + mPosF.mZ + mVerticesF[ 1 ].mZ ),
+
+                Point3Df( aFigPos.mX + mPosF.mX + mVerticesF[ 2 ].mX,
+                          aFigPos.mY + mPosF.mY + mVerticesF[ 2 ].mY,
+                          aFigPos.mZ + mPosF.mZ + mVerticesF[ 2 ].mZ ),
+
+                Point3Df( aFigPos.mX + mPosF.mX + mVerticesF[ 3 ].mX,
+                          aFigPos.mY + mPosF.mY + mVerticesF[ 3 ].mY,
+                          aFigPos.mZ + mPosF.mZ + mVerticesF[ 3 ].mZ )
             );
 
     //Second side
-    DrawSide(	Point3Df( fig_pos.mX + mPosF.mX + mVerticesF[ 1 ].mX, fig_pos.mY + mPosF.mY + mVerticesF[ 1 ].mY, fig_pos.mZ + mPosF.mZ + mVerticesF[ 1 ].mZ ),
-                Point3Df( fig_pos.mX + mPosF.mX + mVerticesF[ 6 ].mX, fig_pos.mY + mPosF.mY + mVerticesF[ 6 ].mY, fig_pos.mZ + mPosF.mZ + mVerticesF[ 6 ].mZ ),
-                Point3Df( fig_pos.mX + mPosF.mX + mVerticesF[ 5 ].mX, fig_pos.mY + mPosF.mY + mVerticesF[ 5 ].mY, fig_pos.mZ + mPosF.mZ + mVerticesF[ 5 ].mZ ),
-                Point3Df( fig_pos.mX + mPosF.mX + mVerticesF[ 2 ].mX, fig_pos.mY + mPosF.mY + mVerticesF[ 2 ].mY, fig_pos.mZ + mPosF.mZ + mVerticesF[ 2 ].mZ )
+    DrawSide(	Point3Df( aFigPos.mX + mPosF.mX + mVerticesF[ 1 ].mX,
+                          aFigPos.mY + mPosF.mY + mVerticesF[ 1 ].mY,
+                          aFigPos.mZ + mPosF.mZ + mVerticesF[ 1 ].mZ ),
+
+                Point3Df( aFigPos.mX + mPosF.mX + mVerticesF[ 6 ].mX,
+                          aFigPos.mY + mPosF.mY + mVerticesF[ 6 ].mY,
+                          aFigPos.mZ + mPosF.mZ + mVerticesF[ 6 ].mZ ),
+
+                Point3Df( aFigPos.mX + mPosF.mX + mVerticesF[ 5 ].mX,
+                          aFigPos.mY + mPosF.mY + mVerticesF[ 5 ].mY,
+                          aFigPos.mZ + mPosF.mZ + mVerticesF[ 5 ].mZ ),
+
+                Point3Df( aFigPos.mX + mPosF.mX + mVerticesF[ 2 ].mX,
+                          aFigPos.mY + mPosF.mY + mVerticesF[ 2 ].mY,
+                          aFigPos.mZ + mPosF.mZ + mVerticesF[ 2 ].mZ )
             );
 
     //Third side
-    DrawSide(	Point3Df( fig_pos.mX + mPosF.mX + mVerticesF[ 2 ].mX, fig_pos.mY + mPosF.mY + mVerticesF[ 2 ].mY, fig_pos.mZ + mPosF.mZ + mVerticesF[ 2 ].mZ ),
-                Point3Df( fig_pos.mX + mPosF.mX + mVerticesF[ 5 ].mX, fig_pos.mY + mPosF.mY + mVerticesF[ 5 ].mY, fig_pos.mZ + mPosF.mZ + mVerticesF[ 5 ].mZ ),
-                Point3Df( fig_pos.mX + mPosF.mX + mVerticesF[ 4 ].mX, fig_pos.mY + mPosF.mY + mVerticesF[ 4 ].mY, fig_pos.mZ + mPosF.mZ + mVerticesF[ 4 ].mZ ),
-                Point3Df( fig_pos.mX + mPosF.mX + mVerticesF[ 3 ].mX, fig_pos.mY + mPosF.mY + mVerticesF[ 3 ].mY, fig_pos.mZ + mPosF.mZ + mVerticesF[ 3 ].mZ )
+    DrawSide(	Point3Df( aFigPos.mX + mPosF.mX + mVerticesF[ 2 ].mX,
+                          aFigPos.mY + mPosF.mY + mVerticesF[ 2 ].mY,
+                          aFigPos.mZ + mPosF.mZ + mVerticesF[ 2 ].mZ ),
+
+                Point3Df( aFigPos.mX + mPosF.mX + mVerticesF[ 5 ].mX,
+                          aFigPos.mY + mPosF.mY + mVerticesF[ 5 ].mY,
+                          aFigPos.mZ + mPosF.mZ + mVerticesF[ 5 ].mZ ),
+
+                Point3Df( aFigPos.mX + mPosF.mX + mVerticesF[ 4 ].mX,
+                          aFigPos.mY + mPosF.mY + mVerticesF[ 4 ].mY,
+                          aFigPos.mZ + mPosF.mZ + mVerticesF[ 4 ].mZ ),
+
+                Point3Df( aFigPos.mX + mPosF.mX + mVerticesF[ 3 ].mX,
+                          aFigPos.mY + mPosF.mY + mVerticesF[ 3 ].mY,
+                          aFigPos.mZ + mPosF.mZ + mVerticesF[ 3 ].mZ )
             );
 
     //Fourth side
-    DrawSide(	Point3Df( fig_pos.mX + mPosF.mX + mVerticesF[ 6 ].mX, fig_pos.mY + mPosF.mY + mVerticesF[ 6 ].mY, fig_pos.mZ + mPosF.mZ + mVerticesF[ 6 ].mZ ),
-                Point3Df( fig_pos.mX + mPosF.mX + mVerticesF[ 7 ].mX, fig_pos.mY + mPosF.mY + mVerticesF[ 7 ].mY, fig_pos.mZ + mPosF.mZ + mVerticesF[ 7 ].mZ ),
-                Point3Df( fig_pos.mX + mPosF.mX + mVerticesF[ 4 ].mX, fig_pos.mY + mPosF.mY + mVerticesF[ 4 ].mY, fig_pos.mZ + mPosF.mZ + mVerticesF[ 4 ].mZ ),
-                Point3Df( fig_pos.mX + mPosF.mX + mVerticesF[ 5 ].mX, fig_pos.mY + mPosF.mY + mVerticesF[ 5 ].mY, fig_pos.mZ + mPosF.mZ + mVerticesF[ 5 ].mZ )
+    DrawSide(	Point3Df( aFigPos.mX + mPosF.mX + mVerticesF[ 6 ].mX,
+                          aFigPos.mY + mPosF.mY + mVerticesF[ 6 ].mY,
+                          aFigPos.mZ + mPosF.mZ + mVerticesF[ 6 ].mZ ),
+
+                Point3Df( aFigPos.mX + mPosF.mX + mVerticesF[ 7 ].mX,
+                          aFigPos.mY + mPosF.mY + mVerticesF[ 7 ].mY,
+                          aFigPos.mZ + mPosF.mZ + mVerticesF[ 7 ].mZ ),
+
+                Point3Df( aFigPos.mX + mPosF.mX + mVerticesF[ 4 ].mX,
+                          aFigPos.mY + mPosF.mY + mVerticesF[ 4 ].mY,
+                          aFigPos.mZ + mPosF.mZ + mVerticesF[ 4 ].mZ ),
+
+                Point3Df( aFigPos.mX + mPosF.mX + mVerticesF[ 5 ].mX,
+                          aFigPos.mY + mPosF.mY + mVerticesF[ 5 ].mY,
+                          aFigPos.mZ + mPosF.mZ + mVerticesF[ 5 ].mZ )
             );
 
     //Fifth side
-    DrawSide(	Point3Df( fig_pos.mX + mPosF.mX + mVerticesF[ 0 ].mX, fig_pos.mY + mPosF.mY + mVerticesF[ 0 ].mY, fig_pos.mZ + mPosF.mZ + mVerticesF[ 0 ].mZ ),
-                Point3Df( fig_pos.mX + mPosF.mX + mVerticesF[ 7 ].mX, fig_pos.mY + mPosF.mY + mVerticesF[ 7 ].mY, fig_pos.mZ + mPosF.mZ + mVerticesF[ 7 ].mZ ),
-                Point3Df( fig_pos.mX + mPosF.mX + mVerticesF[ 6 ].mX, fig_pos.mY + mPosF.mY + mVerticesF[ 6 ].mY, fig_pos.mZ + mPosF.mZ + mVerticesF[ 6 ].mZ ),
-                Point3Df( fig_pos.mX + mPosF.mX + mVerticesF[ 1 ].mX, fig_pos.mY + mPosF.mY + mVerticesF[ 1 ].mY, fig_pos.mZ + mPosF.mZ + mVerticesF[ 1 ].mZ )
+    DrawSide(	Point3Df( aFigPos.mX + mPosF.mX + mVerticesF[ 0 ].mX,
+                          aFigPos.mY + mPosF.mY + mVerticesF[ 0 ].mY,
+                          aFigPos.mZ + mPosF.mZ + mVerticesF[ 0 ].mZ ),
+
+                Point3Df( aFigPos.mX + mPosF.mX + mVerticesF[ 7 ].mX,
+                          aFigPos.mY + mPosF.mY + mVerticesF[ 7 ].mY,
+                          aFigPos.mZ + mPosF.mZ + mVerticesF[ 7 ].mZ ),
+
+                Point3Df( aFigPos.mX + mPosF.mX + mVerticesF[ 6 ].mX,
+                          aFigPos.mY + mPosF.mY + mVerticesF[ 6 ].mY,
+                          aFigPos.mZ + mPosF.mZ + mVerticesF[ 6 ].mZ ),
+
+                Point3Df( aFigPos.mX + mPosF.mX + mVerticesF[ 1 ].mX,
+                          aFigPos.mY + mPosF.mY + mVerticesF[ 1 ].mY,
+                          aFigPos.mZ + mPosF.mZ + mVerticesF[ 1 ].mZ )
             );
 
     //Sixth side
-    DrawSide(	Point3Df( fig_pos.mX + mPosF.mX + mVerticesF[ 3 ].mX, fig_pos.mY + mPosF.mY + mVerticesF[ 3 ].mY, fig_pos.mZ + mPosF.mZ + mVerticesF[ 3 ].mZ ),
-                Point3Df( fig_pos.mX + mPosF.mX + mVerticesF[ 4 ].mX, fig_pos.mY + mPosF.mY + mVerticesF[ 4 ].mY, fig_pos.mZ + mPosF.mZ + mVerticesF[ 4 ].mZ ),
-                Point3Df( fig_pos.mX + mPosF.mX + mVerticesF[ 7 ].mX, fig_pos.mY + mPosF.mY + mVerticesF[ 7 ].mY, fig_pos.mZ + mPosF.mZ + mVerticesF[ 7 ].mZ ),
-                Point3Df( fig_pos.mX + mPosF.mX + mVerticesF[ 0 ].mX, fig_pos.mY + mPosF.mY + mVerticesF[ 0 ].mY, fig_pos.mZ + mPosF.mZ + mVerticesF[ 0 ].mZ )
+    DrawSide(	Point3Df( aFigPos.mX + mPosF.mX + mVerticesF[ 3 ].mX,
+                          aFigPos.mY + mPosF.mY + mVerticesF[ 3 ].mY,
+                          aFigPos.mZ + mPosF.mZ + mVerticesF[ 3 ].mZ ),
+
+                Point3Df( aFigPos.mX + mPosF.mX + mVerticesF[ 4 ].mX,
+                          aFigPos.mY + mPosF.mY + mVerticesF[ 4 ].mY,
+                          aFigPos.mZ + mPosF.mZ + mVerticesF[ 4 ].mZ ),
+
+                Point3Df( aFigPos.mX + mPosF.mX + mVerticesF[ 7 ].mX,
+                          aFigPos.mY + mPosF.mY + mVerticesF[ 7 ].mY,
+                          aFigPos.mZ + mPosF.mZ + mVerticesF[ 7 ].mZ ),
+
+                Point3Df( aFigPos.mX + mPosF.mX + mVerticesF[ 0 ].mX,
+                          aFigPos.mY + mPosF.mY + mVerticesF[ 0 ].mY,
+                          aFigPos.mZ + mPosF.mZ + mVerticesF[ 0 ].mZ )
             );
 }
 
@@ -372,62 +438,74 @@ int Block :: UpperBoundZi()
     return max_z + mPosI.mZ;
 }
 
- bool Block :: PointIn( Point3Df point )
+ bool Block :: PointIn( Point3Df aPoint )
  {
 
-   return   ( Geometry :: MixedMul( point           - mVerticesF[ 0 ],
+   return   ( Geometry :: MixedMul( aPoint          - mVerticesF[ 0 ],
                                     mVerticesF[ 1 ] - mVerticesF[ 0 ],
                                     mVerticesF[ 3 ] - mVerticesF[ 0 ] ) < -Geometry :: eps ) &&
-            ( Geometry :: MixedMul( point           - mVerticesF[ 1 ],
+
+            ( Geometry :: MixedMul( aPoint          - mVerticesF[ 1 ],
                                     mVerticesF[ 6 ] - mVerticesF[ 1 ],
                                     mVerticesF[ 2 ] - mVerticesF[ 1 ] ) < -Geometry :: eps ) &&
-            ( Geometry :: MixedMul( point           - mVerticesF[ 2 ],
+
+            ( Geometry :: MixedMul( aPoint          - mVerticesF[ 2 ],
                                     mVerticesF[ 5 ] - mVerticesF[ 2 ],
                                     mVerticesF[ 3 ] - mVerticesF[ 2 ] ) < -Geometry :: eps ) &&
-            ( Geometry :: MixedMul( point           - mVerticesF[ 3 ],
+
+            ( Geometry :: MixedMul( aPoint          - mVerticesF[ 3 ],
                                     mVerticesF[ 4 ] - mVerticesF[ 3 ],
                                     mVerticesF[ 0 ] - mVerticesF[ 3 ] ) < -Geometry :: eps ) &&
-            ( Geometry :: MixedMul( point           - mVerticesF[ 0 ],
+
+            ( Geometry :: MixedMul( aPoint          - mVerticesF[ 0 ],
                                     mVerticesF[ 7 ] - mVerticesF[ 0 ],
                                     mVerticesF[ 1 ] - mVerticesF[ 0 ] ) < -Geometry :: eps ) &&
-            ( Geometry :: MixedMul( point           - mVerticesF[ 6 ],
+
+            ( Geometry :: MixedMul( aPoint          - mVerticesF[ 6 ],
                                     mVerticesF[ 7 ] - mVerticesF[ 6 ],
                                     mVerticesF[ 5 ] - mVerticesF[ 6 ] ) < -Geometry :: eps );
 }
 
-bool Block :: PointIn( Point3Di point )
+bool Block :: PointIn( Point3Di aPoint )
 {
-    return PointIn( Point3Df( point ) );
+    return PointIn( Point3Df( aPoint ) );
 }
 
-bool Block :: CheckEdgesAveragePoint( Block* block )
+bool Block :: CheckEdgesAveragePoint( Block* apBlock )
 {
-    return block -> PointIn( 0.5f * ( mVerticesF[ 1 ] - mVerticesF[ 0 ] ) + mVerticesF[ 0 ] ) ||
-           block -> PointIn( 0.5f * ( mVerticesF[ 2 ] - mVerticesF[ 1 ] ) + mVerticesF[ 1 ] ) ||
-           block -> PointIn( 0.5f * ( mVerticesF[ 3 ] - mVerticesF[ 2 ] ) + mVerticesF[ 2 ] ) ||
-           block -> PointIn( 0.5f * ( mVerticesF[ 0 ] - mVerticesF[ 3 ] ) + mVerticesF[ 3 ] ) ||
-           block -> PointIn( 0.5f * ( mVerticesF[ 6 ] - mVerticesF[ 7 ] ) + mVerticesF[ 7 ] ) ||
-           block -> PointIn( 0.5f * ( mVerticesF[ 5 ] - mVerticesF[ 6 ] ) + mVerticesF[ 6 ] ) ||
-           block -> PointIn( 0.5f * ( mVerticesF[ 4 ] - mVerticesF[ 5 ] ) + mVerticesF[ 5 ] ) ||
-           block -> PointIn( 0.5f * ( mVerticesF[ 7 ] - mVerticesF[ 4 ] ) + mVerticesF[ 4 ] ) ||
-           block -> PointIn( 0.5f * ( mVerticesF[ 7 ] - mVerticesF[ 0 ] ) + mVerticesF[ 0 ] ) ||
-           block -> PointIn( 0.5f * ( mVerticesF[ 6 ] - mVerticesF[ 1 ] ) + mVerticesF[ 1 ] ) ||
-           block -> PointIn( 0.5f * ( mVerticesF[ 5 ] - mVerticesF[ 2 ] ) + mVerticesF[ 2 ] ) ||
-           block -> PointIn( 0.5f * ( mVerticesF[ 4 ] - mVerticesF[ 3 ] ) + mVerticesF[ 3 ] );
+    return apBlock -> PointIn( 0.5f * ( mVerticesF[ 1 ] - mVerticesF[ 0 ] ) + mVerticesF[ 0 ] ) ||
+           apBlock -> PointIn( 0.5f * ( mVerticesF[ 2 ] - mVerticesF[ 1 ] ) + mVerticesF[ 1 ] ) ||
+           apBlock -> PointIn( 0.5f * ( mVerticesF[ 3 ] - mVerticesF[ 2 ] ) + mVerticesF[ 2 ] ) ||
+           apBlock -> PointIn( 0.5f * ( mVerticesF[ 0 ] - mVerticesF[ 3 ] ) + mVerticesF[ 3 ] ) ||
+           apBlock -> PointIn( 0.5f * ( mVerticesF[ 6 ] - mVerticesF[ 7 ] ) + mVerticesF[ 7 ] ) ||
+           apBlock -> PointIn( 0.5f * ( mVerticesF[ 5 ] - mVerticesF[ 6 ] ) + mVerticesF[ 6 ] ) ||
+           apBlock -> PointIn( 0.5f * ( mVerticesF[ 4 ] - mVerticesF[ 5 ] ) + mVerticesF[ 5 ] ) ||
+           apBlock -> PointIn( 0.5f * ( mVerticesF[ 7 ] - mVerticesF[ 4 ] ) + mVerticesF[ 4 ] ) ||
+           apBlock -> PointIn( 0.5f * ( mVerticesF[ 7 ] - mVerticesF[ 0 ] ) + mVerticesF[ 0 ] ) ||
+           apBlock -> PointIn( 0.5f * ( mVerticesF[ 6 ] - mVerticesF[ 1 ] ) + mVerticesF[ 1 ] ) ||
+           apBlock -> PointIn( 0.5f * ( mVerticesF[ 5 ] - mVerticesF[ 2 ] ) + mVerticesF[ 2 ] ) ||
+           apBlock -> PointIn( 0.5f * ( mVerticesF[ 4 ] - mVerticesF[ 3 ] ) + mVerticesF[ 3 ] );
 }
 
-bool Block :: IsIntersect( Block* block )
+bool Block :: IsIntersect( Block* apBlock )
 {
-    for ( unsigned int i = 0; i < BLOCKS_VERTEX_CNT; i++ )
-        if ( block -> PointIn( mVerticesF[ i ] ) || PointIn( block -> mVerticesF[ i ] ) )
+    float distance = ( apBlock -> GetPosf() - mPosF ).Length();
+
+     if ( distance - Geometry :: eps > Block :: SAFETY_DISTANCE )
+            return false;
+     if ( distance < Block :: NOT_SAFETY_DISTANCE - Geometry :: eps )
             return true;
 
-    return this -> CheckEdgesAveragePoint( block ) || block -> CheckEdgesAveragePoint( this );
+    for ( unsigned int i = 0; i < BLOCKS_VERTEX_CNT; i++ )
+        if ( apBlock -> PointIn( mVerticesF[ i ] ) || PointIn( apBlock -> mVerticesF[ i ] ) )
+            return true;
+
+    return this -> CheckEdgesAveragePoint( apBlock ) || apBlock -> CheckEdgesAveragePoint( this );
 }
 
 //Figure
 
-Figure :: Figure( int x, int y, int z, Figures type, Material material ) : GeomEntity( x, y, z ), PhisEntity( material )
+Figure :: Figure( int aX, int aY, int aZ, Figures aType, Material aMaterial ) : GeomEntity( aX, aY, aZ ), PhisEntity( aMaterial )
 {
     if ( Block :: BLOCK_SIZE % 2 != 0 )
     {
@@ -435,160 +513,160 @@ Figure :: Figure( int x, int y, int z, Figures type, Material material ) : GeomE
 	QApplication :: exit( 1 );
     }
 
-    switch ( type )
+    switch ( aType )
     {
     case IFigure :
         mpBlocks[ 0 ] = new Block(  -( int )Block :: BLOCK_SIZE - ( int )Block :: BLOCK_SIZE / 2,
                                     0,
                                     0,
-                                    material );
+                                    aMaterial );
 
         mpBlocks[ 1 ] = new Block( -( int )Block :: BLOCK_SIZE / 2,
                                     0,
                                     0,
-                                    material );
+                                    aMaterial );
 
         mpBlocks[ 2 ] = new Block( ( int )Block :: BLOCK_SIZE / 2,
                                     0,
                                     0,
-                                    material );
+                                    aMaterial );
 
         mpBlocks[ 3 ] = new Block(  ( int )( Block :: BLOCK_SIZE + Block :: BLOCK_SIZE / 2 ),
                                     0,
                                     0,
-                                    material );
+                                    aMaterial );
 	break;
     case JFigure :
         mpBlocks[ 0 ] = new Block(  ( int )Block :: BLOCK_SIZE / 2,
                                     ( int )Block :: BLOCK_SIZE,
                                     0,
-                                    material );
+                                    aMaterial );
 
         mpBlocks[ 1 ] = new Block(  ( int )Block :: BLOCK_SIZE / 2,
                                     0,
                                     0,
-                                    material );
+                                    aMaterial );
 
         mpBlocks[ 2 ] = new Block(  ( int )Block :: BLOCK_SIZE / 2,
                                    -( int )( Block :: BLOCK_SIZE ),
                                     0,
-                                    material );
+                                    aMaterial );
 
         mpBlocks[ 3 ] = new Block( -( int )Block :: BLOCK_SIZE / 2,
                                    -( int )Block :: BLOCK_SIZE,
                                     0,
-                                    material );
+                                    aMaterial );
 	break;
     case LFigure :
         mpBlocks[ 0 ] = new Block( -( int )Block :: BLOCK_SIZE / 2,
                                     ( int )Block :: BLOCK_SIZE,
                                     0,
-                                    material );
+                                    aMaterial );
 
         mpBlocks[ 1 ] = new Block( -( int )Block :: BLOCK_SIZE / 2,
                                     0,
                                     0,
-                                    material );
+                                    aMaterial );
 
         mpBlocks[ 2 ] = new Block( -( int )Block :: BLOCK_SIZE / 2,
                                    -( int )Block :: BLOCK_SIZE,
                                     0,
-                                    material );
+                                    aMaterial );
 
         mpBlocks[ 3 ] = new Block(  ( int )Block :: BLOCK_SIZE / 2,
                                    -( int )Block :: BLOCK_SIZE,
                                     0,
-                                    material );
+                                    aMaterial );
 	break;
     case OFigure :
         mpBlocks[ 0 ] = new Block( -( int )Block :: BLOCK_SIZE / 2,
                                     ( int )Block :: BLOCK_SIZE / 2,
                                     0,
-                                    material );
+                                    aMaterial );
 
         mpBlocks[ 1 ] = new Block(  ( int )Block :: BLOCK_SIZE / 2,
                                     ( int )Block :: BLOCK_SIZE / 2,
                                     0,
-                                    material );
+                                    aMaterial );
 
         mpBlocks[ 2 ] = new Block(  ( int )Block :: BLOCK_SIZE / 2,
                                    -( int )Block :: BLOCK_SIZE / 2,
                                     0,
-                                    material );
+                                    aMaterial );
 
         mpBlocks[ 3 ] = new Block( -( int )Block :: BLOCK_SIZE / 2,
                                    -( int )Block :: BLOCK_SIZE / 2,
                                     0,
-                                    material );
+                                    aMaterial );
 	break;
     case SFigure :
         mpBlocks[ 0 ] = new Block(  ( int )Block :: BLOCK_SIZE,
                                     ( int )Block :: BLOCK_SIZE / 2,
                                     0,
-                                    material );
+                                    aMaterial );
 
         mpBlocks[ 1 ] = new Block(  0,
                                     ( int )Block :: BLOCK_SIZE / 2,
                                     0,
-                                    material );
+                                    aMaterial );
 
         mpBlocks[ 2 ] = new Block(  0,
                                    -( int )Block :: BLOCK_SIZE / 2,
                                     0,
-                                    material );
+                                    aMaterial );
 
         mpBlocks[ 3 ] = new Block( -( int )Block :: BLOCK_SIZE,
                                    -( int )Block :: BLOCK_SIZE / 2,
                                     0,
-                                    material );
+                                    aMaterial );
 	break;
     case TFigure :
         mpBlocks[ 0 ] = new Block(  ( int )Block :: BLOCK_SIZE,
                                     ( int )Block :: BLOCK_SIZE / 2,
                                     0,
-                                    material );
+                                    aMaterial );
 
         mpBlocks[ 1 ] = new Block(  0,
                                     ( int )Block :: BLOCK_SIZE / 2,
                                     0,
-                                    material );
+                                    aMaterial );
 
         mpBlocks[ 2 ] = new Block( -( int )Block :: BLOCK_SIZE,
                                     ( int )Block :: BLOCK_SIZE / 2,
                                     0,
-                                    material );
+                                    aMaterial );
 
         mpBlocks[ 3 ] = new Block(  0,
                                    -( int )Block :: BLOCK_SIZE / 2,
                                     0,
-                                    material );
+                                    aMaterial );
 	break;
     default : //ZFigure :
         mpBlocks[ 0 ] = new Block( -( int )Block :: BLOCK_SIZE,
                                     ( int )Block :: BLOCK_SIZE / 2,
                                     0,
-                                    material );
+                                    aMaterial );
 
         mpBlocks[ 1 ] = new Block(  0,
                                     ( int )Block :: BLOCK_SIZE / 2,
                                     0,
-                                    material );
+                                    aMaterial );
         mpBlocks[ 2 ] = new Block(  0,
                                    -( int )Block :: BLOCK_SIZE / 2,
                                     0,
-                                    material );
+                                    aMaterial );
 
         mpBlocks[ 3 ] = new Block(  ( int )Block :: BLOCK_SIZE,
                                    -( int )Block :: BLOCK_SIZE / 2,
                                     0,
-                                    material );
+                                    aMaterial );
     }
 }
 
-Figure :: Figure( const Figure& fig ) : GeomEntity( fig.mPosI ), PhisEntity( mMaterial )
+Figure :: Figure( const Figure& aFig ) : GeomEntity( aFig.mPosI ), PhisEntity( mMaterial )
 {
     for ( unsigned int i = 0; i < BlocksCount; i++ )
-        mpBlocks[ i ] = new Block( fig.mpBlocks[ i ] -> GetPosi(), fig.mpBlocks[ i ] -> GetMaterial() );
+        mpBlocks[ i ] = new Block( aFig.mpBlocks[ i ] -> GetPosi(), aFig.mpBlocks[ i ] -> GetMaterial() );
 }
 
 Figure :: ~Figure()
@@ -603,22 +681,22 @@ void Figure :: Draw()
 	mpBlocks[ i ] -> Draw( mPosF );
 }
 
-void Figure :: RotateOnZY( float angle, bool change_const )
+void Figure :: RotateOnZY( float aAngle, bool aChangeConst )
 {
     for ( unsigned int i = 0; i < BlocksCount; ++i )
-	mpBlocks[ i ] -> RotateOnZY( angle, change_const );
+	mpBlocks[ i ] -> RotateOnZY( aAngle, aChangeConst );
 }
 
-void Figure :: RotateOnZX( float angle, bool change_const )
+void Figure :: RotateOnZX( float aAngle, bool ChangeConst )
 {
     for ( unsigned int i = 0; i < BlocksCount; ++i )
-        mpBlocks[ i ] -> RotateOnZX( angle, change_const );
+        mpBlocks[ i ] -> RotateOnZX( aAngle, ChangeConst );
 }
 
-void Figure :: RotateOnXY( float angle, bool change_const )
+void Figure :: RotateOnXY( float aAngle, bool ChangeConst )
 {
     for ( unsigned int i = 0; i < BlocksCount; ++i )
-	mpBlocks[ i ] -> RotateOnXY( angle, change_const );
+	mpBlocks[ i ] -> RotateOnXY( aAngle, ChangeConst );
 }
 
 
@@ -742,34 +820,27 @@ int Figure :: UpperBoundZi()
     return max_z + mPosI.mZ;
 }
 
-Point3Di Figure :: GetBlockPosByIndexi( int index ) const
+Point3Di Figure :: GetBlockPosByIndexi( int aIndex ) const
 {
-    return mpBlocks[ index ] -> GetPosi();
+    return mpBlocks[ aIndex ] -> GetPosi();
 }
 
-Point3Df Figure :: GetBlockPosByIndexf( int index ) const
+Point3Df Figure :: GetBlockPosByIndexf( int aIndex ) const
 {
-    return mpBlocks[ index ] -> GetPosf();
+    return mpBlocks[ aIndex ] -> GetPosf();
 }
 
-Material Figure :: GetBlockMaterialByIndex( int index ) const
+Material Figure :: GetBlockMaterialByIndex( int aIndex ) const
 {
-    return mpBlocks[ index ] -> GetMaterial();
+    return mpBlocks[ aIndex ] -> GetMaterial();
 }
 
-bool Figure :: IsIntersectWithBlock( Block* block )
-{
-    float distance = 0.0f;
+bool Figure :: IsIntersectWithBlock( Block* apBlock )
+{    
     for ( unsigned int i = 0; i < BlocksCount; i++ )
-    {
-        distance = ( block -> GetPosf() - mpBlocks[ i ] -> GetPosf() ).Length();
-        if ( distance - Geometry :: eps > Block :: SAFETY_DISTANCE )
-            continue;
-        if ( distance < Block :: NOT_SAFETY_DISTANCE - Geometry :: eps )
+        if ( mpBlocks[ i ] -> IsIntersect( apBlock ) )
             return true;
-        if ( mpBlocks[ i ] -> IsIntersect( block ) )
-            return true;
-    }
+
     return false;
 }
 
@@ -815,23 +886,23 @@ void Figure :: SetVerRelCoor()
     }
 }
 
-bool Figure :: CheckToCollisonWithBlocks( std :: vector < Block* >& collision_blocks )
+bool Figure :: CheckToCollisonWithBlocks( std :: vector < Block* >& aCollisionBlocks )
 {
     bool collision          = false;
-    int  count_of_blocks    = collision_blocks.size();
+    int  count_of_blocks    = aCollisionBlocks.size();
 
     SetVerAbsCoor();
 
     for ( int i = 0; i < count_of_blocks; ++i )
     {
-        collision_blocks[ i ] -> SetVerAbsCoor();
-        if ( IsIntersectWithBlock( collision_blocks[ i ] ) )
+        aCollisionBlocks[ i ] -> SetVerAbsCoor();
+        if ( IsIntersectWithBlock( aCollisionBlocks[ i ] ) )
         {
             collision = true;
-            collision_blocks[ i ] -> SetVerRelCoor();
+            aCollisionBlocks[ i ] -> SetVerRelCoor();
             break;
         }
-        collision_blocks[ i ] -> SetVerRelCoor();
+        aCollisionBlocks[ i ] -> SetVerRelCoor();
     }
 
     SetVerRelCoor();

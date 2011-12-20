@@ -12,54 +12,17 @@ private :
         float mSpecular[ 4 ];
 public :
         Material();
-        Material( float a_r, float a_g, float a_b, float a_a,
-                  float d_r, float d_g, float d_b, float d_a,
-		  float s_r, float s_g, float s_b, float s_a
+        Material( float aAR, float aAG, float aAB, float aAA,
+                  float aDR, float aDG, float aDB, float aDA,
+		  float aSR, float aSG, float aSB, float aSA
 		);
 
-        friend QTextStream& operator << ( QTextStream& stream, const Material& material );
-        friend QTextStream& operator >> ( QTextStream& stream, Material& material );
+        friend QTextStream& operator << ( QTextStream& aStream, const Material& aMaterial );
+        friend QTextStream& operator >> ( QTextStream& aStream, Material& aMaterial );
 
         const float* GetMaterialForAmbient();
 	const float* GetMaterialForDiffuse();
 	const float* GetMaterialForSpecular();
 };
-
-const int	MATERIALS_CNT = 8;
-
-const Material	materials[ MATERIALS_CNT ] = {
-    Material(  0.0f, 1.0f, 0.0f, 1.0f,
-               0.0f, 1.0f, 0.0f, 1.0f,
-               0.0f, 0.0f, 0.0f, 1.0f
-            ),
-    Material(  1.0f, 0.0f, 0.0f, 1.0f,
-               1.0f, 0.0f, 0.0f, 1.0f,
-	       0.0f, 0.0f, 0.0f, 1.0f
-            ),
-    Material(  0.0f, 0.0f, 1.0f, 1.0f,
-               0.0f, 0.0f, 1.0f, 1.0f,
-	       0.0f, 0.0f, 0.0f, 1.0f
-            ),
-    Material(  1.0f, 0.0f, 1.0f, 1.0f,
-               1.0f, 0.0f, 1.0f, 1.0f,
-	       0.0f, 0.0f, 0.0f, 1.0f
-            ),
-    Material(  1.0f, 1.0f, 0.0f, 1.0f,
-               1.0f, 1.0f, 0.0f, 1.0f,
-	       0.0f, 0.0f, 0.0f, 1.0f
-            ),
-    Material(  0.0f, 1.0f, 1.0f, 1.0f,
-               0.0f, 1.0f, 1.0f, 1.0f,
-	       0.0f, 0.0f, 0.0f, 1.0f
-            ),
-    Material(  1.0f, 1.0f, 1.0f, 1.0f, //For select blocks
-               1.0f, 1.0f, 1.0f, 1.0f,
-               0.0f, 0.0f, 0.0f, 1.0f
-            ),
-    Material(  0.2f, 0.2f, 0.2f, 1.0f, //For bottom platform
-               0.2f, 0.2f, 0.2f, 1.0f,
-               0.0f, 0.0f, 0.0f, 1.0f
-        )
-    };
 
 #endif
